@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -38,7 +38,7 @@ export default function TeamBuilder() {
           setSelectedTeam(team)
         }
       } catch (e) {
-        console.error('Failed to load saved team:', e)
+        // Failed to load saved team, continue with empty team
       }
     }
   }, [])
@@ -48,20 +48,17 @@ export default function TeamBuilder() {
     const units: BattleUnitV3[] = []
     const processedIds = new Set<string>()
 
-    console.log('Processing units - Robotos:', robotos.length, 'Robopets:', robopets.length)
 
     // Process Robotos first
     robotos.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobotoTraits(token.metadata)
-        if (processedIds.has(unit.id)) {
-          console.warn('Duplicate Roboto detected:', unit.id, unit.name)
-        } else {
+        if (!processedIds.has(unit.id)) {
           processedIds.add(unit.id)
           units.push(unit)
         }
       } catch (e) {
-        console.error('Failed to process roboto:', e)
+        // Failed to process roboto, skip it
       }
     })
 
@@ -69,18 +66,15 @@ export default function TeamBuilder() {
     robopets.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobopetTraits(token.metadata)
-        if (processedIds.has(unit.id)) {
-          console.warn('Duplicate Robopet detected:', unit.id, unit.name)
-        } else {
+        if (!processedIds.has(unit.id)) {
           processedIds.add(unit.id)
           units.push(unit)
         }
       } catch (e) {
-        console.error('Failed to process robopet:', e)
+        // Failed to process robopet, skip it
       }
     })
 
-    console.log('Total processed units:', units.length, 'Unique IDs:', processedIds.size)
 
     return units
   }, [robotos, robopets])
@@ -96,37 +90,28 @@ export default function TeamBuilder() {
 
   // Calculate filtered units based on current filters and processed units
   const filteredUnits = useMemo(() => {
-    console.log('=== FILTER DEBUG ===')
-    console.log('Current filters:', JSON.stringify(currentFilters, null, 2))
-    console.log('ProcessedUnits length:', processedUnits.length)
 
     let filtered = [...processedUnits]
 
     // Search filter
     if (currentFilters.search && currentFilters.search.trim() !== '') {
       const search = currentFilters.search.toLowerCase()
-      console.log('Applying search filter:', search)
       filtered = filtered.filter(unit =>
         unit.name.toLowerCase().includes(search) ||
         unit.id.toLowerCase().includes(search)
       )
-      console.log('After search filter:', filtered.length)
     }
 
     // Element filter
     if (currentFilters.elements && currentFilters.elements.length > 0) {
-      console.log('Applying element filter:', currentFilters.elements)
       filtered = filtered.filter(unit =>
         currentFilters.elements.includes(unit.element)
       )
-      console.log('After element filter:', filtered.length)
     }
 
     // Robot type filter
     if (currentFilters.robotType && currentFilters.robotType !== 'all') {
-      console.log('Applying robot type filter:', currentFilters.robotType)
       filtered = filtered.filter(unit => {
-        console.log(`Unit ${unit.name} - type: ${unit.type}, Robot Type trait: ${unit.traits['Robot Type']}`)
         switch (currentFilters.robotType) {
           case 'roboto':
             // For regular Robotos (not Helmeto, Cyborgo, Computo)
@@ -143,7 +128,6 @@ export default function TeamBuilder() {
             return true
         }
       })
-      console.log('After robot type filter:', filtered.length)
     }
 
     // Stat filters
@@ -174,7 +158,6 @@ export default function TeamBuilder() {
 
     // Sort
     if (currentFilters.sortBy) {
-      console.log('Applying sort:', currentFilters.sortBy, currentFilters.sortOrder)
       filtered.sort((a, b) => {
         // Always keep Robotos before Robopets
         if (a.type === 'roboto' && b.type === 'robopet') return -1
@@ -206,12 +189,10 @@ export default function TeamBuilder() {
       })
     }
 
-    console.log('Final filtered length:', filtered.length)
-    console.log('=== END FILTER DEBUG ===')
     return filtered
   }, [processedUnits, currentFilters])
 
-  const toggleUnitSelection = (unit: BattleUnitV3) => {
+  const toggleUnitSelection = useCallback((unit: BattleUnitV3) => {
     if (selectedTeam.find(u => u.id === unit.id)) {
       setSelectedTeam(selectedTeam.filter(u => u.id !== unit.id))
       gameSounds.play('removeUnit')
@@ -227,9 +208,9 @@ export default function TeamBuilder() {
       // Team is full, play cancel sound
       gameSounds.play('cancel')
     }
-  }
+  }, [selectedTeam])
 
-  const saveTeamAndBattle = () => {
+  const saveTeamAndBattle = useCallback(() => {
     // Save team to localStorage
     localStorage.setItem('roboto_rumble_team', JSON.stringify(selectedTeam))
     gameSounds.play('confirm')
@@ -238,9 +219,9 @@ export default function TeamBuilder() {
     setTimeout(() => {
       router.push('/battle/training')
     }, 200)
-  }
+  }, [selectedTeam, router])
 
-  const getElementTooltip = (element: string): string => {
+  const getElementTooltip = useCallback((element: string): string => {
     switch (element) {
       case 'SURGE':
         return 'SURGE > METAL > CODE > GLITCH > SURGE'
@@ -255,7 +236,7 @@ export default function TeamBuilder() {
       default:
         return element
     }
-  }
+  }, [])
 
   // Show loading state during hydration
   if (!mounted) {
@@ -421,10 +402,7 @@ export default function TeamBuilder() {
               {processedUnits.length > 0 && (
                 <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-sm -mx-4 px-4 py-4 md:-mx-8 md:px-8 mb-6 border-b border-green-500/20">
                   <UnitFilters
-                    onFiltersChange={(filters) => {
-                      console.log('Filter change received:', filters)
-                      setCurrentFilters(filters)
-                    }}
+                    onFiltersChange={setCurrentFilters}
                     unitCount={processedUnits.length}
                     filteredCount={filteredUnits.length}
                   />

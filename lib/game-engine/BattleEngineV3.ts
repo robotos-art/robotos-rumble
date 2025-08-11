@@ -850,7 +850,6 @@ export class BattleEngineV3 {
       const beforeTiming = damage
       damage = Math.floor(damage * action.timingBonus)
       damageSteps.afterAttackTiming = damage
-      console.log(`🎯 Attack Timing Applied: ${action.timingBonus}x (${beforeTiming} → ${damage})`)
     }
     
     // Apply defense reduction (defense timing reducer)
@@ -858,26 +857,12 @@ export class BattleEngineV3 {
       const beforeDefense = damage
       damage = Math.floor(damage * action.defenseBonus)
       damageSteps.afterDefenseTiming = damage
-      console.log(`🛡️ Defense Timing Applied: ${action.defenseBonus}x (${beforeDefense} → ${damage})`)
     }
     
-    // Comprehensive damage log
-    console.log('━━━ DAMAGE CALCULATION ━━━')
-    console.log(`Attacker: ${attacker.name} (${attacker.element})`)
-    console.log(`Target: ${target.name} (${target.element})`)
-    console.log(`Base Stats: ATK ${attacker.stats.attack} vs DEF ${target.stats.defense}`)
-    console.log(`Base Damage: ${baseDamage}`)
-    console.log(`Element Multiplier: ${elementMultiplier}x`)
-    console.log(`Attack Timing: ${action.timingBonus ? `${action.timingBonus}x` : 'None (1.0x)'}`)
-    console.log(`Defense Timing: ${action.defenseBonus ? `${action.defenseBonus}x` : 'None (1.0x)'}`)
-    console.log(`Final Damage: ${damage}`)
-    console.log('Damage Steps:', damageSteps)
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━')
     
     // Ensure minimum damage is always at least 1
     if (damage < 1) {
       damage = 1
-      console.log('⚠️ Damage was below 1, set to minimum 1')
     }
 
     // Critical hit chance

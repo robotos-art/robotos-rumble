@@ -466,7 +466,6 @@ export class BattleSceneV2 extends Phaser.Scene {
     if (!currentUnit) {
       // No current unit means we need a new round
       // This should be handled by the battle engine after actions
-      console.warn('No current unit - battle engine should handle turn order')
       return
     }
     
@@ -794,11 +793,8 @@ export class BattleSceneV2 extends Phaser.Scene {
   private async executeAttack(attacker: BattleUnitV3, targetId: string) {
     const target = this.findUnit(targetId)
     if (!target) {
-      console.error('Target not found:', targetId)
       return
     }
-    
-    console.log('Executing attack:', attacker.name, '->', target.name)
     
     // Play attack sound
     gameSounds.play('attack')

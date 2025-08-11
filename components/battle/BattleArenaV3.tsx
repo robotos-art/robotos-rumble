@@ -173,13 +173,11 @@ export default function BattleArenaV3({
     setIsPlayerTurn(isPlayerTurnNext)
     turnIndexRef.current += 1
 
-    console.log('startNextTurn - turnIndex:', turnIndexRef.current, 'isPlayerTurn:', isPlayerTurnNext)
 
     // Get next unit in rotation
     if (isPlayerTurnNext) {
       const { unit, index } = getNextAliveUnit(playerTeam, playerTurnIndex)
       if (unit) {
-        console.log('Player turn:', unit.name, 'index:', index)
         setPlayerTurnIndex(index)
         setCurrentUnit(unit)
         handleUnitActivation(unit, true)
@@ -187,7 +185,6 @@ export default function BattleArenaV3({
     } else {
       const { unit, index } = getNextAliveUnit(enemyTeam, enemyTurnIndex)
       if (unit) {
-        console.log('Enemy turn:', unit.name, 'index:', index)
         setEnemyTurnIndex(index)
         setCurrentUnit(unit)
         handleUnitActivation(unit, false)
@@ -223,7 +220,6 @@ export default function BattleArenaV3({
   }
 
   const executeAITurn = (unit: BattleUnitV3) => {
-    console.log('executeAITurn called for:', unit.name)
     // Get fresh state
     const currentState = battleEngine.getState()
 
@@ -243,7 +239,6 @@ export default function BattleArenaV3({
     const aiDelay = 1500 + Math.random() * 1000 // 1.5-2.5 seconds
 
     setTimeout(() => {
-      console.log('AI executing attack')
       setPhase('executing')
 
       // AI has random timing skill
@@ -391,14 +386,11 @@ export default function BattleArenaV3({
       const centerX = rect.left + rect.width / 2
       const centerY = rect.top + rect.height / 2
 
-      console.log(`Unit ${unitId} position:`, { x: centerX, y: centerY, rect })
-
       return {
         x: centerX,
         y: centerY
       }
     }
-    console.warn(`Could not find unit with id: ${unitId}`)
     return { x: window.innerWidth / 2, y: window.innerHeight / 2 }
   }
 
@@ -432,11 +424,6 @@ export default function BattleArenaV3({
       defScore >= 1.25 ? 0.75 :
         defScore >= 1.0 ? 1.0 : 1.2
 
-    console.log('━━━ TIMING SCORES ━━━')
-    console.log(`Attack Score: ${atkScore} (${atkScore >= 1.5 ? 'PERFECT' : atkScore >= 1.25 ? 'GOOD' : atkScore >= 1.0 ? 'OK' : 'WEAK'})`)
-    console.log(`Defense Score: ${defScore} (${defScore >= 1.5 ? 'PERFECT' : defScore >= 1.25 ? 'GOOD' : defScore >= 1.0 ? 'OK' : 'WEAK'})`)
-    console.log(`Defense Multiplier: ${defenseBonus}x`)
-    console.log('━━━━━━━━━━━━━━━━━━━')
 
     // Get defender's HP BEFORE the attack
     const prevHp = battleEngine.getState().unitStatuses.get(defender.id)?.currentHp || defender.stats.hp
@@ -451,7 +438,6 @@ export default function BattleArenaV3({
       defenseBonus: defenseBonus
     } as any)
 
-    console.log('Battle engine result:', result)
 
     // Get the updated state
     const newState = battleEngine.getState()
@@ -474,13 +460,6 @@ export default function BattleArenaV3({
       gameSounds.play('attackDevastating')
     }
 
-    console.log('Damage calculation:', {
-      defender: defender.name,
-      prevHp,
-      currentHp: targetStatus?.currentHp,
-      actualDamage,
-      isAlive: targetStatus?.isAlive
-    })
 
     // Determine damage type based on actual results and timing
     let damageType: 'normal' | 'critical' | 'effective' | 'weak' | 'miss' = 'normal'
@@ -519,10 +498,6 @@ export default function BattleArenaV3({
       damageType = 'critical' // Show perfect timing as critical
     }
 
-    console.log('Damage type:', damageType, 'for', actualDamage, 'damage', 'timing:', atkScore)
-
-    // Log exactly what we're showing
-    console.log(`SHOWING DAMAGE: ${damageType} for ${defender.name} (${defender.id}) with damage: ${actualDamage}`)
 
     // Store attack type for animation
     setCurrentAttackType(damageType)
@@ -559,7 +534,6 @@ export default function BattleArenaV3({
 
     // Reset states and continue to next turn
     setTimeout(() => {
-      console.log('executeAttack - moving to next turn')
       setAttackingUnitId(null)
       setDefendingUnitId(null)
       setTargetUnit(null)
@@ -578,14 +552,11 @@ export default function BattleArenaV3({
   const showDamage = (unitId: string, damage: number, type: 'normal' | 'critical' | 'effective' | 'weak' | 'miss') => {
     const timestamp = Date.now()
 
-    console.log(`showDamage called: unitId=${unitId}, damage=${damage}, type=${type}`)
-
     // Immediately update to show only this damage for this unit
     setDamageNumbers(prev => {
       // Remove any existing damage for this unit and add the new one
       const filtered = prev.filter(d => d.unitId !== unitId)
       const newEntry = { unitId, damage, type, timestamp }
-      console.log('Replacing damage entry for unit:', unitId, 'New entry:', newEntry)
       return [...filtered, newEntry]
     })
 

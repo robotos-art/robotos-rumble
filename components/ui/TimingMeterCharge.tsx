@@ -44,7 +44,6 @@ export default function TimingMeterCharge({
       // Randomize resistance: 0.7x to 1.3x (harder or easier to charge)
       const newResistance = 0.7 + Math.random() * 0.6
       setResistanceMultiplier(newResistance)
-      console.log(`Charge resistance: ${(newResistance * 100).toFixed(0)}% (${newResistance < 1 ? 'easier' : 'harder'})`)
     }
     // Don't reset when active becomes false - keep the locked state
   }, [active, hasInput])

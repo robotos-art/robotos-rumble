@@ -36,7 +36,6 @@ export function useRobotoTokens() {
             `https://ipfs.io/ipfs/QmQh36CsceXZoqS7v9YQLUyxXdRmWd8YWTBUz7WCXsiVty/${tokenId}`
           )
           const ipfsMetadata = await metadataResponse.json()
-          console.log(`Roboto #${tokenId} metadata:`, ipfsMetadata)
           
           // Use CloudFront CDN for image
           const metadata = {
@@ -51,7 +50,6 @@ export function useRobotoTokens() {
             type: 'roboto'
           })
         } catch (err) {
-          console.error(`Error loading Roboto #${i}:`, err)
           // Add placeholder if metadata fetch fails
           const tokenId = await robotoContract.methods.tokenOfOwnerByIndex(address, i).call()
           robotoTokens.push({
@@ -83,7 +81,6 @@ export function useRobotoTokens() {
             `https://ipfs.io/ipfs/QmcVBQAbPMzEstPyaBoZ3J1dnE3t1horoX9WebLcCCYLR9/${tokenId}`
           )
           const ipfsMetadata = await metadataResponse.json()
-          console.log(`Robopet #${tokenId} metadata:`, ipfsMetadata)
           
           // Use CloudFront CDN for image
           const metadata = {
@@ -98,7 +95,6 @@ export function useRobotoTokens() {
             type: 'robopet'
           })
         } catch (err) {
-          console.error(`Error loading Robopet #${i}:`, err)
           // Add placeholder if metadata fetch fails
           const tokenId = await robopetContract.methods.tokenOfOwnerByIndex(address, i).call()
           robopetTokens.push({
@@ -117,7 +113,6 @@ export function useRobotoTokens() {
       setRobopets(robopetTokens)
       
     } catch (err) {
-      console.error('Error fetching tokens:', err)
       setError('Failed to load your Robotos and Robopets')
     } finally {
       setLoading(false)

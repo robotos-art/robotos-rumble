@@ -46,7 +46,7 @@ function setCachedTokens(address: string, robotos: TokenWithMetadata[], robopets
       timestamp: Date.now()
     }))
   } catch (e) {
-    console.warn('Failed to cache tokens:', e)
+    // Failed to cache tokens - continue without caching
   }
 }
 
@@ -105,20 +105,11 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
         Promise.all(robopetIdPromises)
       ])
       
-      // Log for debugging
-      console.log('Fetched Roboto IDs:', robotoIds)
-      console.log('Fetched Robopet IDs:', robopetIds)
       
       // Check for duplicates
       const uniqueRobotoIds = Array.from(new Set(robotoIds.map(id => id.toString())))
       const uniqueRobopetIds = Array.from(new Set(robopetIds.map(id => id.toString())))
       
-      if (uniqueRobotoIds.length !== robotoIds.length) {
-        console.warn('Duplicate Roboto IDs detected!', robotoIds.length, 'vs', uniqueRobotoIds.length, 'unique')
-      }
-      if (uniqueRobopetIds.length !== robopetIds.length) {
-        console.warn('Duplicate Robopet IDs detected!', robopetIds.length, 'vs', uniqueRobopetIds.length, 'unique')
-      }
       
       // Fetch metadata concurrently with progress updates
       const fetchMetadataBatch = async (tokenIds: string[], type: 'roboto' | 'robopet') => {
@@ -159,7 +150,7 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
               type
             } as TokenWithMetadata
           } catch (err) {
-            console.warn(`Failed to load ${type} #${tokenId}, using fallback`)
+            // Failed to load metadata, using fallback
             processedTokens++
             setLoadingProgress(Math.round((processedTokens / totalTokens) * 100))
             
@@ -221,7 +212,6 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
       setCachedTokens(address, robotoTokens, robopetTokens)
       
     } catch (err) {
-      console.error('Error fetching tokens:', err)
       setError('Failed to load your Robotos and Robopets')
     } finally {
       setLoading(false)

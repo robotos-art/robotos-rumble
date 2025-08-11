@@ -39,7 +39,6 @@ export default function TimingMeterSpinner({
       // Randomize speed: 0.9x to 2.1x (slightly faster range)
       const newSpeed = 0.9 + Math.random() * 1.2
       setSpeedMultiplier(newSpeed)
-      console.log(`Spinner speed: ${(newSpeed * 100).toFixed(0)}% of base`)
     }
   }, [active, hasInput])
 

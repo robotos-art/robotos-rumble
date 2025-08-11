@@ -43,7 +43,6 @@ export default function TimingMeter({
       // Base speed is 2.5, so we want 2/2.5 = 0.8 to 4/2.5 = 1.6
       const newSpeed = 0.8 + Math.random() * 0.8
       setSpeedMultiplier(newSpeed)
-      console.log(`Timing meter speed: ${(newSpeed * 2.5).toFixed(1)} (${(newSpeed * 100).toFixed(0)}% of base)`)
     }
   }, [active, hasInput])
 
