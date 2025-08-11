@@ -687,6 +687,8 @@ export class BattleSceneV2 extends Phaser.Scene {
       repeat: -1,
       onUpdate: (tween) => {
         const y = tween.getValue()
+        if (y === null) return
+        
         mainIndicator.clear()
         
         // Redraw box
