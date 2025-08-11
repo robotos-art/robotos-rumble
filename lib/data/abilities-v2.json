@@ -1,0 +1,730 @@
+{
+  "version": "2.0.0",
+  "description": "All abilities in Roboto Rumble with detailed stats",
+  
+  "basic_abilities": {
+    "spark_shot": {
+      "name": "Spark Shot",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Basic electrical attack",
+      "stats": {
+        "power": 40,
+        "accuracy": 90,
+        "energyCost": 10,
+        "cooldown": 0,
+        "critChance": 5
+      },
+      "targeting": "single",
+      "effects": []
+    },
+    "data_pulse": {
+      "name": "Data Pulse",
+      "element": "CODE",
+      "type": "damage",
+      "description": "Basic digital attack",
+      "stats": {
+        "power": 35,
+        "accuracy": 95,
+        "energyCost": 10,
+        "cooldown": 0,
+        "critChance": 10
+      },
+      "targeting": "single",
+      "effects": ["accuracy_down_minor"]
+    },
+    "metal_strike": {
+      "name": "Metal Strike",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Basic physical attack",
+      "stats": {
+        "power": 45,
+        "accuracy": 85,
+        "energyCost": 10,
+        "cooldown": 0,
+        "critChance": 5
+      },
+      "targeting": "single",
+      "effects": []
+    },
+    "error_burst": {
+      "name": "Error Burst",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "Basic chaotic attack",
+      "stats": {
+        "power": "30-50",
+        "accuracy": 80,
+        "energyCost": 10,
+        "cooldown": 0,
+        "critChance": 15
+      },
+      "targeting": "single",
+      "effects": ["random_minor"]
+    },
+    "standard_strike": {
+      "name": "Standard Strike",
+      "element": "NEUTRAL",
+      "type": "damage",
+      "description": "Basic balanced attack",
+      "stats": {
+        "power": 40,
+        "accuracy": 85,
+        "energyCost": 10,
+        "cooldown": 0,
+        "critChance": 7
+      },
+      "targeting": "single",
+      "effects": []
+    }
+  },
+  
+  "real_trait_abilities": {
+    "electron_surge": {
+      "name": "Electron Surge",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Channel stored electricity into attacks",
+      "stats": {
+        "power": 60,
+        "accuracy": 90,
+        "energyCost": 20,
+        "cooldown": 2,
+        "critChance": 10
+      },
+      "targeting": "single",
+      "effects": ["paralysis_chance"],
+      "animation": "electric_burst"
+    },
+    "katana_strike": {
+      "name": "Katana Strike",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Swift blade attacks",
+      "stats": {
+        "power": 70,
+        "accuracy": 95,
+        "energyCost": 25,
+        "cooldown": 2,
+        "critChance": 20
+      },
+      "targeting": "single",
+      "effects": ["bleed"],
+      "animation": "blade_slash"
+    },
+    "compressor_blast": {
+      "name": "Compressor Blast",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Compressed air burst attack",
+      "stats": {
+        "power": 55,
+        "accuracy": 85,
+        "energyCost": 15,
+        "cooldown": 1,
+        "critChance": 5
+      },
+      "targeting": "single",
+      "effects": ["knockback"],
+      "animation": "air_burst"
+    },
+    "cruncher_grip": {
+      "name": "Cruncher Grip",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Crushing physical attack",
+      "stats": {
+        "power": 80,
+        "accuracy": 80,
+        "energyCost": 30,
+        "cooldown": 3,
+        "critChance": 15
+      },
+      "targeting": "single",
+      "effects": ["dented"],
+      "animation": "crush"
+    },
+    "saw_blade_fury": {
+      "name": "Saw Blade Fury",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Spinning saw attack",
+      "stats": {
+        "power": 65,
+        "accuracy": 85,
+        "energyCost": 25,
+        "cooldown": 2,
+        "critChance": 10
+      },
+      "targeting": "all_enemies",
+      "effects": ["bleed"],
+      "animation": "spinning_saw"
+    },
+    "jetpack_assault": {
+      "name": "Jetpack Assault",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Aerial energy attack",
+      "stats": {
+        "power": 75,
+        "accuracy": 75,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 15
+      },
+      "targeting": "single",
+      "effects": ["priority"],
+      "animation": "aerial_strike"
+    },
+    "armored_blade_master": {
+      "name": "Armored Blade Master",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Tank defense with blade offense",
+      "stats": {
+        "power": 90,
+        "accuracy": 85,
+        "energyCost": 40,
+        "cooldown": 4,
+        "critChance": 25
+      },
+      "targeting": "single",
+      "effects": ["pierce_defense", "bleed"],
+      "animation": "heavy_blade"
+    },
+    "overcharged_compression": {
+      "name": "Overcharged Compression",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Electric-powered compression wave",
+      "stats": {
+        "power": 85,
+        "accuracy": 80,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 15
+      },
+      "targeting": "cone",
+      "effects": ["paralysis_chance", "knockback"],
+      "animation": "electric_wave"
+    },
+    "mullet_power": {
+      "name": "Mullet Power",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "The legendary power of the Mulletos",
+      "stats": {
+        "power": 100,
+        "accuracy": 85,
+        "energyCost": 40,
+        "cooldown": 3,
+        "critChance": 30
+      },
+      "targeting": "single",
+      "effects": ["style_damage", "intimidate"],
+      "animation": "mullet_whip"
+    },
+    "cyborg_superiority": {
+      "name": "Cyborg Superiority",
+      "element": "CODE",
+      "type": "buff",
+      "description": "Upper class precision strikes",
+      "stats": {
+        "duration": 4,
+        "energyCost": 35,
+        "cooldown": 5
+      },
+      "targeting": "self",
+      "effects": {
+        "all_stats_boost": 20,
+        "accuracy_boost": 20
+      },
+      "animation": "cyborg_enhance"
+    },
+    "punk_rebellion": {
+      "name": "Punk Rebellion",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "Anarchy in the mainframe",
+      "stats": {
+        "power": 85,
+        "accuracy": 75,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 20
+      },
+      "targeting": "all_enemies",
+      "effects": ["system_shock"],
+      "animation": "punk_blast"
+    },
+    "pirate_plunder": {
+      "name": "Pirate Plunder",
+      "element": "METAL",
+      "type": "utility",
+      "description": "Steal enemy buffs and energy",
+      "stats": {
+        "accuracy": 90,
+        "energyCost": 25,
+        "cooldown": 3
+      },
+      "targeting": "single",
+      "effects": ["steal_buffs", "energy_drain"],
+      "animation": "pirate_steal"
+    },
+    "computo_overclock": {
+      "name": "Computo Overclock",
+      "element": "CODE",
+      "type": "ultimate",
+      "description": "Legendary computational supremacy",
+      "stats": {
+        "power": 150,
+        "accuracy": 100,
+        "energyCost": 70,
+        "cooldown": "once_per_battle"
+      },
+      "targeting": "all",
+      "effects": ["time_dilation", "calculate_weakness"],
+      "animation": "computo_supreme"
+    },
+    "war_veteran_rage": {
+      "name": "War Veteran Rage",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Survivor of the human-roboto war",
+      "stats": {
+        "power": 95,
+        "accuracy": 80,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 25
+      },
+      "targeting": "single",
+      "effects": ["pierce_defense", "intimidate"],
+      "animation": "war_rage"
+    }
+  },
+  
+  "surge_abilities": {
+    "synchronized_devastation": {
+      "name": "Synchronized Devastation",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Laser eyes and cannon arms fire in perfect sync",
+      "stats": {
+        "power": 120,
+        "accuracy": 85,
+        "energyCost": 45,
+        "cooldown": 4,
+        "critChance": 20
+      },
+      "targeting": "single",
+      "effects": ["pierce_defense", "overcharge"],
+      "animation": "dual_beam"
+    },
+    "overload_protocol": {
+      "name": "Overload Protocol",
+      "element": "SURGE",
+      "type": "buff",
+      "description": "Push systems beyond safe limits",
+      "stats": {
+        "duration": 3,
+        "energyCost": 30,
+        "cooldown": 5
+      },
+      "targeting": "self",
+      "effects": {
+        "attack_boost": 50,
+        "speed_boost": 30,
+        "self_damage": 10
+      },
+      "animation": "electric_surge"
+    },
+    "lightning_dash": {
+      "name": "Lightning Dash",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Electrified charge that damages on contact",
+      "stats": {
+        "power": 70,
+        "accuracy": 90,
+        "energyCost": 25,
+        "cooldown": 2,
+        "critChance": 15
+      },
+      "targeting": "single",
+      "effects": ["priority", "paralysis_chance"],
+      "animation": "electric_rush"
+    },
+    "thunder_storm": {
+      "name": "Thunder Storm",
+      "element": "SURGE",
+      "type": "damage",
+      "description": "Area-wide electrical devastation",
+      "stats": {
+        "power": 60,
+        "accuracy": 75,
+        "energyCost": 50,
+        "cooldown": 4,
+        "critChance": 10
+      },
+      "targeting": "all_enemies",
+      "effects": ["shocked"],
+      "animation": "lightning_field"
+    }
+  },
+  
+  "code_abilities": {
+    "hack_protocol": {
+      "name": "Hack Protocol",
+      "element": "CODE",
+      "type": "debuff",
+      "description": "Infiltrate and disrupt enemy systems",
+      "stats": {
+        "accuracy": 100,
+        "energyCost": 20,
+        "cooldown": 2,
+        "duration": 3
+      },
+      "targeting": "single",
+      "effects": ["hacked", "reveal_stats"],
+      "animation": "digital_infiltration"
+    },
+    "viral_cascade": {
+      "name": "Viral Cascade",
+      "element": "CODE",
+      "type": "damage",
+      "description": "Spreading digital infection",
+      "stats": {
+        "power": 50,
+        "accuracy": 90,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 5
+      },
+      "targeting": "spread",
+      "effects": ["virus", "damage_over_time"],
+      "animation": "virus_spread"
+    },
+    "firewall_matrix": {
+      "name": "Firewall Matrix",
+      "element": "CODE",
+      "type": "defensive",
+      "description": "Digital shields for the team",
+      "stats": {
+        "shieldStrength": 30,
+        "energyCost": 30,
+        "cooldown": 4,
+        "duration": 3
+      },
+      "targeting": "all_allies",
+      "effects": ["digital_shield", "debuff_immunity"],
+      "animation": "firewall_deploy"
+    },
+    "system_reboot": {
+      "name": "System Reboot",
+      "element": "CODE",
+      "type": "utility",
+      "description": "Clear all status effects and restore systems",
+      "stats": {
+        "energyCost": 40,
+        "cooldown": 5
+      },
+      "targeting": "single_ally",
+      "effects": ["cleanse", "energy_restore", "skip_turn"],
+      "animation": "reboot_sequence"
+    }
+  },
+  
+  "metal_abilities": {
+    "fortress_mode": {
+      "name": "Fortress Mode",
+      "element": "METAL",
+      "type": "defensive",
+      "description": "Become an immovable defensive position",
+      "stats": {
+        "defenseBoost": 100,
+        "energyCost": 25,
+        "cooldown": 3,
+        "duration": 2
+      },
+      "targeting": "self",
+      "effects": ["immobilize", "taunt", "damage_reduction"],
+      "animation": "fortress_transform"
+    },
+    "crushing_impact": {
+      "name": "Crushing Impact",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Devastating ground slam",
+      "stats": {
+        "power": 100,
+        "accuracy": 70,
+        "energyCost": 40,
+        "cooldown": 3,
+        "critChance": 25
+      },
+      "targeting": "all_enemies",
+      "effects": ["knockback", "dented"],
+      "animation": "ground_slam"
+    },
+    "blade_storm": {
+      "name": "Blade Storm",
+      "element": "METAL",
+      "type": "damage",
+      "description": "Spinning blade attack",
+      "stats": {
+        "power": 80,
+        "accuracy": 85,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 15
+      },
+      "targeting": "all_enemies",
+      "effects": ["bleed"],
+      "animation": "spinning_blades"
+    },
+    "repair_protocol": {
+      "name": "Repair Protocol",
+      "element": "METAL",
+      "type": "heal",
+      "description": "Emergency field repairs",
+      "stats": {
+        "healPower": 50,
+        "energyCost": 25,
+        "cooldown": 3
+      },
+      "targeting": "single_ally",
+      "effects": ["heal", "remove_dented"],
+      "animation": "repair_beam"
+    }
+  },
+  
+  "glitch_abilities": {
+    "system_crash": {
+      "name": "System Crash",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "Cause catastrophic failures",
+      "stats": {
+        "power": "50-150",
+        "accuracy": 60,
+        "energyCost": 50,
+        "cooldown": 5,
+        "critChance": 30
+      },
+      "targeting": "random",
+      "effects": ["corrupted", "system_failure_chance"],
+      "animation": "glitch_explosion"
+    },
+    "chaos_field": {
+      "name": "Chaos Field",
+      "element": "GLITCH",
+      "type": "field",
+      "description": "Area of pure unpredictability",
+      "stats": {
+        "duration": 5,
+        "energyCost": 40,
+        "cooldown": 6
+      },
+      "targeting": "field",
+      "effects": ["random_stat_changes", "ability_chaos"],
+      "animation": "chaos_deploy"
+    },
+    "glitch_teleport": {
+      "name": "Glitch Teleport",
+      "element": "GLITCH",
+      "type": "utility",
+      "description": "Phase through corrupted space",
+      "stats": {
+        "energyCost": 20,
+        "cooldown": 2
+      },
+      "targeting": "self",
+      "effects": ["untargetable", "position_swap_chance"],
+      "animation": "glitch_phase"
+    },
+    "corruption_wave": {
+      "name": "Corruption Wave",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "Wave of digital corruption",
+      "stats": {
+        "power": 70,
+        "accuracy": 75,
+        "energyCost": 35,
+        "cooldown": 3,
+        "critChance": 20
+      },
+      "targeting": "cone",
+      "effects": ["corrupted", "glitch_damage_over_time"],
+      "animation": "corruption_pulse"
+    }
+  },
+  
+  "legendary_abilities": {
+    "genesis_protocol": {
+      "name": "Genesis Protocol",
+      "element": "SPECIAL",
+      "type": "ultimate",
+      "description": "Activate primordial roboto powers",
+      "stats": {
+        "power": 200,
+        "accuracy": 100,
+        "energyCost": 80,
+        "cooldown": "once_per_battle"
+      },
+      "targeting": "all",
+      "effects": ["time_stop", "genesis_wave", "full_restore_allies"],
+      "animation": "genesis_activation",
+      "requirements": {
+        "traits": ["Ancient Body", "Ancient Eyes", "Ancient Marking"]
+      }
+    },
+    "golden_aegis": {
+      "name": "Golden Aegis",
+      "element": "SPECIAL",
+      "type": "defensive",
+      "description": "Legendary golden protection",
+      "stats": {
+        "shieldStrength": 100,
+        "energyCost": 60,
+        "cooldown": "once_per_battle",
+        "duration": 3
+      },
+      "targeting": "all_allies",
+      "effects": ["invulnerability", "golden_aura", "inspire"],
+      "animation": "golden_shield",
+      "requirements": {
+        "traits": ["Golden", "Tank Body"]
+      }
+    },
+    "apex_predator": {
+      "name": "Apex Predator",
+      "element": "SPECIAL",
+      "type": "ultimate",
+      "description": "Ultimate hunter unleashed",
+      "stats": {
+        "power": 180,
+        "accuracy": 100,
+        "energyCost": 75,
+        "cooldown": "once_per_battle",
+        "critChance": 50
+      },
+      "targeting": "single",
+      "effects": ["execute_low_hp", "fear_aura", "beast_mode"],
+      "animation": "apex_hunt",
+      "requirements": {
+        "traits": ["Shark Head", "Katanas", "Spikes"]
+      }
+    },
+    "digital_pirate_king": {
+      "name": "Digital Pirate King",
+      "element": "SPECIAL",
+      "type": "utility",
+      "description": "Rule the seven servers",
+      "stats": {
+        "energyCost": 50,
+        "cooldown": 4,
+        "duration": "permanent"
+      },
+      "targeting": "all",
+      "effects": ["steal_all_buffs", "treasure_hunt", "crew_morale"],
+      "animation": "pirate_throne",
+      "requirements": {
+        "traits": ["Pirate Hat", "Cannon Arms", "Golden"]
+      }
+    }
+  },
+  
+  "robopet_abilities": {
+    "quick_reflexes": {
+      "name": "Quick Reflexes",
+      "element": "SURGE",
+      "type": "buff",
+      "description": "Cat-like agility boost",
+      "stats": {
+        "duration": 3,
+        "energyCost": 15,
+        "cooldown": 3
+      },
+      "targeting": "single_ally",
+      "effects": {"evasion": 30, "speed": 20}
+    },
+    "loyal_guard": {
+      "name": "Loyal Guard",
+      "element": "METAL",
+      "type": "defensive",
+      "description": "Dog protects its master",
+      "stats": {
+        "energyCost": 20,
+        "cooldown": 3,
+        "duration": 2
+      },
+      "targeting": "single_ally",
+      "effects": ["redirect_damage", "defense_boost"]
+    },
+    "aerial_recon": {
+      "name": "Aerial Recon",
+      "element": "CODE",
+      "type": "utility",
+      "description": "Bird provides battlefield intel",
+      "stats": {
+        "energyCost": 10,
+        "cooldown": 2
+      },
+      "targeting": "all_enemies",
+      "effects": ["reveal_all", "accuracy_team_boost"]
+    },
+    "venom_corruption": {
+      "name": "Venom Corruption",
+      "element": "GLITCH",
+      "type": "damage",
+      "description": "Snake's corrupting bite",
+      "stats": {
+        "power": 50,
+        "accuracy": 90,
+        "energyCost": 25,
+        "cooldown": 3
+      },
+      "targeting": "single",
+      "effects": ["poison", "corrupt_data"]
+    }
+  },
+  
+  "effect_definitions": {
+    "pierce_defense": "Ignores 50% of target's defense",
+    "overcharge": "25% chance to shock target",
+    "priority": "Always goes first",
+    "paralysis_chance": "30% chance to paralyze",
+    "hacked": "Reduce accuracy by 30% for 3 turns",
+    "virus": "Spreads to adjacent units",
+    "digital_shield": "Blocks next digital attack",
+    "corrupted": "Random stat changes each turn",
+    "dented": "Reduce defense by 25%",
+    "bleed": "Take damage over 3 turns",
+    "system_failure_chance": "10% chance to instantly KO",
+    "style_damage": "Extra damage based on fashion power",
+    "confuse": "50% chance to hit wrong target",
+    "dual_type": "Gains resistances of both types",
+    "feral": "Increases crit chance by 20%",
+    "lifesteal": "Heal 30% of damage dealt",
+    "pack_tactics": "Adjacent allies gain attack boost",
+    "system_shock": "Disable random ability for 2 turns",
+    "anti_authority": "Ignore defensive buffs",
+    "steal_buffs": "Transfer enemy buffs to self",
+    "energy_drain": "Steal 20 energy from target",
+    "doubloons": "Gain bonus loot (future feature)",
+    "sea_curse": "Reduce healing effectiveness by 50%",
+    "time_dilation": "Take an extra turn",
+    "calculate_weakness": "Next attack always crits",
+    "quantum_damage": "Ignores all resistances",
+    "crush": "Reduce speed by 30%",
+    "intimidate": "Reduce enemy accuracy by 20%",
+    "keen_eye": "Cannot miss for 3 turns",
+    "double_strike": "Attack twice per turn",
+    "frenzy_on_crit": "Critical hits grant extra turn",
+    "fear": "Skip next turn",
+    "pride_boost": "Boost all lion allies' stats"
+  }
+}

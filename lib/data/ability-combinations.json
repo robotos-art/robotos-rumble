@@ -1,0 +1,257 @@
+{
+  "version": "2.0.0",
+  "description": "Trait combinations that unlock abilities in Roboto Rumble",
+  "combinations": {
+    "robotos": [
+      {
+        "id": "synchronized_devastation",
+        "name": "Synchronized Devastation",
+        "element": "SURGE",
+        "requirements": {
+          "Eyes": "Laser",
+          "Arms": "Cannon"
+        },
+        "description": "Laser eyes and cannon arms fire in perfect sync",
+        "rarity": "rare"
+      },
+      {
+        "id": "overload_protocol",
+        "name": "Overload Protocol",
+        "element": "SURGE",
+        "requirements": {
+          "Arms": "Energy",
+          "Special": "Overcharged Core"
+        },
+        "description": "Channel pure energy through overcharged systems",
+        "rarity": "epic"
+      },
+      {
+        "id": "lightning_dash",
+        "name": "Lightning Dash",
+        "element": "SURGE",
+        "requirements": {
+          "Legs": "Wheels",
+          "Backpack": "Electron Battery"
+        },
+        "description": "Electrified speed burst that damages on contact",
+        "rarity": "common"
+      },
+      
+      {
+        "id": "hack_protocol",
+        "name": "Hack Protocol",
+        "element": "CODE",
+        "requirements": {
+          "Eyes": "Digital",
+          "Arms": "Manipulator"
+        },
+        "description": "Infiltrate enemy systems with precision",
+        "rarity": "common"
+      },
+      {
+        "id": "viral_cascade",
+        "name": "Viral Cascade",
+        "element": "CODE",
+        "requirements": {
+          "Eyes": "Digital",
+          "Special": "Corrupted Core"
+        },
+        "description": "Spread corruption through digital networks",
+        "rarity": "rare"
+      },
+      {
+        "id": "firewall_matrix",
+        "name": "Firewall Matrix",
+        "element": "CODE",
+        "requirements": {
+          "Body": "Slim",
+          "Backpack": "Antivirus Software"
+        },
+        "description": "Create protective digital barriers",
+        "rarity": "common"
+      },
+      
+      {
+        "id": "fortress_mode",
+        "name": "Fortress Mode",
+        "element": "METAL",
+        "requirements": {
+          "Body": "Tank",
+          "Legs": "Treads"
+        },
+        "description": "Become an immovable defensive position",
+        "rarity": "common"
+      },
+      {
+        "id": "crushing_impact",
+        "name": "Crushing Impact",
+        "element": "METAL",
+        "requirements": {
+          "Arms": "Cannon",
+          "Body": "Tank"
+        },
+        "description": "Devastating physical slam attack",
+        "rarity": "rare"
+      },
+      {
+        "id": "blade_storm",
+        "name": "Blade Storm",
+        "element": "METAL",
+        "requirements": {
+          "Arms": "Blades",
+          "Legs": "Wheels"
+        },
+        "description": "Spinning blade attack hitting all enemies",
+        "rarity": "rare"
+      },
+      
+      {
+        "id": "system_crash",
+        "name": "System Crash",
+        "element": "GLITCH",
+        "requirements": {
+          "Eyes": "Corrupted",
+          "Special": "Corrupted Core"
+        },
+        "description": "Cause catastrophic system failures",
+        "rarity": "epic"
+      },
+      {
+        "id": "chaos_field",
+        "name": "Chaos Field",
+        "element": "GLITCH",
+        "requirements": {
+          "Body": "Ancient",
+          "Eyes": "Corrupted"
+        },
+        "description": "Create area of pure unpredictability",
+        "rarity": "rare"
+      },
+      {
+        "id": "glitch_teleport",
+        "name": "Glitch Teleport",
+        "element": "GLITCH",
+        "requirements": {
+          "Legs": "Hover",
+          "Special": "Glitch Marking"
+        },
+        "description": "Teleport through corrupted space",
+        "rarity": "rare"
+      },
+      
+      {
+        "id": "genesis_protocol",
+        "name": "Genesis Protocol",
+        "element": "SPECIAL",
+        "requirements": {
+          "Body": "Ancient",
+          "Eyes": "Ancient",
+          "Special": "Ancient Marking"
+        },
+        "description": "Activate primordial roboto powers",
+        "rarity": "legendary"
+      },
+      {
+        "id": "golden_aegis",
+        "name": "Golden Aegis",
+        "element": "SPECIAL",
+        "requirements": {
+          "Special": "Golden",
+          "Body": "Tank"
+        },
+        "description": "Protect all allies with golden shields",
+        "rarity": "legendary"
+      }
+    ],
+    
+    "basic_abilities": {
+      "description": "Every Roboto gets one basic ability based on their dominant element",
+      "SURGE": {
+        "id": "spark_shot",
+        "name": "Spark Shot",
+        "description": "Basic electrical attack"
+      },
+      "CODE": {
+        "id": "data_pulse",
+        "name": "Data Pulse",
+        "description": "Basic digital attack"
+      },
+      "METAL": {
+        "id": "metal_strike",
+        "name": "Metal Strike",
+        "description": "Basic physical attack"
+      },
+      "GLITCH": {
+        "id": "error_burst",
+        "name": "Error Burst",
+        "description": "Basic chaotic attack"
+      },
+      "NEUTRAL": {
+        "id": "standard_strike",
+        "name": "Standard Strike",
+        "description": "Basic balanced attack"
+      }
+    },
+    
+    "robopet_abilities": {
+      "description": "Robopets provide support abilities based on type",
+      "Cat": {
+        "element": "SURGE",
+        "abilities": ["quick_reflexes", "nine_lives"]
+      },
+      "Dog": {
+        "element": "METAL",
+        "abilities": ["loyal_guard", "pack_tactics"]
+      },
+      "Bird": {
+        "element": "CODE",
+        "abilities": ["aerial_recon", "data_link"]
+      },
+      "Snake": {
+        "element": "GLITCH",
+        "abilities": ["venom_corruption", "shed_protocols"]
+      }
+    }
+  },
+  
+  "element_determination": {
+    "description": "How to determine a Roboto's primary element based on traits",
+    "trait_weights": {
+      "Eyes": {
+        "Laser": { "SURGE": 3 },
+        "Digital": { "CODE": 3 },
+        "Mechanical": { "METAL": 3 },
+        "Corrupted": { "GLITCH": 3 }
+      },
+      "Body": {
+        "Tank": { "METAL": 4 },
+        "Slim": { "SURGE": 2, "CODE": 2 },
+        "Ancient": { "GLITCH": 2, "SPECIAL": 2 }
+      },
+      "Arms": {
+        "Cannon": { "METAL": 2, "SURGE": 1 },
+        "Blades": { "METAL": 3 },
+        "Energy": { "SURGE": 4 },
+        "Manipulator": { "CODE": 3 }
+      },
+      "Legs": {
+        "Wheels": { "SURGE": 2 },
+        "Hover": { "CODE": 2, "GLITCH": 1 },
+        "Treads": { "METAL": 3 },
+        "Spider": { "GLITCH": 2 }
+      },
+      "Special": {
+        "Overcharged Core": { "SURGE": 5 },
+        "Corrupted Core": { "GLITCH": 5 },
+        "Golden": { "SPECIAL": 5 },
+        "Ancient Marking": { "SPECIAL": 3 }
+      },
+      "Backpack": {
+        "Electron Battery": { "SURGE": 2 },
+        "Antivirus Software": { "CODE": 2 },
+        "Armor Plating": { "METAL": 2 },
+        "Chaos Generator": { "GLITCH": 2 }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" fill="transparent"/>
+  <rect x="20" y="20" width="80" height="80" rx="10" fill="#666666" stroke="#00ff00" stroke-width="2"/>
+  <text x="60" y="65" text-anchor="middle" fill="#00ff00" font-family="monospace" font-size="16">LOADING</text>
+</svg>
