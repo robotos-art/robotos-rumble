@@ -2,9 +2,9 @@ import { ethers } from 'ethers'
 import Web3 from 'web3'
 import { AbiItem } from 'web3-utils'
 
-// Import ABIs from main project
-import RobotoABI from '../../../contract-abi.json'
-import RobopetABI from '../../../robopets-abi.json'
+// Import ABIs
+import RobotoABI from '../../contract-abi.json'
+import RobopetABI from '../../robopets-abi.json'
 
 const ROBOTO_CONTRACT_ADDRESS = '0x099689220846644F87D1137665CDED7BF3422747'
 const ROBOPET_CONTRACT_ADDRESS = '0x4e962D488412A14aA37eAcADCb83f18C7e2271a7'
