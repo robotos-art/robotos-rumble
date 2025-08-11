@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '../components/ui/button'
 import { Swords, Trophy, Users } from 'lucide-react'
 import { gameSounds } from '../lib/sounds/gameSounds'
-import { pageTransition, buttonAnimations } from '../lib/animations/gameAnimations'
 import FuzzyText from '../components/ui/FuzzyText'
 import { GameHeader } from '../components/shared/GameHeader'
 import { PageLayout } from '../components/shared/PageLayout'
@@ -76,34 +75,45 @@ PRESS ANY KEY TO CONTINUE`
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 flex-1 flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto">
           {/* Logo with FuzzyText */}
-          <div className="mb-8 flex flex-col items-center w-full">
-            <div className="mb-4 flex justify-center">
-              <div style={{ letterSpacing: '0.3em' }}>
-                <FuzzyText 
-                  fontSize="clamp(2.5rem, 7vw, 5rem)"
-                  fontWeight={400}
-                  fontFamily="Space Mono, monospace"
-                  color="#86efac"
-                  baseIntensity={0.1} 
-                  hoverIntensity={0.4} 
-                  enableHover={true}
-                >
-                  ROBOTOS
-                </FuzzyText>
+          <div className="mb-8 flex justify-center w-full" style={{
+            perspective: '300px',
+          }}>
+            <div className="flex flex-col items-center" style={{
+              transform: 'rotateX(30deg)',
+              transformOrigin: 'center top',
+            }}>
+              <div className="mb-4 flex justify-center">
+                <div>
+                  <FuzzyText
+                    fontSize="clamp(2.5rem, 7vw, 5rem)"
+                    fontWeight={400}
+                    fontFamily="Space Mono, monospace"
+                    color="#86efac"
+                    baseIntensity={0.1}
+                    hoverIntensity={0.4}
+                    enableHover={true}
+                  >
+                    ROBOTOS
+                  </FuzzyText>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-center">
-              <FuzzyText 
-                fontSize="clamp(3rem, 10vw, 10rem)"
-                fontWeight={900}
-                fontFamily="Space Mono, monospace"
-                color="#22c55e"
-                baseIntensity={0.2} 
-                hoverIntensity={0.8} 
-                enableHover={true}
-              >
-                RUMBLE
-              </FuzzyText>
+              <div className="flex justify-center">
+                <div style={{
+                  letterSpacing: '-0.05em',
+                }}>
+                  <FuzzyText
+                    fontSize="clamp(3rem, 10vw, 10rem)"
+                    fontWeight={900}
+                    fontFamily="Space Mono, monospace"
+                    color="#22c55e"
+                    baseIntensity={0.2}
+                    hoverIntensity={0.8}
+                    enableHover={true}
+                  >
+                    RUMBLE
+                  </FuzzyText>
+                </div>
+              </div>
             </div>
           </div>
 
