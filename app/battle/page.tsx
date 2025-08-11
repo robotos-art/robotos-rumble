@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Bot, UserCircle } from 'lucide-react'
@@ -12,13 +10,6 @@ import { PageLayout } from '../../components/shared/PageLayout'
 
 export default function BattleSelect() {
   const router = useRouter()
-  const [hasTeam, setHasTeam] = useState(false)
-  
-  useEffect(() => {
-    // Check if user has a saved team
-    const savedTeam = localStorage.getItem('roboto_rumble_team')
-    setHasTeam(!!savedTeam && JSON.parse(savedTeam).length === 5)
-  }, [])
   
   const handleModeSelect = (mode: 'computer' | 'player') => {
     if (mode === 'player') {
@@ -46,16 +37,6 @@ export default function BattleSelect() {
       />
       
       <div className="mt-8">
-        
-        {/* Team Check */}
-        {!hasTeam && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded text-center">
-            <p className="text-red-500">
-              NO BATTLE SQUAD DETECTED - BUILD YOUR TEAM FIRST
-            </p>
-          </div>
-        )}
-        
         {/* Battle Mode Selection - Taller cards */}
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           <Card 
@@ -121,22 +102,6 @@ export default function BattleSelect() {
           <p>BATTLE PROTOCOL: SELECT YOUR OPPONENT TYPE</p>
           <p>REMEMBER: A FULL SQUAD OF 5 UNITS IS REQUIRED</p>
         </div>
-        
-        {/* Quick Actions */}
-        {!hasTeam && (
-          <div className="mt-6 text-center">
-            <Link href="/team-builder">
-              <Button 
-                variant="terminal"
-                size="lg"
-                className="animate-pulse"
-                onClick={() => gameSounds.playConfirm()}
-              >
-                [BUILD YOUR BATTLE SQUAD]
-              </Button>
-            </Link>
-          </div>
-        )}
       </div>
     </PageLayout>
   )

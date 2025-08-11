@@ -5,9 +5,8 @@ import { Button } from '../ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { SoundToggle } from './SoundToggle'
-import { WalletMenu } from './WalletMenu'
+import { WalletConnect } from './WalletConnect'
 import { BackgroundSelector } from './BackgroundSelector'
-import { useAccount } from 'wagmi'
 import { cn } from '../../lib/utils'
 
 interface GameHeaderProps {
@@ -33,8 +32,6 @@ export function GameHeader({
   leftContent,
   rightContent
 }: GameHeaderProps) {
-  const { isConnected } = useAccount()
-
   return (
     <header className={cn(
       "flex items-center justify-between",
@@ -69,7 +66,7 @@ export function GameHeader({
         {rightContent}
         {showBackgroundSelector && <BackgroundSelector />}
         {showSoundToggle && <SoundToggle />}
-        {showWallet && isConnected && <WalletMenu />}
+        {showWallet && <WalletConnect />}
       </div>
     </header>
   )
