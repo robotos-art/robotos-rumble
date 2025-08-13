@@ -35,12 +35,18 @@ export default function TeamBuilder() {
     setMounted(true)
 
     // Load battle settings first
-    let currentSettings = { teamSize: 5, speed: 'speedy' as const }
+    let currentSettings: BattleSettings = { teamSize: 5, speed: 'speedy' }
     const savedSettings = localStorage.getItem('battle_settings')
     if (savedSettings) {
       try {
-        currentSettings = JSON.parse(savedSettings)
-        setSettings(currentSettings)
+        const parsed = JSON.parse(savedSettings)
+        // Validate and ensure teamSize is 3 or 5
+        const validatedSettings: BattleSettings = {
+          teamSize: (parsed.teamSize === 3 || parsed.teamSize === 5) ? parsed.teamSize : 5,
+          speed: (parsed.speed === 'calm' || parsed.speed === 'speedy') ? parsed.speed : 'speedy'
+        }
+        currentSettings = validatedSettings
+        setSettings(validatedSettings)
       } catch (e) {
         // Use defaults if parsing fails
       }
@@ -253,7 +259,7 @@ export default function TeamBuilder() {
     gameSounds.play('menuNavigate')
     
     // Clear team if changing team size and current team is too large
-    if (key === 'teamSize' && selectedTeam.length > value) {
+    if (key === 'teamSize' && typeof value === 'number' && selectedTeam.length > value) {
       setSelectedTeam([])
     }
   }

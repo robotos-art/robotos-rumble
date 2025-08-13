@@ -296,7 +296,7 @@ export function TutorialDialog({ open: controlledOpen, onOpenChange, showButton 
               <div className="text-xl mt-1">2️⃣</div>
               <div>
                 <p className="text-green-400 font-medium">Choose Action</p>
-                <p className="text-sm text-gray-400">Pick attack or ability when it's your turn</p>
+                <p className="text-sm text-gray-400">Pick attack or ability when it&apos;s your turn</p>
               </div>
             </div>
             

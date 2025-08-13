@@ -26,7 +26,13 @@ export default function BattleSelect() {
     const savedSettings = localStorage.getItem('battle_settings')
     if (savedSettings) {
       try {
-        setSettings(JSON.parse(savedSettings))
+        const parsed = JSON.parse(savedSettings)
+        // Validate and ensure teamSize is 3 or 5
+        const validatedSettings: BattleSettings = {
+          teamSize: (parsed.teamSize === 3 || parsed.teamSize === 5) ? parsed.teamSize : 5,
+          speed: (parsed.speed === 'calm' || parsed.speed === 'speedy') ? parsed.speed : 'speedy'
+        }
+        setSettings(validatedSettings)
       } catch (e) {
         // Use defaults if parsing fails
       }
