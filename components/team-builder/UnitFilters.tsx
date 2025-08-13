@@ -8,7 +8,7 @@ import { TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 
 type Element = 'SURGE' | 'CODE' | 'METAL' | 'GLITCH' | 'NEUTRAL'
-type RobotType = 'all' | 'roboto' | 'robopet' | 'helmeto' | 'cyborgo' | 'computo'
+type RobotType = 'all' | 'roboto' | 'robopet' | 'helmeto' | 'mulleto' | 'cyborgo' | 'computo'
 
 interface FilterState {
   search: string
@@ -151,6 +151,7 @@ export function UnitFilters({ onFiltersChange, unitCount, filteredCount }: UnitF
             { value: 'roboto', label: 'ROBOTO' },
             { value: 'robopet', label: 'ROBOPET' },
             { value: 'helmeto', label: 'HELMETO' },
+            { value: 'mulleto', label: 'MULLETO' },
             { value: 'cyborgo', label: 'CYBORGO' },
             { value: 'computo', label: 'COMPUTO' }
           ].map(type => (

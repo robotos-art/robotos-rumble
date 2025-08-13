@@ -74,15 +74,15 @@ export default function TeamBuilder() {
   // Process units as they load - Robotos first, then Robopets
   const processedUnits = useMemo(() => {
     const units: BattleUnitV3[] = []
-    const processedIds = new Set<string>()
-
+    const processedKeys = new Set<string>() // Use composite keys to avoid conflicts
 
     // Process Robotos first
     robotos.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobotoTraits(token.metadata)
-        if (!processedIds.has(unit.id)) {
-          processedIds.add(unit.id)
+        const uniqueKey = `${unit.type}-${unit.id}`
+        if (!processedKeys.has(uniqueKey)) {
+          processedKeys.add(uniqueKey)
           units.push(unit)
         }
       } catch (e) {
@@ -94,15 +94,15 @@ export default function TeamBuilder() {
     robopets.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobopetTraits(token.metadata)
-        if (!processedIds.has(unit.id)) {
-          processedIds.add(unit.id)
+        const uniqueKey = `${unit.type}-${unit.id}`
+        if (!processedKeys.has(uniqueKey)) {
+          processedKeys.add(uniqueKey)
           units.push(unit)
         }
       } catch (e) {
         // Failed to process robopet, skip it
       }
     })
-
 
     return units
   }, [robotos, robopets])
@@ -148,6 +148,9 @@ export default function TeamBuilder() {
             return unit.type === 'robopet'
           case 'helmeto':
             return unit.type === 'roboto' && unit.traits['Robot Type'] === 'Roboto Helmeto'
+          case 'mulleto':
+            // Mulleto = Helmeto with Mullet helmet
+            return unit.type === 'roboto' && unit.traits['Robot Type'] === 'Roboto Helmeto' && unit.traits['Helmet'] === 'Mullet'
           case 'cyborgo':
             return unit.type === 'roboto' && unit.traits['Robot Type'] === 'Roboto Cyborgo'
           case 'computo':
@@ -221,8 +224,11 @@ export default function TeamBuilder() {
   }, [processedUnits, currentFilters])
 
   const toggleUnitSelection = useCallback((unit: BattleUnitV3) => {
-    if (selectedTeam.find(u => u.id === unit.id)) {
-      setSelectedTeam(selectedTeam.filter(u => u.id !== unit.id))
+    // Check if this exact unit (type + id) is already selected
+    const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
+    
+    if (isSelected) {
+      setSelectedTeam(selectedTeam.filter(u => !(u.id === unit.id && u.type === unit.type)))
       gameSounds.play('removeUnit')
     } else if (selectedTeam.length < settings.teamSize) {
       setSelectedTeam([...selectedTeam, unit])
@@ -237,6 +243,29 @@ export default function TeamBuilder() {
       gameSounds.play('cancel')
     }
   }, [selectedTeam, settings.teamSize])
+
+  const addCompanionPair = useCallback((unit: BattleUnitV3) => {
+    // Find the companion unit
+    const companion = processedUnits.find(u => u.id === unit.id && u.type !== unit.type)
+    if (!companion) return
+    
+    // Check which units are already selected
+    const unitSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
+    const companionSelected = selectedTeam.find(u => u.id === companion.id && u.type === companion.type)
+    
+    let newTeam = [...selectedTeam]
+    
+    // Add units that aren't already selected
+    if (!unitSelected && newTeam.length < settings.teamSize) {
+      newTeam.push(unit)
+    }
+    if (!companionSelected && newTeam.length < settings.teamSize) {
+      newTeam.push(companion)
+    }
+    
+    setSelectedTeam(newTeam)
+    gameSounds.play('teamComplete')
+  }, [processedUnits, selectedTeam, settings.teamSize])
 
   const saveTeamAndBattle = useCallback(() => {
     // Save team to localStorage
@@ -390,7 +419,7 @@ export default function TeamBuilder() {
               <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-3' : 'grid-cols-5'} gap-4`}>
                 {[...Array(settings.teamSize)].map((_, index) => {
                   const unit = selectedTeam[index]
-                  const key = unit ? `selected-${unit.id}` : `empty-slot-${index}`
+                  const key = unit ? `selected-${unit.type}-${unit.id}-${index}` : `empty-slot-${index}`
                   return (
                     <Card
                       key={key}
@@ -518,12 +547,17 @@ export default function TeamBuilder() {
               {/* Units Grid */}
               <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredUnits.map((unit, index) => {
-                  const isSelected = selectedTeam.find(u => u.id === unit.id)
+                  const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
+                  const hasCompanion = processedUnits.find(u => u.id === unit.id && u.type !== unit.type)
+                  const companionInTeam = hasCompanion && selectedTeam.find(u => u.id === unit.id && u.type !== unit.type)
+                  
                   return (
                     <Card
-                      key={unit.id}
+                      key={`${unit.type}-${unit.id}`}
                       className={`bg-black/60 border-2 rounded-lg transition-all overflow-hidden relative ${isSelected
                         ? 'border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]'
+                        : companionInTeam
+                        ? 'border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]'
                         : 'border-green-500/30 hover:border-green-500/60'
                         }`}
                       onMouseEnter={() => gameSounds.playHover()}
@@ -556,7 +590,14 @@ export default function TeamBuilder() {
                         <div className="flex-1 p-4">
                           {/* Header */}
                           <div className="mb-3">
-                            <h3 className="text-lg font-bold mb-1">{unit.name}</h3>
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className="text-lg font-bold">{unit.name}</h3>
+                              {companionInTeam && (
+                                <span className="text-xs text-yellow-400 px-2 py-1 bg-yellow-400/10 rounded">
+                                  COMPANION ACTIVE
+                                </span>
+                              )}
+                            </div>
                             <div className="text-sm" style={{ color: TraitProcessorV3.getElementColor(unit.element) }}>
                               {TraitProcessorV3.getElementSymbol(unit.element)} {unit.element}
                             </div>
@@ -640,7 +681,7 @@ export default function TeamBuilder() {
                           </TooltipProvider>
 
                           {/* Abilities */}
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1 mb-3">
                             {unit.abilities.map(abilityId => {
                               const ability = TraitProcessorV3.getAbilityData(abilityId)
                               return ability ? (
@@ -657,6 +698,28 @@ export default function TeamBuilder() {
                               ) : null
                             })}
                           </div>
+                          
+                          {/* Add Both Button for Companions */}
+                          {hasCompanion && !isSelected && !companionInTeam && selectedTeam.length <= settings.teamSize - 2 && (
+                            <Button
+                              variant="terminal"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                addCompanionPair(unit)
+                              }}
+                              className="w-full mt-2 bg-yellow-500/10 border-yellow-500/50 hover:bg-yellow-500/20"
+                            >
+                              ADD BOTH COMPANIONS (+2% BONUS)
+                            </Button>
+                          )}
+                          {hasCompanion && (isSelected || companionInTeam) && (
+                            <div className="text-xs text-center mt-2 text-yellow-400/60">
+                              {isSelected && companionInTeam ? '✓ Both companions in team' : 
+                               isSelected ? `Add ${hasCompanion.type === 'roboto' ? 'Roboto' : 'Robopet'} #${unit.id} for bonus` :
+                               `Add ${unit.type === 'roboto' ? 'Roboto' : 'Robopet'} #${unit.id} for bonus`}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>

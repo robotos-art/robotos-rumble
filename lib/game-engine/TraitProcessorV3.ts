@@ -26,6 +26,8 @@ export interface BattleUnitV3 {
     strongAgainst: string[]
     weakAgainst: string[]
   }
+  hasCompanionBonus?: boolean // Added for companion tracking
+  battleId?: string // Unique identifier for battle instance
 }
 
 export interface AbilityInstance {

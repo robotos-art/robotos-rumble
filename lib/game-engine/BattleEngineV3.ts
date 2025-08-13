@@ -82,13 +82,15 @@ export class BattleEngineV3 {
   }
   
   initializeBattle(playerTeam: BattleUnitV3[], enemyTeam: BattleUnitV3[]) {
-    this.state.playerTeam = playerTeam
-    this.state.enemyTeam = enemyTeam
+    // Apply companion bonuses before battle starts
+    this.state.playerTeam = this.applyCompanionBonuses(playerTeam)
+    this.state.enemyTeam = this.applyCompanionBonuses(enemyTeam)
     
-    // Initialize unit statuses
-    const allUnits = [...playerTeam, ...enemyTeam]
+    // Initialize unit statuses - use battleId for tracking
+    const allUnits = [...this.state.playerTeam, ...this.state.enemyTeam]
     allUnits.forEach((unit, index) => {
-      this.state.unitStatuses.set(unit.id, {
+      const unitId = (unit as any).battleId || unit.id
+      this.state.unitStatuses.set(unitId, {
         currentHp: unit.stats.hp,
         currentEnergy: unit.stats.energy,
         statusEffects: [],
@@ -683,6 +685,56 @@ export class BattleEngineV3 {
     })
   }
   
+  private applyCompanionBonuses(team: BattleUnitV3[]): BattleUnitV3[] {
+    // Find companion pairs (Roboto and Robopet with matching IDs)
+    const companionPairs: Map<string, string> = new Map() // tokenId -> battleId
+    
+    // First, check for matching token IDs between Robotos and Robopets
+    const matchingIds: Set<string> = new Set()
+    team.forEach(unit1 => {
+      team.forEach(unit2 => {
+        // Extract the base token ID (without type prefix)
+        const id1 = unit1.id.replace(/^(roboto|robopet)-/, '')
+        const id2 = unit2.id.replace(/^(roboto|robopet)-/, '')
+        if (id1 === id2 && unit1.type !== unit2.type) {
+          matchingIds.add(id1)
+          companionPairs.set(unit1.id, unit1.id) // Track which units get bonus
+          companionPairs.set(unit2.id, unit2.id)
+        }
+      })
+    })
+    
+    // Apply 2% bonus to units with companions
+    return team.map((unit, index) => {
+      // Ensure each unit has a unique battle ID
+      const battleUnit = { ...unit }
+      battleUnit.battleId = `${unit.type}-${unit.id}-${index}` // Unique battle identifier
+      
+      if (companionPairs.has(unit.id)) {
+        // Create a new unit with boosted stats
+        battleUnit.stats = { ...unit.stats }
+        battleUnit.hasCompanionBonus = true
+        
+        // Apply 2% boost to all stats
+        battleUnit.stats.hp = Math.round(unit.stats.hp * 1.02)
+        battleUnit.stats.attack = Math.round(unit.stats.attack * 1.02)
+        battleUnit.stats.defense = Math.round(unit.stats.defense * 1.02)
+        battleUnit.stats.speed = Math.round(unit.stats.speed * 1.02)
+        battleUnit.stats.energy = Math.round(unit.stats.energy * 1.02)
+        battleUnit.stats.crit = Math.round(unit.stats.crit * 1.02)
+        
+        // Log the companion bonus
+        this.addBattleEvent({
+          type: 'buff',
+          description: `${unit.name} gains COMPANION BONUS (+2% all stats)!`,
+          timestamp: Date.now()
+        })
+      }
+      
+      return battleUnit
+    })
+  }
+
   private checkBattleEnd() {
     const alivePlayerUnits = this.state.playerTeam.filter(
       unit => this.state.unitStatuses.get(unit.id)?.isAlive
@@ -711,7 +763,10 @@ export class BattleEngineV3 {
   
   private findUnit(unitId: string): BattleUnitV3 | undefined {
     return [...this.state.playerTeam, ...this.state.enemyTeam]
-      .find(u => u.id === unitId)
+      .find(u => {
+        const battleId = (u as any).battleId || u.id
+        return battleId === unitId || u.id === unitId
+      })
   }
   
   private addBattleEvent(event: BattleEvent) {
