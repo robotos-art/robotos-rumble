@@ -179,14 +179,17 @@ export class BattleEngineV3 {
     
     // Sort by speed with small random factor for variety
     const sortedUnits = allUnits
-      .filter(unit => this.state.unitStatuses.get(unit.id)?.isAlive)
+      .filter(unit => {
+        const unitId = (unit as any).battleId || unit.id
+        return this.state.unitStatuses.get(unitId)?.isAlive
+      })
       .sort((a, b) => {
         const aSpeed = a.stats.speed + Math.random() * 10
         const bSpeed = b.stats.speed + Math.random() * 10
         return bSpeed - aSpeed
       })
     
-    this.state.turnOrder = sortedUnits.map(unit => unit.id)
+    this.state.turnOrder = sortedUnits.map(unit => (unit as any).battleId || unit.id)
     this.state.turnIndex = 0
   }
   
@@ -197,7 +200,10 @@ export class BattleEngineV3 {
     
     const unitId = this.state.turnOrder[this.state.turnIndex]
     const unit = [...this.state.playerTeam, ...this.state.enemyTeam]
-      .find(u => u.id === unitId)
+      .find(u => {
+        const battleId = (u as any).battleId || u.id
+        return battleId === unitId
+      })
     
     return unit || null
   }
@@ -206,7 +212,8 @@ export class BattleEngineV3 {
     const unit = this.findUnit(unitId)
     if (!unit) return []
     
-    const unitStatus = this.state.unitStatuses.get(unitId)
+    const battleId = (unit as any).battleId || unit.id
+    const unitStatus = this.state.unitStatuses.get(battleId)
     if (!unitStatus) return []
     
     return unit.abilities.map(abilityId => {
@@ -223,10 +230,13 @@ export class BattleEngineV3 {
   
   canUseAbility(unitId: string, abilityId: string): boolean {
     const unit = this.findUnit(unitId)
-    const unitStatus = this.state.unitStatuses.get(unitId)
+    if (!unit) return false
+    
+    const battleId = (unit as any).battleId || unit.id
+    const unitStatus = this.state.unitStatuses.get(battleId)
     const ability = TraitProcessorV3.getAbilityData(abilityId)
     
-    if (!unit || !unitStatus || !ability) return false
+    if (!unitStatus || !ability) return false
     
     // Check cooldown
     const cooldown = unitStatus.cooldowns.get(abilityId) || 0
@@ -249,7 +259,8 @@ export class BattleEngineV3 {
     
     if (!source || !ability) return
     
-    const sourceStatus = this.state.unitStatuses.get(sourceId)
+    const sourceBattleId = (source as any).battleId || source.id
+    const sourceStatus = this.state.unitStatuses.get(sourceBattleId)
     if (!sourceStatus || !sourceStatus.isAlive) return
     
     // Check if ability can be used
@@ -326,7 +337,8 @@ export class BattleEngineV3 {
         return
       }
       
-      const targetStatus = this.state.unitStatuses.get(target.id)!
+      const targetBattleId = (target as any).battleId || target.id
+      const targetStatus = this.state.unitStatuses.get(targetBattleId)!
       targetStatus.currentHp -= damage
       
       // Show element effectiveness
@@ -371,7 +383,8 @@ export class BattleEngineV3 {
     const targets = this.resolveTargets(source, targetId, ability.targeting)
     
     targets.forEach(target => {
-      const targetStatus = this.state.unitStatuses.get(target.id)!
+      const targetBattleId = (target as any).battleId || target.id
+      const targetStatus = this.state.unitStatuses.get(targetBattleId)!
       const healAmount = ability.stats.healPower || 50
       const actualHeal = Math.min(healAmount, target.stats.hp - targetStatus.currentHp)
       
@@ -392,7 +405,8 @@ export class BattleEngineV3 {
     const targets = this.resolveTargets(source, targetId, ability.targeting)
     
     targets.forEach(target => {
-      const targetStatus = this.state.unitStatuses.get(target.id)!
+      const targetBattleId = (target as any).battleId || target.id
+      const targetStatus = this.state.unitStatuses.get(targetBattleId)!
       
       // Create status effect
       const statusEffect: StatusEffect = {
@@ -420,7 +434,8 @@ export class BattleEngineV3 {
     const targets = this.resolveTargets(source, targetId, ability.targeting)
     
     targets.forEach(target => {
-      const targetStatus = this.state.unitStatuses.get(target.id)!
+      const targetBattleId = (target as any).battleId || target.id
+      const targetStatus = this.state.unitStatuses.get(targetBattleId)!
       
       // Check for debuff immunity
       const hasImmunity = targetStatus.statusEffects.some(e => 
@@ -517,7 +532,10 @@ export class BattleEngineV3 {
         
       case 'random':
         const enemies = isPlayerUnit ? this.state.enemyTeam : this.state.playerTeam
-        const aliveEnemies = enemies.filter(e => this.state.unitStatuses.get(e.id)?.isAlive)
+        const aliveEnemies = enemies.filter(e => {
+          const battleId = (e as any).battleId || e.id
+          return this.state.unitStatuses.get(battleId)?.isAlive
+        })
         return aliveEnemies.length > 0 
           ? [aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)]]
           : []
@@ -737,7 +755,10 @@ export class BattleEngineV3 {
 
   private checkBattleEnd() {
     const alivePlayerUnits = this.state.playerTeam.filter(
-      unit => this.state.unitStatuses.get(unit.id)?.isAlive
+      unit => {
+        const battleId = (unit as any).battleId || unit.id
+        return this.state.unitStatuses.get(battleId)?.isAlive
+      }
     )
     
     const aliveEnemyUnits = this.state.enemyTeam.filter(
@@ -782,7 +803,10 @@ export class BattleEngineV3 {
     if (!isEnemyUnit) return
     
     const alivePlayerUnits = this.state.playerTeam.filter(
-      unit => this.state.unitStatuses.get(unit.id)?.isAlive
+      unit => {
+        const battleId = (unit as any).battleId || unit.id
+        return this.state.unitStatuses.get(battleId)?.isAlive
+      }
     )
     
     if (alivePlayerUnits.length === 0) return
