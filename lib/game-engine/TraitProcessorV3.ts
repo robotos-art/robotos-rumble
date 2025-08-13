@@ -17,7 +17,7 @@ export interface BattleUnitV3 {
   id: string
   name: string
   type: 'roboto' | 'robopet'
-  element: 'SURGE' | 'CODE' | 'METAL' | 'GLITCH' | 'NEUTRAL'
+  element: 'SURGE' | 'CODE' | 'METAL' | 'GLITCH' | 'NEUTRAL' | 'BOND' | 'WILD'
   imageUrl: string
   stats: Stats
   abilities: string[] // Ability IDs
@@ -77,14 +77,26 @@ export class TraitProcessorV3 {
   
   static processRobopetTraits(metadata: any): BattleUnitV3 {
     const traits = this.extractTraits(metadata.attributes || [])
-    const petType = traits['Type'] || 'Unknown'
+    // Robopets use "Robopet Type" as their trait name
+    const petType = traits['Robopet Type'] || 'default'
     
-    // Determine element based on pet type
-    const petAbilities = (abilityCombinations.combinations.robopet_abilities as any)[petType]
-    const element = petAbilities?.element || 'NEUTRAL'
+    // Get abilities and element based on the actual Robopet Type
+    const petAbilities = (abilityCombinations.combinations.robopet_abilities as any)[petType] 
+      || abilityCombinations.combinations.robopet_abilities.default
     
-    const stats = this.calculateStats(traits, element, ROBOPET_BASE_STATS)
-    const abilities = petAbilities?.abilities || []
+    const element = petAbilities?.element || 'BOND'
+    
+    let stats = this.calculateStats(traits, element, ROBOPET_BASE_STATS)
+    
+    // Apply rarity bonuses to Robopets
+    const powerTier = petAbilities?.power_tier || 1
+    const rarityMultiplier = 1 + (powerTier - 1) * 0.1 // 10% bonus per tier
+    stats.hp = Math.round(stats.hp * rarityMultiplier)
+    stats.attack = Math.round(stats.attack * rarityMultiplier)
+    stats.defense = Math.round(stats.defense * rarityMultiplier)
+    stats.energy = Math.round(stats.energy * rarityMultiplier)
+    
+    const abilities = petAbilities?.abilities || ["companion_shield"]
     
     return {
       id: metadata.tokenId || metadata.id,

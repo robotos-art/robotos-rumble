@@ -398,7 +398,9 @@ export class BattleUI {
     const width = this.scene.scale.width
     const height = this.scene.scale.height
     
+    // Set high depth to ensure overlay appears above everything
     const overlay = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8)
+    overlay.setDepth(1000)
     
     const victoryText = this.scene.add.text(width / 2, height / 2, 'VICTORY!', {
       fontSize: '64px',
@@ -407,6 +409,7 @@ export class BattleUI {
       strokeThickness: 6,
       fontFamily: 'monospace'
     }).setOrigin(0.5)
+    victoryText.setDepth(1001)
     
     // Pulse animation
     this.scene.tweens.add({
@@ -422,7 +425,9 @@ export class BattleUI {
     const width = this.scene.scale.width
     const height = this.scene.scale.height
     
+    // Set high depth to ensure overlay appears above everything
     const overlay = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8)
+    overlay.setDepth(1000)
     
     const defeatText = this.scene.add.text(width / 2, height / 2, 'DEFEAT', {
       fontSize: '64px',
@@ -431,6 +436,7 @@ export class BattleUI {
       strokeThickness: 6,
       fontFamily: 'monospace'
     }).setOrigin(0.5)
+    defeatText.setDepth(1001)
     
     const centerX = width / 2
     

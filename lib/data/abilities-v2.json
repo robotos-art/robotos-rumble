@@ -638,6 +638,8 @@
   },
   
   "robopet_abilities": {
+    "_description": "Robopet-specific abilities with unique BOND and WILD elements",
+    
     "quick_reflexes": {
       "name": "Quick Reflexes",
       "element": "SURGE",
@@ -651,6 +653,35 @@
       "targeting": "single_ally",
       "effects": {"evasion": 30, "speed": 20}
     },
+    "nine_lives": {
+      "name": "Nine Lives",
+      "element": "BOND",
+      "type": "defensive",
+      "description": "Cat's legendary survival instinct",
+      "stats": {
+        "energyCost": 40,
+        "cooldown": "once_per_battle"
+      },
+      "targeting": "self",
+      "effects": ["revive_on_ko", "heal_50_percent"]
+    },
+    "pounce_strike": {
+      "name": "Pounce Strike",
+      "element": "WILD",
+      "type": "damage",
+      "description": "Feline predator attack",
+      "stats": {
+        "power": 60,
+        "accuracy": 95,
+        "energyCost": 20,
+        "cooldown": 2,
+        "critChance": 25
+      },
+      "targeting": "single",
+      "effects": ["always_goes_first", "bleed"],
+      "timingType": "spinner"
+    },
+    
     "loyal_guard": {
       "name": "Loyal Guard",
       "element": "METAL",
@@ -664,6 +695,33 @@
       "targeting": "single_ally",
       "effects": ["redirect_damage", "defense_boost"]
     },
+    "pack_tactics": {
+      "name": "Pack Tactics",
+      "element": "BOND",
+      "type": "buff",
+      "description": "Coordinate with pack members",
+      "stats": {
+        "duration": 4,
+        "energyCost": 25,
+        "cooldown": 4
+      },
+      "targeting": "all_allies",
+      "effects": ["attack_boost_15", "crit_boost_10", "pack_bond"]
+    },
+    "howl_of_courage": {
+      "name": "Howl of Courage",
+      "element": "WILD",
+      "type": "buff",
+      "description": "Inspiring battle cry",
+      "stats": {
+        "energyCost": 15,
+        "cooldown": 3
+      },
+      "targeting": "all_allies",
+      "effects": ["remove_debuffs", "morale_boost", "fear_immunity"],
+      "timingType": "charge"
+    },
+    
     "aerial_recon": {
       "name": "Aerial Recon",
       "element": "CODE",
@@ -676,6 +734,36 @@
       "targeting": "all_enemies",
       "effects": ["reveal_all", "accuracy_team_boost"]
     },
+    "data_link": {
+      "name": "Data Link",
+      "element": "BOND",
+      "type": "utility",
+      "description": "Share sensory data with allies",
+      "stats": {
+        "duration": 3,
+        "energyCost": 20,
+        "cooldown": 3
+      },
+      "targeting": "all_allies",
+      "effects": ["shared_vision", "critical_awareness", "dodge_boost"]
+    },
+    "sky_dive": {
+      "name": "Sky Dive",
+      "element": "WILD",
+      "type": "damage",
+      "description": "Devastating aerial assault",
+      "stats": {
+        "power": 80,
+        "accuracy": 85,
+        "energyCost": 30,
+        "cooldown": 3,
+        "critChance": 15
+      },
+      "targeting": "single",
+      "effects": ["ignore_defense_50", "stun_chance"],
+      "timingType": "spinner"
+    },
+    
     "venom_corruption": {
       "name": "Venom Corruption",
       "element": "GLITCH",
@@ -688,7 +776,91 @@
         "cooldown": 3
       },
       "targeting": "single",
-      "effects": ["poison", "corrupt_data"]
+      "effects": ["poison", "corrupt_data"],
+      "timingType": "precision"
+    },
+    "shed_protocols": {
+      "name": "Shed Protocols",
+      "element": "BOND",
+      "type": "defensive",
+      "description": "Shed damaged systems like skin",
+      "stats": {
+        "energyCost": 20,
+        "cooldown": 4
+      },
+      "targeting": "self",
+      "effects": ["remove_all_debuffs", "defense_reset", "regeneration"]
+    },
+    "constrict": {
+      "name": "Constrict",
+      "element": "WILD",
+      "type": "damage",
+      "description": "Crushing serpent embrace",
+      "stats": {
+        "power": 40,
+        "accuracy": 100,
+        "energyCost": 25,
+        "cooldown": 2
+      },
+      "targeting": "single",
+      "effects": ["immobilize", "damage_over_time", "energy_drain"],
+      "timingType": "charge"
+    },
+    
+    "harmony_pulse": {
+      "name": "Harmony Pulse",
+      "element": "BOND",
+      "type": "healing",
+      "description": "Synchronized healing frequency",
+      "stats": {
+        "healPower": 40,
+        "energyCost": 30,
+        "cooldown": 3
+      },
+      "targeting": "all_allies",
+      "effects": ["heal_team", "sync_hp_levels", "bond_strengthen"]
+    },
+    "primal_fury": {
+      "name": "Primal Fury",
+      "element": "WILD",
+      "type": "buff",
+      "description": "Unleash untamed power",
+      "stats": {
+        "duration": 3,
+        "energyCost": 35,
+        "cooldown": 5
+      },
+      "targeting": "self",
+      "effects": ["berserk_mode", "lifesteal", "wild_strikes"],
+      "timingType": "charge"
+    },
+    "companion_shield": {
+      "name": "Companion Shield",
+      "element": "BOND",
+      "type": "defensive",
+      "description": "Protective bond energy",
+      "stats": {
+        "shieldStrength": 60,
+        "energyCost": 25,
+        "cooldown": 3,
+        "duration": 2
+      },
+      "targeting": "single_ally",
+      "effects": ["damage_share", "bond_shield", "counter_on_break"]
+    },
+    "nature_call": {
+      "name": "Nature's Call",
+      "element": "WILD",
+      "type": "field",
+      "description": "Summon the wild's power",
+      "stats": {
+        "duration": 4,
+        "energyCost": 40,
+        "cooldown": 6
+      },
+      "targeting": "field",
+      "effects": ["wild_terrain", "regen_wild_units", "intimidate_metal"],
+      "timingType": "spinner"
     }
   },
   

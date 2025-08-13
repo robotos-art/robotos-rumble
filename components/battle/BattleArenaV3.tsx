@@ -18,6 +18,7 @@ import DotGrid from '../backgrounds/DotGrid'
 import LightRays from '../backgrounds/LightRays'
 import Galaxy from '../backgrounds/Galaxy'
 import Aurora from '../backgrounds/Aurora'
+import type { BattleSettings } from '../../app/battle/page'
 import { useBackground } from '../shared/BackgroundSelector'
 
 interface BattleArenaV3Props {
@@ -56,6 +57,26 @@ export default function BattleArenaV3({
   enemyTeam,
   onBattleEnd
 }: BattleArenaV3Props) {
+  // Load battle settings
+  const [settings, setSettings] = useState<BattleSettings>({
+    teamSize: 5,
+    speed: 'speedy'
+  })
+  
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('battle_settings')
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings))
+      } catch (e) {
+        // Use defaults if parsing fails
+      }
+    }
+  }, [])
+  
+  // Calculate timer duration based on speed setting
+  const timerDuration = settings.speed === 'calm' ? 10 : 5
+  
   // Battle state
   const [battleEngine] = useState(() => new BattleEngineV3())
   const [battleState, setBattleState] = useState(battleEngine.getState())
@@ -103,9 +124,9 @@ export default function BattleArenaV3({
   // Timing states
   const [attackScore, setAttackScore] = useState(1.0)
   const [defenseScore, setDefenseScore] = useState(1.0)
-  const [actionCountdown, setActionCountdown] = useState(5)
-  const [targetCountdown, setTargetCountdown] = useState(5)
-  const [attackCountdown, setAttackCountdown] = useState(5)
+  const [actionCountdown, setActionCountdown] = useState(timerDuration)
+  const [targetCountdown, setTargetCountdown] = useState(timerDuration)
+  const [attackCountdown, setAttackCountdown] = useState(5) // Keep at 5 for timing minigame
   const [defenseActive, setDefenseActive] = useState(false)
   const [defenseCommitted, setDefenseCommitted] = useState(false)
   const [attackCommitted, setAttackCommitted] = useState(false)
@@ -203,7 +224,7 @@ export default function BattleArenaV3({
 
     if (isPlayer) {
       setPhase('selecting-action')
-      setActionCountdown(5)
+      setActionCountdown(timerDuration)
       // Clear any existing interval
       if (actionIntervalRef.current) {
         clearInterval(actionIntervalRef.current)
@@ -269,7 +290,7 @@ export default function BattleArenaV3({
   const handleAttack = useCallback(() => {
     setPendingAction({ type: 'attack' })
     setPhase('selecting-target')
-    setTargetCountdown(5)
+    setTargetCountdown(timerDuration)
 
     // Preselect first alive enemy
     const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
@@ -322,7 +343,7 @@ export default function BattleArenaV3({
     setPhase('attack-timing')
     setAttackingUnitId(currentUnit.id)
     setDefendingUnitId(targetUnit.id)
-    setAttackCountdown(5)
+    setAttackCountdown(5) // Keep at 5 for timing minigame
     setAttackScore(1.0)
     setAttackCommitted(false)
 

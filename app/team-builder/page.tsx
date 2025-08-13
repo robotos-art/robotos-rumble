@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import { WalletConnect } from '../../components/shared/WalletConnect'
 import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext'
 import { TraitProcessorV3, BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
-import { ArrowLeft, Shield, Swords, Zap, Heart, Gauge, Sparkles, RefreshCw, Expand } from 'lucide-react'
+import { ArrowLeft, Shield, Swords, Zap, Heart, Gauge, Sparkles, RefreshCw, Expand, Users, Clock, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { UnitFilters } from '../../components/team-builder/UnitFilters'
@@ -17,6 +17,7 @@ import { UnitLightbox } from '../../components/team-builder/UnitLightbox'
 import { cardAnimations, buttonAnimations, pageTransition } from '../../lib/animations/gameAnimations'
 import { GameHeader } from '../../components/shared/GameHeader'
 import { PageLayout } from '../../components/shared/PageLayout'
+import type { BattleSettings } from '../battle/page'
 
 export default function TeamBuilder() {
   const router = useRouter()
@@ -25,17 +26,38 @@ export default function TeamBuilder() {
   const [selectedTeam, setSelectedTeam] = useState<BattleUnitV3[]>([])
   const [mounted, setMounted] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [settings, setSettings] = useState<BattleSettings>({
+    teamSize: 5,
+    speed: 'speedy'
+  })
 
   useEffect(() => {
     setMounted(true)
 
-    // Load saved team from localStorage
+    // Load battle settings first
+    let currentSettings = { teamSize: 5, speed: 'speedy' as const }
+    const savedSettings = localStorage.getItem('battle_settings')
+    if (savedSettings) {
+      try {
+        currentSettings = JSON.parse(savedSettings)
+        setSettings(currentSettings)
+      } catch (e) {
+        // Use defaults if parsing fails
+      }
+    }
+
+    // Load saved team from localStorage and validate against current team size
     const savedTeam = localStorage.getItem('roboto_rumble_team')
     if (savedTeam) {
       try {
         const team = JSON.parse(savedTeam)
         if (Array.isArray(team)) {
-          setSelectedTeam(team)
+          // If saved team is larger than current team size, truncate it
+          if (team.length > currentSettings.teamSize) {
+            setSelectedTeam(team.slice(0, currentSettings.teamSize))
+          } else {
+            setSelectedTeam(team)
+          }
         }
       } catch (e) {
         // Failed to load saved team, continue with empty team
@@ -196,19 +218,19 @@ export default function TeamBuilder() {
     if (selectedTeam.find(u => u.id === unit.id)) {
       setSelectedTeam(selectedTeam.filter(u => u.id !== unit.id))
       gameSounds.play('removeUnit')
-    } else if (selectedTeam.length < 5) {
+    } else if (selectedTeam.length < settings.teamSize) {
       setSelectedTeam([...selectedTeam, unit])
       gameSounds.play('addUnit')
 
       // Play team complete sound if team is now full
-      if (selectedTeam.length === 4) {
+      if (selectedTeam.length === settings.teamSize - 1) {
         setTimeout(() => gameSounds.play('teamComplete'), 300)
       }
     } else {
       // Team is full, play cancel sound
       gameSounds.play('cancel')
     }
-  }, [selectedTeam])
+  }, [selectedTeam, settings.teamSize])
 
   const saveTeamAndBattle = useCallback(() => {
     // Save team to localStorage
@@ -220,6 +242,21 @@ export default function TeamBuilder() {
       router.push('/battle/training')
     }, 200)
   }, [selectedTeam, router])
+
+  const updateSetting = <K extends keyof BattleSettings>(
+    key: K,
+    value: BattleSettings[K]
+  ) => {
+    const newSettings = { ...settings, [key]: value }
+    setSettings(newSettings)
+    localStorage.setItem('battle_settings', JSON.stringify(newSettings))
+    gameSounds.play('menuNavigate')
+    
+    // Clear team if changing team size and current team is too large
+    if (key === 'teamSize' && selectedTeam.length > value) {
+      setSelectedTeam([])
+    }
+  }
 
   const getElementTooltip = useCallback((element: string): string => {
     switch (element) {
@@ -276,13 +313,76 @@ export default function TeamBuilder() {
           </Card>
         ) : (
           <>
+            {/* Settings Bar */}
+            <Card className="bg-black/80 border-2 border-green-500/50 mb-6">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-6">
+                    {/* Team Size Setting */}
+                    <div className="flex items-center gap-3">
+                      <Users className="w-4 h-4 text-green-400" />
+                      <span className="text-sm font-bold text-green-400">TEAM SIZE:</span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={settings.teamSize === 3 ? "default" : "outline"}
+                          size="sm"
+                          className={`${settings.teamSize === 3 ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          onClick={() => updateSetting('teamSize', 3)}
+                          onMouseEnter={() => gameSounds.playHover()}
+                        >
+                          3v3
+                        </Button>
+                        <Button
+                          variant={settings.teamSize === 5 ? "default" : "outline"}
+                          size="sm"
+                          className={`${settings.teamSize === 5 ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          onClick={() => updateSetting('teamSize', 5)}
+                          onMouseEnter={() => gameSounds.playHover()}
+                        >
+                          5v5
+                        </Button>
+                      </div>
+                    </div>
+                    {/* Timer Speed Setting */}
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-green-400" />
+                      <span className="text-sm font-bold text-green-400">TIMER:</span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={settings.speed === 'calm' ? "default" : "outline"}
+                          size="sm"
+                          className={`${settings.speed === 'calm' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          onClick={() => updateSetting('speed', 'calm')}
+                          onMouseEnter={() => gameSounds.playHover()}
+                        >
+                          CALM
+                        </Button>
+                        <Button
+                          variant={settings.speed === 'speedy' ? "default" : "outline"}
+                          size="sm"
+                          className={`${settings.speed === 'speedy' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          onClick={() => updateSetting('speed', 'speedy')}
+                          onMouseEnter={() => gameSounds.playHover()}
+                        >
+                          SPEEDY
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-green-400/60">
+                    {settings.speed === 'calm' ? '10 second decisions' : '5 second decisions'}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Selected Team */}
             <div className="mb-8">
               <h2 className="text-xl font-bold mb-4 text-green-400">
-                SELECTED SQUAD ({selectedTeam.length}/5)
+                SELECTED SQUAD ({selectedTeam.length}/{settings.teamSize})
               </h2>
-              <div className="grid grid-cols-5 gap-4">
-                {[...Array(5)].map((_, index) => {
+              <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-3' : 'grid-cols-5'} gap-4`}>
+                {[...Array(settings.teamSize)].map((_, index) => {
                   const unit = selectedTeam[index]
                   const key = unit ? `selected-${unit.id}` : `empty-slot-${index}`
                   return (
@@ -309,7 +409,7 @@ export default function TeamBuilder() {
                 })}
               </div>
 
-              {selectedTeam.length === 5 && (
+              {selectedTeam.length === settings.teamSize && (
                 <div className="mt-4 text-center">
                   <Button
                     variant="terminal"
@@ -582,6 +682,7 @@ export default function TeamBuilder() {
             setLightboxIndex(null)
           }}
           selectedTeam={selectedTeam}
+          maxTeamSize={settings.teamSize}
         />
       )}
     </PageLayout>

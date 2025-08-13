@@ -1,0 +1,127 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Robopet NFT trait types and values from the collection",
+  "collection": {
+    "name": "Robopets",
+    "contract": "0x4e962D488412A14aA37eAcADCb83f18C7e2271a7",
+    "ipfs_base": "QmcVBQAbPMzEstPyaBoZ3J1dnE3t1horoX9WebLcCCYLR9",
+    "image_cdn": "https://d2w8sp0plvpr8a.cloudfront.net/{tokenId}/body-transparent.png"
+  },
+  
+  "trait_categories": [
+    "Body",
+    "Backpack", 
+    "Eyes",
+    "Head",
+    "Face",
+    "Accessory",
+    "Robopet Type",
+    "Chassis Color",
+    "Background Color",
+    "Matching Traits"
+  ],
+  
+  "robopet_types": {
+    "description": "All unique Robopet Type values found in the collection",
+    "types": [
+      "Puppyboto",
+      "Puppy Helmeto",
+      "Puppy Mulleto",
+      "Kittyboto",
+      "Kitty Helmeto",
+      "Kitty Mulleto",
+      "Lionboto",
+      "Piggyboto",
+      "Koalaboto",
+      "Frogboto",
+      "Bunnyboto",
+      "Cyborgee"
+    ],
+    "type_mapping": {
+      "Puppyboto": {
+        "species": "Dog",
+        "variant": "Standard",
+        "suggested_element": "METAL",
+        "description": "Loyal robotic canine companion"
+      },
+      "Puppy Helmeto": {
+        "species": "Dog",
+        "variant": "Helmeted",
+        "suggested_element": "METAL",
+        "description": "Armored puppy protector"
+      },
+      "Puppy Mulleto": {
+        "species": "Dog",
+        "variant": "Mullet",
+        "suggested_element": "WILD",
+        "description": "Rock'n'roll rebel pup"
+      },
+      "Kittyboto": {
+        "species": "Cat",
+        "variant": "Standard",
+        "suggested_element": "SURGE",
+        "description": "Agile feline companion"
+      },
+      "Kitty Helmeto": {
+        "species": "Cat",
+        "variant": "Helmeted",
+        "suggested_element": "CODE",
+        "description": "Tech-savvy armored kitty"
+      },
+      "Kitty Mulleto": {
+        "species": "Cat",
+        "variant": "Mullet",
+        "suggested_element": "GLITCH",
+        "description": "Chaotic punk cat"
+      },
+      "Lionboto": {
+        "species": "Lion",
+        "variant": "Standard",
+        "suggested_element": "WILD",
+        "description": "Majestic king of robopets"
+      },
+      "Piggyboto": {
+        "species": "Pig",
+        "variant": "Standard",
+        "suggested_element": "BOND",
+        "description": "Cheerful oinker companion"
+      },
+      "Koalaboto": {
+        "species": "Koala",
+        "variant": "Standard",
+        "suggested_element": "BOND",
+        "description": "Calm and cuddly friend"
+      },
+      "Frogboto": {
+        "species": "Frog",
+        "variant": "Standard",
+        "suggested_element": "CODE",
+        "description": "Amphibious digital hopper"
+      },
+      "Bunnyboto": {
+        "species": "Bunny",
+        "variant": "Standard",
+        "suggested_element": "WILD",
+        "description": "Quick and bouncy companion"
+      },
+      "Cyborgee": {
+        "species": "Cyborg",
+        "variant": "Elite",
+        "suggested_element": "CODE",
+        "description": "Advanced AI companion"
+      }
+    }
+  },
+  
+  "sample_traits": {
+    "description": "Example trait values from sampled Robopets",
+    "Body": ["Tractor Wheel", "Basic"],
+    "Backpack": ["Cape", "None"],
+    "Eyes": ["Shades", "Basic"],
+    "Head": ["Bun", "Basic"],
+    "Face": ["Moustache", "None"],
+    "Accessory": ["Bulb", "None"],
+    "Chassis Color": ["Copper", "Silver", "Gold"],
+    "Background Color": ["Sunflower", "Blue", "Pink"]
+  }
+}

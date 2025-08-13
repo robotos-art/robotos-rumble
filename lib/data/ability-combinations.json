@@ -194,22 +194,93 @@
     },
     
     "robopet_abilities": {
-      "description": "Robopets provide support abilities based on type",
-      "Cat": {
-        "element": "SURGE",
-        "abilities": ["quick_reflexes", "nine_lives"]
-      },
-      "Dog": {
+      "description": "Robopets provide unique abilities based on their Type trait with rarity tiers",
+      
+      "Puppyboto": {
         "element": "METAL",
-        "abilities": ["loyal_guard", "pack_tactics"]
+        "abilities": ["loyal_guard"],
+        "rarity": "common",
+        "power_tier": 1
       },
-      "Bird": {
+      "Puppy Helmeto": {
+        "element": "METAL",
+        "abilities": ["loyal_guard", "companion_shield"],
+        "rarity": "uncommon",
+        "power_tier": 2
+      },
+      "Puppy Mulleto": {
+        "element": "WILD",
+        "abilities": ["primal_fury", "howl_of_courage", "pack_tactics"],
+        "rarity": "rare",
+        "power_tier": 3
+      },
+      
+      "Kittyboto": {
+        "element": "SURGE",
+        "abilities": ["quick_reflexes"],
+        "rarity": "common",
+        "power_tier": 1
+      },
+      "Kitty Helmeto": {
         "element": "CODE",
-        "abilities": ["aerial_recon", "data_link"]
+        "abilities": ["data_link", "quick_reflexes"],
+        "rarity": "uncommon",
+        "power_tier": 2
       },
-      "Snake": {
+      "Kitty Mulleto": {
         "element": "GLITCH",
-        "abilities": ["venom_corruption", "shed_protocols"]
+        "abilities": ["venom_corruption", "pounce_strike", "shed_protocols"],
+        "rarity": "epic",
+        "power_tier": 4
+      },
+      
+      "Lionboto": {
+        "element": "WILD",
+        "abilities": ["primal_fury", "nature_call", "pounce_strike"],
+        "rarity": "legendary",
+        "power_tier": 5
+      },
+      
+      "Piggyboto": {
+        "element": "BOND",
+        "abilities": ["harmony_pulse"],
+        "rarity": "common",
+        "power_tier": 1
+      },
+      
+      "Koalaboto": {
+        "element": "BOND",
+        "abilities": ["companion_shield", "harmony_pulse"],
+        "rarity": "uncommon",
+        "power_tier": 2
+      },
+      
+      "Frogboto": {
+        "element": "CODE",
+        "abilities": ["data_link", "aerial_recon"],
+        "rarity": "uncommon",
+        "power_tier": 2
+      },
+      
+      "Bunnyboto": {
+        "element": "WILD",
+        "abilities": ["quick_reflexes", "pounce_strike"],
+        "rarity": "uncommon",
+        "power_tier": 2
+      },
+      
+      "Cyborgee": {
+        "element": "CODE",
+        "abilities": ["data_link", "aerial_recon", "harmony_pulse"],
+        "rarity": "epic",
+        "power_tier": 4
+      },
+      
+      "default": {
+        "element": "BOND",
+        "abilities": ["companion_shield"],
+        "rarity": "common",
+        "power_tier": 1
       }
     }
   },

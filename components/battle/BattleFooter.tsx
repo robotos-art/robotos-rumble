@@ -8,6 +8,7 @@ import { Progress } from '../ui/progress'
 import { cn } from '../../lib/utils'
 import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
 import { ChevronLeft, Shield, Zap, Heart, Clock, Target } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import Image from 'next/image'
 
 interface BattleFooterProps {
@@ -234,20 +235,49 @@ export default function BattleFooter({
                   Attack (A)
                 </Button>
                 
-                {currentUnit?.abilities.map((ability, index) => (
-                  <Button
-                    key={ability}
-                    onClick={() => handleAbility(index)}
-                    className={cn(
-                      "flex items-center gap-2 transition-all",
-                      focusIndex === index + 1 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black"
-                    )}
-                    variant={focusIndex === index + 1 ? "default" : "outline"}
-                  >
-                    <Target className="w-4 h-4" />
-                    {ability} ({index === 0 ? 'S' : 'D'})
-                  </Button>
-                ))}
+                {currentUnit?.abilities.map((ability, index) => {
+                  const unitStatus = currentUnit && unitStatuses.get(currentUnit.id)
+                  const cooldown = unitStatus?.cooldowns.get(ability) || 0
+                  const isOnCooldown = cooldown > 0
+                  
+                  return (
+                    <TooltipProvider key={ability}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="relative">
+                            <Button
+                              onClick={() => !isOnCooldown && handleAbility(index)}
+                              className={cn(
+                                "flex items-center gap-2 transition-all",
+                                focusIndex === index + 1 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black",
+                                isOnCooldown && "opacity-50 cursor-not-allowed"
+                              )}
+                              variant={focusIndex === index + 1 ? "default" : "outline"}
+                              disabled={isOnCooldown}
+                            >
+                              <Target className="w-4 h-4" />
+                              {ability} ({index === 0 ? 'S' : 'D'})
+                            </Button>
+                            {isOnCooldown && (
+                              <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                {cooldown === 999 ? '∞' : cooldown}
+                              </div>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        {isOnCooldown && (
+                          <TooltipContent>
+                            <p className="text-red-400">
+                              {cooldown === 999 
+                                ? 'Once per battle - Already used!' 
+                                : `Cooldown: ${cooldown} turn${cooldown > 1 ? 's' : ''} remaining`}
+                            </p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  )
+                })}
                 
                 <div className="ml-auto text-sm text-gray-400">
                   Use ←→ or ↑↓ to navigate • <kbd className="text-xs">ENTER</kbd>/<kbd className="text-xs">SPACE</kbd> to select • Number keys for quick select

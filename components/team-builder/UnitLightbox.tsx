@@ -12,13 +12,14 @@ interface UnitLightboxProps {
   onClose: () => void
   onSelect?: (unit: BattleUnitV3) => void
   selectedTeam?: BattleUnitV3[]
+  maxTeamSize?: number
 }
 
-export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedTeam = [] }: UnitLightboxProps) {
+export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedTeam = [], maxTeamSize = 5 }: UnitLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const currentUnit = units[currentIndex]
   const isSelected = selectedTeam.find(u => u.id === currentUnit.id)
-  const canSelect = !isSelected && selectedTeam.length < 5
+  const canSelect = !isSelected && selectedTeam.length < maxTeamSize
 
   const navigatePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -200,7 +201,7 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
                 >
                   {isSelected ? (
                     '[ALREADY SELECTED]'
-                  ) : selectedTeam.length >= 5 ? (
+                  ) : selectedTeam.length >= maxTeamSize ? (
                     '[TEAM FULL]'
                   ) : (
                     <>

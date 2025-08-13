@@ -352,19 +352,38 @@ export class BattleSceneV2 extends Phaser.Scene {
     const horizontalSpacing = spriteSize * 1.3
     const verticalSpacing = spriteSize * 1.1
     
-    // Pyramid formation: 3 in back, 2 in front
-    // Back row: indices 0, 1, 2
-    // Front row: indices 3, 4
+    // Check team size from battle settings
+    const savedSettings = localStorage.getItem('battle_settings')
+    const teamSize = savedSettings ? JSON.parse(savedSettings).teamSize : 5
     
     let row: number, col: number
-    if (index < 3) {
-      // Back row
-      row = 0
-      col = index - 1 // -1, 0, 1 (centered)
+    
+    if (teamSize === 3) {
+      // Triangle formation for 3v3: 2 in back, 1 in front
+      // Back row: indices 0, 1
+      // Front row: index 2
+      if (index < 2) {
+        // Back row
+        row = 0
+        col = index - 0.5 // -0.5, 0.5 (centered)
+      } else {
+        // Front row
+        row = 1
+        col = 0 // Centered
+      }
     } else {
-      // Front row
-      row = 1
-      col = (index - 3) - 0.5 // -0.5, 0.5 (centered between back row)
+      // Pyramid formation for 5v5: 3 in back, 2 in front
+      // Back row: indices 0, 1, 2
+      // Front row: indices 3, 4
+      if (index < 3) {
+        // Back row
+        row = 0
+        col = index - 1 // -1, 0, 1 (centered)
+      } else {
+        // Front row
+        row = 1
+        col = (index - 3) - 0.5 // -0.5, 0.5 (centered between back row)
+      }
     }
     
     // Mirror formation for enemy team
