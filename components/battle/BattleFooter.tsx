@@ -295,7 +295,9 @@ export default function BattleFooter({
                 className="space-y-2"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-green-400">Select Target:</span>
+                  <span className="text-yellow-400 font-bold animate-pulse">
+                    {!targetUnit ? 'CHOOSE YOUR TARGET!' : 'TARGET SELECTED'}
+                  </span>
                   <div className="flex items-center gap-2">
                     <Button
                       onClick={onCancel}
@@ -310,6 +312,7 @@ export default function BattleFooter({
                       onClick={onTargetConfirm}
                       size="sm"
                       disabled={!targetUnit}
+                      className={targetUnit ? 'animate-pulse' : ''}
                     >
                       Confirm <kbd className="text-xs ml-1">ENTER</kbd>
                     </Button>
