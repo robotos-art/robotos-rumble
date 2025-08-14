@@ -636,13 +636,13 @@ class GameSoundPlayer {
     oscillator.type = 'square';
     oscillator.frequency.setValueAtTime(this.midiToFrequency(midiNote), startTime);
     
-    // Calculate volume
+    // Calculate volume - ensure masterVolume is properly applied
     const baseVolume = volumeOverride || 0.1;
     const finalVolume = baseVolume * this.masterVolume;
     
-    // Create envelope
+    // Create envelope with proper volume scaling
     gainNode.gain.setValueAtTime(finalVolume, startTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration * decay);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration * decay);
     
     // Connect nodes
     oscillator.connect(gainNode);

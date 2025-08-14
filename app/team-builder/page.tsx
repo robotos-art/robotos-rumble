@@ -51,24 +51,6 @@ export default function TeamBuilder() {
         // Use defaults if parsing fails
       }
     }
-
-    // Load saved team from localStorage and validate against current team size
-    const savedTeam = localStorage.getItem('roboto_rumble_team')
-    if (savedTeam) {
-      try {
-        const team = JSON.parse(savedTeam)
-        if (Array.isArray(team)) {
-          // If saved team is larger than current team size, truncate it
-          if (team.length > currentSettings.teamSize) {
-            setSelectedTeam(team.slice(0, currentSettings.teamSize))
-          } else {
-            setSelectedTeam(team)
-          }
-        }
-      } catch (e) {
-        // Failed to load saved team, continue with empty team
-      }
-    }
   }, [])
 
   // Process units as they load - Robotos first, then Robopets
@@ -106,6 +88,33 @@ export default function TeamBuilder() {
 
     return units
   }, [robotos, robopets])
+  
+  // Load saved team after units are processed
+  useEffect(() => {
+    if (processedUnits.length > 0 && selectedTeam.length === 0) {
+      const savedTeam = localStorage.getItem('roboto_rumble_team')
+      if (savedTeam) {
+        try {
+          const team = JSON.parse(savedTeam)
+          if (Array.isArray(team)) {
+            // Match saved units with processed units
+            const matchedTeam = team.map(savedUnit => 
+              processedUnits.find(u => u.id === savedUnit.id && u.type === savedUnit.type)
+            ).filter(Boolean) as BattleUnitV3[]
+            
+            // If saved team is larger than current team size, truncate it
+            if (matchedTeam.length > settings.teamSize) {
+              setSelectedTeam(matchedTeam.slice(0, settings.teamSize))
+            } else {
+              setSelectedTeam(matchedTeam)
+            }
+          }
+        } catch (e) {
+          // Failed to load saved team, continue with empty team
+        }
+      }
+    }
+  }, [processedUnits, settings.teamSize])
 
   // State for filters - start with default values to show all units
   const [currentFilters, setCurrentFilters] = useState<any>({
@@ -227,11 +236,14 @@ export default function TeamBuilder() {
     // Check if this exact unit (type + id) is already selected
     const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
     
+    let newTeam: BattleUnitV3[]
     if (isSelected) {
-      setSelectedTeam(selectedTeam.filter(u => !(u.id === unit.id && u.type === unit.type)))
+      newTeam = selectedTeam.filter(u => !(u.id === unit.id && u.type === unit.type))
+      setSelectedTeam(newTeam)
       gameSounds.play('removeUnit')
     } else if (selectedTeam.length < settings.teamSize) {
-      setSelectedTeam([...selectedTeam, unit])
+      newTeam = [...selectedTeam, unit]
+      setSelectedTeam(newTeam)
       gameSounds.play('addUnit')
 
       // Play team complete sound if team is now full
@@ -241,12 +253,20 @@ export default function TeamBuilder() {
     } else {
       // Team is full, play cancel sound
       gameSounds.play('cancel')
+      return
     }
+    
+    // Save team to localStorage
+    localStorage.setItem('roboto_rumble_team', JSON.stringify(newTeam))
   }, [selectedTeam, settings.teamSize])
 
   const addCompanionPair = useCallback((unit: BattleUnitV3) => {
     // Find the companion unit
-    const companion = processedUnits.find(u => u.id === unit.id && u.type !== unit.type)
+    const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '')
+    const companion = processedUnits.find(u => {
+      const uBaseId = u.id.replace(/^(roboto|robopet)-/, '')
+      return uBaseId === unitBaseId && u.type !== unit.type
+    })
     if (!companion) return
     
     // Check which units are already selected
@@ -265,6 +285,9 @@ export default function TeamBuilder() {
     
     setSelectedTeam(newTeam)
     gameSounds.play('teamComplete')
+    
+    // Save team to localStorage
+    localStorage.setItem('roboto_rumble_team', JSON.stringify(newTeam))
   }, [processedUnits, selectedTeam, settings.teamSize])
 
   const saveTeamAndBattle = useCallback(() => {
@@ -419,16 +442,27 @@ export default function TeamBuilder() {
               <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-3' : 'grid-cols-5'} gap-4`}>
                 {[...Array(settings.teamSize)].map((_, index) => {
                   const unit = selectedTeam[index]
+                  const companion = unit ? selectedTeam.find(u => {
+                    // Extract base IDs by removing prefixes
+                    const id1 = unit.id.replace(/^(roboto|robopet)-/, '')
+                    const id2 = u.id.replace(/^(roboto|robopet)-/, '')
+                    return id1 === id2 && u.type !== unit.type
+                  }) : null
                   const key = unit ? `selected-${unit.type}-${unit.id}-${index}` : `empty-slot-${index}`
                   return (
                     <Card
                       key={key}
-                      className={`bg-black/60 border-2 rounded-lg ${unit ? 'border-green-500 cursor-pointer hover:border-red-500 transition-colors' : 'border-green-500/30 border-dashed'} aspect-square flex items-center justify-center`}
+                      className={`bg-black/60 border-2 rounded-lg ${unit ? 'border-green-500 cursor-pointer hover:border-red-500 transition-colors' : 'border-green-500/30 border-dashed'} aspect-square flex items-center justify-center relative`}
                       onClick={() => unit && toggleUnitSelection(unit)}
                       onMouseEnter={() => unit && gameSounds.playHover()}
                     >
                       {unit ? (
-                        <div className="text-center p-2">
+                        <div className="text-center p-2 w-full">
+                          {companion && (
+                            <div className="absolute top-1 right-1 text-xs bg-yellow-500 text-black px-1 rounded font-bold">
+                              +2%
+                            </div>
+                          )}
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -548,8 +582,12 @@ export default function TeamBuilder() {
               <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredUnits.map((unit, index) => {
                   const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
-                  const hasCompanion = processedUnits.find(u => u.id === unit.id && u.type !== unit.type)
-                  const companionInTeam = hasCompanion && selectedTeam.find(u => u.id === unit.id && u.type !== unit.type)
+                  const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '')
+                  const companion = processedUnits.find(u => {
+                    const uBaseId = u.id.replace(/^(roboto|robopet)-/, '')
+                    return uBaseId === unitBaseId && u.type !== unit.type
+                  })
+                  const companionInTeam = companion && selectedTeam.find(u => u.id === companion.id && u.type === companion.type)
                   
                   return (
                     <Card
@@ -577,8 +615,8 @@ export default function TeamBuilder() {
                       </Button>
 
                       <div className="flex cursor-pointer" onClick={() => toggleUnitSelection(unit)}>
-                        {/* Left side - Image */}
-                        <div className="w-48 h-48 flex-shrink-0 bg-black/50 border-r border-green-500/20">
+                        {/* Left side - Image with companion */}
+                        <div className="w-48 h-48 flex-shrink-0 bg-black/50 border-r border-green-500/20 relative">
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -589,12 +627,17 @@ export default function TeamBuilder() {
                         {/* Right side - Metadata */}
                         <div className="flex-1 p-4">
                           {/* Header */}
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between mb-1">
+                          <div className="mb-3 pr-12">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h3 className="text-lg font-bold">{unit.name}</h3>
-                              {companionInTeam && (
+                              {isSelected && companionInTeam && (
+                                <span className="text-xs text-green-400 px-2 py-1 bg-green-400/10 rounded">
+                                  +2% BOOST
+                                </span>
+                              )}
+                              {!isSelected && companionInTeam && (
                                 <span className="text-xs text-yellow-400 px-2 py-1 bg-yellow-400/10 rounded">
-                                  COMPANION ACTIVE
+                                  COMPANION
                                 </span>
                               )}
                             </div>
@@ -699,25 +742,38 @@ export default function TeamBuilder() {
                             })}
                           </div>
                           
-                          {/* Add Both Button for Companions */}
-                          {hasCompanion && !isSelected && !companionInTeam && selectedTeam.length <= settings.teamSize - 2 && (
-                            <Button
-                              variant="terminal"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                addCompanionPair(unit)
-                              }}
-                              className="w-full mt-2 bg-yellow-500/10 border-yellow-500/50 hover:bg-yellow-500/20"
-                            >
-                              ADD BOTH COMPANIONS (+2% BONUS)
-                            </Button>
-                          )}
-                          {hasCompanion && (isSelected || companionInTeam) && (
-                            <div className="text-xs text-center mt-2 text-yellow-400/60">
-                              {isSelected && companionInTeam ? '✓ Both companions in team' : 
-                               isSelected ? `Add ${hasCompanion.type === 'roboto' ? 'Roboto' : 'Robopet'} #${unit.id} for bonus` :
-                               `Add ${unit.type === 'roboto' ? 'Roboto' : 'Robopet'} #${unit.id} for bonus`}
+                          {/* Companion Checkbox */}
+                          {companion && (
+                            <div className="mt-3 flex items-center gap-2 p-2 bg-black/30 rounded border border-yellow-500/30">
+                              <input
+                                type="checkbox"
+                                id={`companion-${unit.type}-${unit.id}`}
+                                checked={!!companionInTeam}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleUnitSelection(companion)
+                                }}
+                                disabled={!companionInTeam && selectedTeam.length >= settings.teamSize}
+                                className="companion-checkbox"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <label 
+                                htmlFor={`companion-${unit.type}-${unit.id}`}
+                                className="flex items-center gap-2 cursor-pointer flex-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <img
+                                  src={companion.imageUrl}
+                                  alt={companion.name}
+                                  className="w-8 h-8 object-cover pixelated rounded"
+                                />
+                                <div className="text-xs">
+                                  <div className="text-yellow-400">{companion.name}</div>
+                                  {companionInTeam && isSelected && (
+                                    <div className="text-green-400">+2% bonus</div>
+                                  )}
+                                </div>
+                              </label>
                             </div>
                           )}
                         </div>

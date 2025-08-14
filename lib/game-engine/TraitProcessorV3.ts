@@ -62,7 +62,7 @@ export class TraitProcessorV3 {
     const abilities = this.findUnlockedAbilities(traits, 'roboto')
     
     return {
-      id: metadata.tokenId || metadata.id,
+      id: `roboto-${metadata.tokenId || metadata.id}`,
       name: metadata.name,
       type: 'roboto',
       element,
@@ -101,7 +101,7 @@ export class TraitProcessorV3 {
     const abilities = petAbilities?.abilities || ["companion_shield"]
     
     return {
-      id: metadata.tokenId || metadata.id,
+      id: `robopet-${metadata.tokenId || metadata.id}`,
       name: metadata.name,
       type: 'robopet',
       element: element as any,
