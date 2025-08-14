@@ -4,6 +4,8 @@ import { checkAchievements } from '@/lib/achievements/checker'
 import { normalizeAddress } from '@/lib/utils/address'
 import type { BattleRecord } from '@/lib/storage/types'
 
+export const dynamic = 'force-dynamic'
+
 const storage = new StorageService()
 
 export async function POST(request: NextRequest) {

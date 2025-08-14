@@ -149,7 +149,7 @@ export class StorageService {
   async getGlobalStats(): Promise<GlobalStats | null> {
     try {
       const config = await get('globalStats')
-      return config as GlobalStats
+      return config as unknown as GlobalStats
     } catch (error) {
       console.error('Error fetching global stats:', error)
       return null

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { StorageService } from '@/lib/storage/storage-service'
 
+export const dynamic = 'force-dynamic'
+
 const storage = new StorageService()
 
 export async function GET(request: NextRequest) {

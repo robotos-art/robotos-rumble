@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { StorageService } from '@/lib/storage/storage-service'
 import { normalizeAddress } from '@/lib/utils/address'
 
+export const dynamic = 'force-dynamic'
+
 const storage = new StorageService()
 
 export async function GET(

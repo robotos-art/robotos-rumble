@@ -316,7 +316,7 @@ export default function BattleArenaV3({
           })),
           damageDealt: totalDamageDealt.current,
           damageReceived: totalDamageReceived.current,
-          elementsUsed: [...new Set(playerTeam.map(u => u.element))]
+          elementsUsed: Array.from(new Set(playerTeam.map(u => u.element)))
         }
         
         const response = await fetch('/api/battles/save', {
