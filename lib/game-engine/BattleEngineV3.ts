@@ -85,7 +85,7 @@ export class BattleEngineV3 {
     // Validate teams
     if (!playerTeam?.length || !enemyTeam?.length) {
       console.error('Invalid teams provided to battle', { playerTeam, enemyTeam })
-      this.state.status = 'error'
+      this.state.status = 'defeat'
       return
     }
     
