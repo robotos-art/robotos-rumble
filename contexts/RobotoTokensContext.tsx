@@ -75,10 +75,8 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
     
     try {
       // Fetch balances first
-      const [robotoContract, robopetContract] = await Promise.all([
-        getRobotoContract(),
-        getRobopetContract()
-      ])
+      const robotoContract = getRobotoContract()
+      const robopetContract = getRobopetContract()
       
       const [robotoBalance, robopetBalance] = await Promise.all([
         robotoContract.methods.balanceOf(address).call(),
