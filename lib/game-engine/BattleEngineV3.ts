@@ -82,6 +82,13 @@ export class BattleEngineV3 {
   }
   
   initializeBattle(playerTeam: BattleUnitV3[], enemyTeam: BattleUnitV3[]) {
+    // Validate teams
+    if (!playerTeam?.length || !enemyTeam?.length) {
+      console.error('Invalid teams provided to battle', { playerTeam, enemyTeam })
+      this.state.status = 'error'
+      return
+    }
+    
     // Apply companion bonuses before battle starts
     this.state.playerTeam = this.applyCompanionBonuses(playerTeam)
     this.state.enemyTeam = this.applyCompanionBonuses(enemyTeam)
@@ -89,9 +96,13 @@ export class BattleEngineV3 {
     // Initialize unit statuses
     const allUnits = [...this.state.playerTeam, ...this.state.enemyTeam]
     allUnits.forEach((unit, index) => {
+      if (!unit || !unit.id) {
+        console.error('Invalid unit at index', index, unit)
+        return
+      }
       this.state.unitStatuses.set(unit.id, {
-        currentHp: unit.stats.hp,
-        currentEnergy: unit.stats.energy,
+        currentHp: unit.stats?.hp || 100,
+        currentEnergy: unit.stats?.energy || 50,
         statusEffects: [],
         cooldowns: new Map(),
         isAlive: true,

@@ -26,6 +26,7 @@ export default function TeamBuilder() {
   const [selectedTeam, setSelectedTeam] = useState<BattleUnitV3[]>([])
   const [mounted, setMounted] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [teamSaved, setTeamSaved] = useState(false)
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
     speed: 'speedy'
@@ -33,6 +34,20 @@ export default function TeamBuilder() {
 
   useEffect(() => {
     setMounted(true)
+    
+    // Add keyboard shortcut for clearing team (Ctrl/Cmd + Shift + C)
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'C') {
+        e.preventDefault()
+        if (selectedTeam.length > 0) {
+          setSelectedTeam([])
+          localStorage.setItem('roboto_rumble_team', JSON.stringify([]))
+          gameSounds.play('cancel')
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
 
     // Load battle settings first
     let currentSettings: BattleSettings = { teamSize: 5, speed: 'speedy' }
@@ -51,24 +66,27 @@ export default function TeamBuilder() {
         // Use defaults if parsing fails
       }
     }
-  }, [])
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [selectedTeam.length])
 
   // Process units as they load - Robotos first, then Robopets
   const processedUnits = useMemo(() => {
     const units: BattleUnitV3[] = []
-    const processedKeys = new Set<string>() // Use composite keys to avoid conflicts
+    const processedIds = new Set<string>()
 
     // Process Robotos first
     robotos.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobotoTraits(token.metadata)
-        const uniqueKey = `${unit.type}-${unit.id}`
-        if (!processedKeys.has(uniqueKey)) {
-          processedKeys.add(uniqueKey)
+        if (!processedIds.has(unit.id)) {
+          processedIds.add(unit.id)
           units.push(unit)
         }
       } catch (e) {
-        // Failed to process roboto, skip it
+        console.warn('Failed to process Roboto:', e)
       }
     })
 
@@ -76,13 +94,12 @@ export default function TeamBuilder() {
     robopets.forEach(token => {
       try {
         const unit = TraitProcessorV3.processRobopetTraits(token.metadata)
-        const uniqueKey = `${unit.type}-${unit.id}`
-        if (!processedKeys.has(uniqueKey)) {
-          processedKeys.add(uniqueKey)
+        if (!processedIds.has(unit.id)) {
+          processedIds.add(unit.id)
           units.push(unit)
         }
       } catch (e) {
-        // Failed to process robopet, skip it
+        console.warn('Failed to process Robopet:', e)
       }
     })
 
@@ -258,6 +275,10 @@ export default function TeamBuilder() {
     
     // Save team to localStorage
     localStorage.setItem('roboto_rumble_team', JSON.stringify(newTeam))
+    
+    // Show saved feedback
+    setTeamSaved(true)
+    setTimeout(() => setTeamSaved(false), 2000)
   }, [selectedTeam, settings.teamSize])
 
   const addCompanionPair = useCallback((unit: BattleUnitV3) => {
@@ -436,9 +457,16 @@ export default function TeamBuilder() {
 
             {/* Selected Team */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-green-400">
-                SELECTED SQUAD ({selectedTeam.length}/{settings.teamSize})
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-green-400">
+                  SELECTED SQUAD ({selectedTeam.length}/{settings.teamSize})
+                </h2>
+                {teamSaved && (
+                  <span className="text-sm text-green-400 animate-pulse">
+                    ✓ TEAM SAVED
+                  </span>
+                )}
+              </div>
               <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-3' : 'grid-cols-5'} gap-4`}>
                 {[...Array(settings.teamSize)].map((_, index) => {
                   const unit = selectedTeam[index]
@@ -744,7 +772,7 @@ export default function TeamBuilder() {
                           
                           {/* Companion Checkbox */}
                           {companion && (
-                            <div className="mt-3 flex items-center gap-2 p-2 bg-black/30 rounded border border-yellow-500/30">
+                            <div className="mt-3 flex items-center gap-3 p-2 bg-black/50 rounded border border-yellow-500/30 hover:border-yellow-500/50 transition-colors">
                               <input
                                 type="checkbox"
                                 id={`companion-${unit.type}-${unit.id}`}
@@ -754,23 +782,23 @@ export default function TeamBuilder() {
                                   toggleUnitSelection(companion)
                                 }}
                                 disabled={!companionInTeam && selectedTeam.length >= settings.teamSize}
-                                className="companion-checkbox"
+                                className="companion-checkbox flex-shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               />
                               <label 
                                 htmlFor={`companion-${unit.type}-${unit.id}`}
-                                className="flex items-center gap-2 cursor-pointer flex-1"
+                                className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <img
                                   src={companion.imageUrl}
                                   alt={companion.name}
-                                  className="w-8 h-8 object-cover pixelated rounded"
+                                  className="w-8 h-8 object-cover pixelated rounded flex-shrink-0"
                                 />
-                                <div className="text-xs">
-                                  <div className="text-yellow-400">{companion.name}</div>
+                                <div className="text-xs min-w-0">
+                                  <div className="text-yellow-400 truncate">{companion.name}</div>
                                   {companionInTeam && isSelected && (
-                                    <div className="text-green-400">+2% bonus</div>
+                                    <div className="text-green-400 text-xs">+2% BOOST ACTIVE</div>
                                   )}
                                 </div>
                               </label>
