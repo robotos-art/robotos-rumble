@@ -1,0 +1,93 @@
+{
+  "first_blood": {
+    "id": "first_blood",
+    "name": "First Blood",
+    "description": "Win your first battle",
+    "points": 10,
+    "icon": "🩸"
+  },
+  "winning_streak_3": {
+    "id": "winning_streak_3",
+    "name": "Hat Trick",
+    "description": "Win 3 battles in a row",
+    "points": 15,
+    "icon": "🎩"
+  },
+  "winning_streak_5": {
+    "id": "winning_streak_5",
+    "name": "On Fire",
+    "description": "Win 5 battles in a row",
+    "points": 25,
+    "icon": "🔥"
+  },
+  "winning_streak_10": {
+    "id": "winning_streak_10",
+    "name": "Unstoppable",
+    "description": "Win 10 battles in a row",
+    "points": 50,
+    "icon": "💪"
+  },
+  "battle_veteran_10": {
+    "id": "battle_veteran_10",
+    "name": "Recruit",
+    "description": "Complete 10 battles",
+    "points": 10,
+    "icon": "🎖️"
+  },
+  "battle_veteran_50": {
+    "id": "battle_veteran_50",
+    "name": "Soldier",
+    "description": "Complete 50 battles",
+    "points": 25,
+    "icon": "⚔️"
+  },
+  "battle_veteran_100": {
+    "id": "battle_veteran_100",
+    "name": "Veteran",
+    "description": "Complete 100 battles",
+    "points": 50,
+    "icon": "🏆"
+  },
+  "perfect_victory": {
+    "id": "perfect_victory",
+    "name": "Flawless Victory",
+    "description": "Win without losing any units",
+    "points": 30,
+    "icon": "✨"
+  },
+  "speed_demon": {
+    "id": "speed_demon",
+    "name": "Speed Demon",
+    "description": "Win a battle in under 60 seconds",
+    "points": 20,
+    "icon": "⚡"
+  },
+  "element_diversity": {
+    "id": "element_diversity",
+    "name": "Element Master",
+    "description": "Win with all 4 elements in your team",
+    "points": 40,
+    "icon": "🌈"
+  },
+  "companion_synergy": {
+    "id": "companion_synergy",
+    "name": "Best Friends Forever",
+    "description": "Win with 3 or more companion pairs",
+    "points": 35,
+    "icon": "🤝"
+  },
+  "damage_dealer_500": {
+    "id": "damage_dealer_500",
+    "name": "Heavy Hitter",
+    "description": "Deal 500+ damage in a single battle",
+    "points": 20,
+    "icon": "💥"
+  },
+  "tank_master": {
+    "id": "tank_master",
+    "name": "Tank Master",
+    "description": "Win while taking less than 100 damage",
+    "points": 25,
+    "icon": "🛡️"
+  }
+}

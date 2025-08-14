@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAccount } from 'wagmi'
 import { cn } from '../../lib/utils'
 import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
 import { BattleEngineV3 } from '../../lib/game-engine/BattleEngineV3'
@@ -19,6 +20,7 @@ import LightRays from '../backgrounds/LightRays'
 import Galaxy from '../backgrounds/Galaxy'
 import Aurora from '../backgrounds/Aurora'
 import type { BattleSettings } from '../../app/battle/page'
+import type { BattleRecord } from '../../lib/storage/types'
 import { useBackground } from '../shared/BackgroundSelector'
 
 interface BattleArenaV3Props {
@@ -57,6 +59,8 @@ export default function BattleArenaV3({
   enemyTeam,
   onBattleEnd
 }: BattleArenaV3Props) {
+  const { address } = useAccount()
+  
   // Load battle settings
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
@@ -76,6 +80,11 @@ export default function BattleArenaV3({
   
   // Calculate timer duration based on speed setting
   const timerDuration = settings.speed === 'calm' ? 10 : 5
+  
+  // Battle tracking for stats
+  const battleStartTime = useRef<number>(Date.now())
+  const totalDamageDealt = useRef<number>(0)
+  const totalDamageReceived = useRef<number>(0)
   
   // Battle state
   const [battleEngine] = useState(() => new BattleEngineV3())
@@ -272,7 +281,7 @@ export default function BattleArenaV3({
     }, aiDelay)
   }
 
-  const handleBattleEnd = (won: boolean) => {
+  const handleBattleEnd = async (won: boolean) => {
     setPhase('waiting')
     if (won) {
       gameSounds.play('victory')
@@ -280,6 +289,59 @@ export default function BattleArenaV3({
     } else {
       gameSounds.play('defeat')
       showMessage('DEFEAT... Better luck next time.', 0)
+    }
+
+    // Save battle results if player is connected
+    if (address) {
+      try {
+        const battleDuration = Math.floor((Date.now() - battleStartTime.current) / 1000)
+        
+        const battleData: BattleRecord = {
+          id: `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          playerAddress: address,
+          timestamp: new Date().toISOString(),
+          result: won ? 'victory' : 'defeat',
+          duration: battleDuration,
+          teamUsed: playerTeam.map(u => ({
+            id: u.id,
+            name: u.name,
+            element: u.element,
+            type: u.type
+          })),
+          enemyTeam: enemyTeam.map(u => ({
+            id: u.id,
+            name: u.name,
+            element: u.element,
+            type: u.type
+          })),
+          damageDealt: totalDamageDealt.current,
+          damageReceived: totalDamageReceived.current,
+          elementsUsed: [...new Set(playerTeam.map(u => u.element))]
+        }
+        
+        const response = await fetch('/api/battles/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(battleData)
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          
+          // Show achievements if any
+          if (result.newAchievements?.length > 0) {
+            // TODO: Show achievement notifications
+            console.log('New achievements unlocked:', result.newAchievements)
+          }
+          
+          if (result.newBadges?.length > 0) {
+            // TODO: Show badge notifications
+            console.log('New badges earned:', result.newBadges)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to save battle results:', error)
+      }
     }
 
     setTimeout(() => {
@@ -470,6 +532,16 @@ export default function BattleArenaV3({
     // Calculate actual damage dealt for display
     const targetStatus = newState.unitStatuses.get(defender.id)
     const actualDamage = prevHp - (targetStatus?.currentHp || 0)
+    
+    // Track damage for stats
+    if (actualDamage > 0) {
+      const isPlayerAttacking = playerTeam.some(u => u.id === attacker.id)
+      if (isPlayerAttacking) {
+        totalDamageDealt.current += actualDamage
+      } else {
+        totalDamageReceived.current += actualDamage
+      }
+    }
 
     // Play attack sound based on damage amount
     if (actualDamage === 0) {
