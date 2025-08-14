@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { UnitFilters } from '../../components/team-builder/UnitFilters'
 import { UnitLightbox } from '../../components/team-builder/UnitLightbox'
+import { TeamFooter } from '../../components/team-builder/TeamFooter'
 import { cardAnimations, buttonAnimations, pageTransition } from '../../lib/animations/gameAnimations'
 import { GameHeader } from '../../components/shared/GameHeader'
 import { PageLayout } from '../../components/shared/PageLayout'
@@ -837,6 +838,22 @@ export default function TeamBuilder() {
           selectedTeam={selectedTeam}
           maxTeamSize={settings.teamSize}
         />
+      )}
+      
+      {/* Fixed Team Footer - Only show when connected and have units */}
+      {isConnected && processedUnits.length > 0 && (
+        <TeamFooter
+          selectedTeam={selectedTeam}
+          settings={settings}
+          onUpdateSetting={updateSetting}
+          onRemoveUnit={toggleUnitSelection}
+          onStartBattle={saveTeamAndBattle}
+        />
+      )}
+      
+      {/* Add bottom padding when footer is visible */}
+      {isConnected && processedUnits.length > 0 && (
+        <div className="h-20" />
       )}
     </PageLayout>
   )
