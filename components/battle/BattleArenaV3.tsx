@@ -292,15 +292,19 @@ export default function BattleArenaV3({
     setPhase('selecting-target')
     setTargetCountdown(timerDuration)
 
-    // Don't pre-select any target - let player choose or wait for timeout
-    setTargetUnit(null)
+    // Pre-select first alive enemy for keyboard navigation
+    // But still wait for full timer before auto-confirming
+    const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
+    if (aliveEnemies.length > 0) {
+      setTargetUnit(aliveEnemies[0])
+    }
 
     // Clear action interval when moving to target selection
     if (actionIntervalRef.current) {
       clearInterval(actionIntervalRef.current)
       actionIntervalRef.current = null
     }
-  }, [battleState, timerDuration])
+  }, [battleState, timerDuration, enemyTeam])
 
   const handleAbility = (abilityIndex: number) => {
     const abilityId = currentUnit?.abilities[abilityIndex]
@@ -310,8 +314,12 @@ export default function BattleArenaV3({
     setPhase('selecting-target')
     setTargetCountdown(timerDuration)
 
-    // Don't pre-select any target - let player choose or wait for timeout
-    setTargetUnit(null)
+    // Pre-select first alive enemy for keyboard navigation
+    // But still wait for full timer before auto-confirming
+    const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
+    if (aliveEnemies.length > 0) {
+      setTargetUnit(aliveEnemies[0])
+    }
   }
 
   const handleTargetSelect = (unitId: string, autoConfirm: boolean = false) => {
@@ -592,13 +600,11 @@ export default function BattleArenaV3({
   const isUnitAttacking = (unitId: string) => attackingUnitId === unitId
   const isUnitDefending = (unitId: string) => defendingUnitId === unitId
   const isUnitTarget = (unitId: string) => {
-    // Show unit as selectable during target phase if enemy and alive
+    // Show unit as selected/selectable during target phase
     const isEnemy = enemyTeam.some(u => u.id === unitId)
     if (phase === 'selecting-target' && isEnemy && isAlive(unitId)) {
-      // If no target selected yet, all alive enemies are selectable
-      if (!targetUnit) return true
-      // If target selected, only that unit shows as selected
-      return targetUnit.id === unitId
+      // Show the selected target
+      return targetUnit?.id === unitId
     }
     return false
   }
@@ -624,16 +630,8 @@ export default function BattleArenaV3({
     if (phase === 'selecting-target' && targetCountdown > 0) {
       const timer = setTimeout(() => {
         if (targetCountdown === 1) {
-          // Only auto-select if player hasn't chosen
-          if (!targetUnit) {
-            const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
-            if (aliveEnemies.length > 0) {
-              // Auto-select first alive enemy when timer expires
-              setTargetUnit(aliveEnemies[0])
-              gameSounds.play('targetSelect')
-            }
-          }
-          // Auto-confirm target on timeout
+          // Auto-confirm whatever target is selected on timeout
+          // (Target should already be pre-selected from handleAttack/handleAbility)
           handleTargetConfirm()
         } else {
           setTargetCountdown(targetCountdown - 1)
@@ -641,7 +639,7 @@ export default function BattleArenaV3({
       }, 1000)
       return () => clearTimeout(timer)
     }
-  }, [phase, targetCountdown, targetUnit, handleTargetConfirm, enemyTeam, battleState.unitStatuses])
+  }, [phase, targetCountdown, handleTargetConfirm])
 
   // Handle attack countdown
   useEffect(() => {
