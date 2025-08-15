@@ -10,14 +10,15 @@ const ROBOTO_CONTRACT_ADDRESS = '0x099689220846644F87D1137665CDED7BF3422747'
 const ROBOPET_CONTRACT_ADDRESS = '0x4e962D488412A14aA37eAcADCb83f18C7e2271a7'
 
 // Use the same Alchemy setup as main app
-const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY || 'https://eth-mainnet.alchemyapi.io/v2/jwUAqVKEyazD8laQ6Vz224g085Ekr6zz'
+const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY || 'oKxs-03sij-U_N0iOlrSsZFr29-IqbuF'
+const ALCHEMY_URL = `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`
 
 // Lazy initialize Web3 to avoid issues during static generation
 let web3Instance: Web3 | null = null
 
 function getWeb3Instance() {
   if (!web3Instance) {
-    web3Instance = new Web3(ALCHEMY_KEY)
+    web3Instance = new Web3(ALCHEMY_URL)
   }
   return web3Instance
 }

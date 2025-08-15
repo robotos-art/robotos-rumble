@@ -210,6 +210,7 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
       setCachedTokens(address, robotoTokens, robopetTokens)
       
     } catch (err) {
+      console.error('Error fetching tokens:', err)
       setError('Failed to load your Robotos and Robopets')
     } finally {
       setLoading(false)
