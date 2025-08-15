@@ -61,7 +61,8 @@ export default function Leaderboard() {
         backHref="/"
       />
       
-      <div className="mt-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
         
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
@@ -191,6 +192,7 @@ export default function Leaderboard() {
           <p className="text-green-500">
             🎮 LIVE RANKINGS - Battle to climb the leaderboard!
           </p>
+        </div>
         </div>
       </div>
     </PageLayout>
