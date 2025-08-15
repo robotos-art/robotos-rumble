@@ -196,11 +196,11 @@ export default function ProfilePage() {
           {/* Achievements */}
           <Card className="terminal-card">
             <CardHeader>
-              <CardTitle>Achievements ({profile.achievements.length}/{achievementsData.achievements.length})</CardTitle>
+              <CardTitle>Achievements ({profile.achievements.length}/{Object.keys(achievementsData).length})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {achievementsData.achievements.map((achievement) => {
+                {Object.values(achievementsData).map((achievement: any) => {
                   const earned = profile.achievements.includes(achievement.id)
                   return (
                     <div
