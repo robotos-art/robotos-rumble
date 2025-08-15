@@ -19,17 +19,22 @@ export class StorageService {
     try {
       // Use lowercase address for consistency
       const normalizedAddress = address.toLowerCase()
-      const blobName = `players/${normalizedAddress}/profile.json`
+      const prefix = `players/${normalizedAddress}/profile.json`
       
-      // Try to fetch from blob storage
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BLOB_URL || 'https://blob-rumble.public.blob.vercel-storage.com'}/${blobName}`
-      )
+      // List blobs with the specific prefix
+      const { blobs } = await list({
+        prefix,
+        limit: 1,
+        token: this.blobToken
+      })
       
+      if (!blobs || blobs.length === 0) {
+        return null // Profile doesn't exist yet
+      }
+      
+      // Fetch the profile from the blob URL
+      const response = await fetch(blobs[0].url)
       if (!response.ok) {
-        if (response.status === 404) {
-          return null // Profile doesn't exist yet
-        }
         throw new Error(`Failed to fetch profile: ${response.statusText}`)
       }
       
