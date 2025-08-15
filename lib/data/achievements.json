@@ -4,90 +4,369 @@
     "name": "First Blood",
     "description": "Win your first battle",
     "points": 10,
-    "icon": "🩸"
+    "icon": "🩸",
+    "tier": "bronze"
   },
+  
   "winning_streak_3": {
     "id": "winning_streak_3",
     "name": "Hat Trick",
     "description": "Win 3 battles in a row",
     "points": 15,
-    "icon": "🎩"
+    "icon": "🎩",
+    "tier": "bronze"
   },
   "winning_streak_5": {
     "id": "winning_streak_5",
-    "name": "On Fire",
+    "name": "On Fire I",
     "description": "Win 5 battles in a row",
     "points": 25,
-    "icon": "🔥"
+    "icon": "🔥",
+    "tier": "bronze"
   },
   "winning_streak_10": {
     "id": "winning_streak_10",
-    "name": "Unstoppable",
+    "name": "On Fire II",
     "description": "Win 10 battles in a row",
     "points": 50,
-    "icon": "💪"
+    "icon": "🔥",
+    "tier": "silver"
   },
+  "winning_streak_20": {
+    "id": "winning_streak_20",
+    "name": "On Fire III",
+    "description": "Win 20 battles in a row",
+    "points": 100,
+    "icon": "🔥",
+    "tier": "gold"
+  },
+  "winning_streak_50": {
+    "id": "winning_streak_50",
+    "name": "Inferno",
+    "description": "Win 50 battles in a row",
+    "points": 250,
+    "icon": "🌋",
+    "tier": "platinum"
+  },
+  "winning_streak_100": {
+    "id": "winning_streak_100",
+    "name": "Legendary",
+    "description": "Win 100 battles in a row",
+    "points": 500,
+    "icon": "👑",
+    "tier": "diamond"
+  },
+  
+  "total_wins_5": {
+    "id": "total_wins_5",
+    "name": "Warrior I",
+    "description": "Win 5 total battles",
+    "points": 10,
+    "icon": "⚔️",
+    "tier": "bronze"
+  },
+  "total_wins_10": {
+    "id": "total_wins_10",
+    "name": "Warrior II",
+    "description": "Win 10 total battles",
+    "points": 20,
+    "icon": "⚔️",
+    "tier": "bronze"
+  },
+  "total_wins_25": {
+    "id": "total_wins_25",
+    "name": "Warrior III",
+    "description": "Win 25 total battles",
+    "points": 40,
+    "icon": "⚔️",
+    "tier": "silver"
+  },
+  "total_wins_50": {
+    "id": "total_wins_50",
+    "name": "Champion I",
+    "description": "Win 50 total battles",
+    "points": 75,
+    "icon": "🏆",
+    "tier": "silver"
+  },
+  "total_wins_100": {
+    "id": "total_wins_100",
+    "name": "Champion II",
+    "description": "Win 100 total battles",
+    "points": 150,
+    "icon": "🏆",
+    "tier": "gold"
+  },
+  "total_wins_250": {
+    "id": "total_wins_250",
+    "name": "Champion III",
+    "description": "Win 250 total battles",
+    "points": 300,
+    "icon": "🏆",
+    "tier": "platinum"
+  },
+  "total_wins_500": {
+    "id": "total_wins_500",
+    "name": "Grand Champion",
+    "description": "Win 500 total battles",
+    "points": 500,
+    "icon": "👑",
+    "tier": "diamond"
+  },
+  
   "battle_veteran_10": {
     "id": "battle_veteran_10",
     "name": "Recruit",
     "description": "Complete 10 battles",
     "points": 10,
-    "icon": "🎖️"
+    "icon": "🎖️",
+    "tier": "bronze"
   },
   "battle_veteran_50": {
     "id": "battle_veteran_50",
     "name": "Soldier",
     "description": "Complete 50 battles",
     "points": 25,
-    "icon": "⚔️"
+    "icon": "🎖️",
+    "tier": "silver"
   },
   "battle_veteran_100": {
     "id": "battle_veteran_100",
     "name": "Veteran",
     "description": "Complete 100 battles",
     "points": 50,
-    "icon": "🏆"
+    "icon": "🎖️",
+    "tier": "gold"
   },
+  "battle_veteran_500": {
+    "id": "battle_veteran_500",
+    "name": "General",
+    "description": "Complete 500 battles",
+    "points": 200,
+    "icon": "⭐",
+    "tier": "platinum"
+  },
+  
+  "damage_dealer_500": {
+    "id": "damage_dealer_500",
+    "name": "Heavy Hitter I",
+    "description": "Deal 500+ damage in a single battle",
+    "points": 20,
+    "icon": "💥",
+    "tier": "bronze"
+  },
+  "damage_dealer_1000": {
+    "id": "damage_dealer_1000",
+    "name": "Heavy Hitter II",
+    "description": "Deal 1000+ damage in a single battle",
+    "points": 40,
+    "icon": "💥",
+    "tier": "silver"
+  },
+  "damage_dealer_2000": {
+    "id": "damage_dealer_2000",
+    "name": "Heavy Hitter III",
+    "description": "Deal 2000+ damage in a single battle",
+    "points": 80,
+    "icon": "💥",
+    "tier": "gold"
+  },
+  "damage_total_10000": {
+    "id": "damage_total_10000",
+    "name": "Destroyer I",
+    "description": "Deal 10,000 total damage",
+    "points": 30,
+    "icon": "☄️",
+    "tier": "bronze"
+  },
+  "damage_total_50000": {
+    "id": "damage_total_50000",
+    "name": "Destroyer II",
+    "description": "Deal 50,000 total damage",
+    "points": 75,
+    "icon": "☄️",
+    "tier": "silver"
+  },
+  "damage_total_100000": {
+    "id": "damage_total_100000",
+    "name": "Destroyer III",
+    "description": "Deal 100,000 total damage",
+    "points": 150,
+    "icon": "☄️",
+    "tier": "gold"
+  },
+  "damage_total_500000": {
+    "id": "damage_total_500000",
+    "name": "Annihilator",
+    "description": "Deal 500,000 total damage",
+    "points": 500,
+    "icon": "💀",
+    "tier": "platinum"
+  },
+  
   "perfect_victory": {
     "id": "perfect_victory",
     "name": "Flawless Victory",
     "description": "Win without losing any units",
     "points": 30,
-    "icon": "✨"
+    "icon": "✨",
+    "tier": "silver"
   },
-  "speed_demon": {
-    "id": "speed_demon",
-    "name": "Speed Demon",
+  "perfect_streak_3": {
+    "id": "perfect_streak_3",
+    "name": "Untouchable",
+    "description": "Win 3 perfect victories in a row",
+    "points": 100,
+    "icon": "🛡️",
+    "tier": "gold"
+  },
+  
+  "speed_demon_60": {
+    "id": "speed_demon_60",
+    "name": "Speed Demon I",
     "description": "Win a battle in under 60 seconds",
     "points": 20,
-    "icon": "⚡"
+    "icon": "⚡",
+    "tier": "bronze"
+  },
+  "speed_demon_30": {
+    "id": "speed_demon_30",
+    "name": "Speed Demon II",
+    "description": "Win a battle in under 30 seconds",
+    "points": 50,
+    "icon": "⚡",
+    "tier": "silver"
+  },
+  "speed_demon_15": {
+    "id": "speed_demon_15",
+    "name": "Speed Demon III",
+    "description": "Win a battle in under 15 seconds",
+    "points": 100,
+    "icon": "⚡",
+    "tier": "gold"
+  },
+  
+  "element_master_surge": {
+    "id": "element_master_surge",
+    "name": "Surge Master",
+    "description": "Win 10 battles with SURGE element",
+    "points": 25,
+    "icon": "⚡",
+    "tier": "bronze"
+  },
+  "element_master_code": {
+    "id": "element_master_code",
+    "name": "Code Master",
+    "description": "Win 10 battles with CODE element",
+    "points": 25,
+    "icon": "💻",
+    "tier": "bronze"
+  },
+  "element_master_metal": {
+    "id": "element_master_metal",
+    "name": "Metal Master",
+    "description": "Win 10 battles with METAL element",
+    "points": 25,
+    "icon": "🤖",
+    "tier": "bronze"
+  },
+  "element_master_glitch": {
+    "id": "element_master_glitch",
+    "name": "Glitch Master",
+    "description": "Win 10 battles with GLITCH element",
+    "points": 25,
+    "icon": "🌀",
+    "tier": "bronze"
   },
   "element_diversity": {
     "id": "element_diversity",
-    "name": "Element Master",
+    "name": "Element Collector",
     "description": "Win with all 4 elements in your team",
     "points": 40,
-    "icon": "🌈"
+    "icon": "🌈",
+    "tier": "silver"
   },
+  
+  "comeback_kid": {
+    "id": "comeback_kid",
+    "name": "Comeback Kid",
+    "description": "Win after being down to 1 unit",
+    "points": 50,
+    "icon": "🔄",
+    "tier": "silver"
+  },
+  "early_bird": {
+    "id": "early_bird",
+    "name": "Early Bird",
+    "description": "Play your first battle before 8 AM",
+    "points": 15,
+    "icon": "🌅",
+    "tier": "bronze"
+  },
+  "night_owl": {
+    "id": "night_owl",
+    "name": "Night Owl",
+    "description": "Play a battle after midnight",
+    "points": 15,
+    "icon": "🦉",
+    "tier": "bronze"
+  },
+  "weekend_warrior": {
+    "id": "weekend_warrior",
+    "name": "Weekend Warrior",
+    "description": "Win 10 battles on weekends",
+    "points": 20,
+    "icon": "🎉",
+    "tier": "bronze"
+  },
+  
   "companion_synergy": {
     "id": "companion_synergy",
     "name": "Best Friends Forever",
     "description": "Win with 3 or more companion pairs",
     "points": 35,
-    "icon": "🤝"
-  },
-  "damage_dealer_500": {
-    "id": "damage_dealer_500",
-    "name": "Heavy Hitter",
-    "description": "Deal 500+ damage in a single battle",
-    "points": 20,
-    "icon": "💥"
+    "icon": "🤝",
+    "tier": "silver"
   },
   "tank_master": {
     "id": "tank_master",
     "name": "Tank Master",
     "description": "Win while taking less than 100 damage",
     "points": 25,
-    "icon": "🛡️"
+    "icon": "🛡️",
+    "tier": "silver"
+  },
+  "survivor": {
+    "id": "survivor",
+    "name": "Survivor",
+    "description": "Win a battle with all units under 20 HP",
+    "points": 75,
+    "icon": "💪",
+    "tier": "gold"
+  },
+  
+  "critical_striker": {
+    "id": "critical_striker",
+    "name": "Critical Striker",
+    "description": "Land 10 critical hits in one battle",
+    "points": 30,
+    "icon": "🎯",
+    "tier": "silver"
+  },
+  "status_master": {
+    "id": "status_master",
+    "name": "Status Master",
+    "description": "Apply 5 different status effects in one battle",
+    "points": 40,
+    "icon": "🎭",
+    "tier": "silver"
+  },
+  "dodge_master": {
+    "id": "dodge_master",
+    "name": "Dodge Master",
+    "description": "Dodge 10 attacks in one battle",
+    "points": 35,
+    "icon": "💨",
+    "tier": "silver"
   }
 }

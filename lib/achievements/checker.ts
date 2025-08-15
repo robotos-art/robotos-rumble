@@ -7,6 +7,7 @@ export interface Achievement {
   description: string
   points: number
   icon: string
+  tier?: string
 }
 
 export function checkAchievements(
@@ -16,75 +17,113 @@ export function checkAchievements(
 ): string[] {
   const newAchievements: string[] = []
 
+  // Helper function to check and add achievement
+  const checkAndAdd = (id: string, condition: boolean) => {
+    if (!currentAchievements.includes(id) && condition) {
+      newAchievements.push(id)
+    }
+  }
+
   // First Blood - First victory
-  if (!currentAchievements.includes('first_blood') && 
-      battleResult.result === 'victory' && 
-      playerStats.wins === 1) {
-    newAchievements.push('first_blood')
-  }
+  checkAndAdd('first_blood', 
+    battleResult.result === 'victory' && playerStats.wins === 1)
 
-  // Winning Streaks
-  if (!currentAchievements.includes('winning_streak_3') && 
+  // === WINNING STREAKS ===
+  checkAndAdd('winning_streak_3', playerStats.winStreak >= 3)
+  checkAndAdd('winning_streak_5', playerStats.winStreak >= 5)
+  checkAndAdd('winning_streak_10', playerStats.winStreak >= 10)
+  checkAndAdd('winning_streak_20', playerStats.winStreak >= 20)
+  checkAndAdd('winning_streak_50', playerStats.winStreak >= 50)
+  checkAndAdd('winning_streak_100', playerStats.winStreak >= 100)
+
+  // === TOTAL WINS ===
+  checkAndAdd('total_wins_5', playerStats.wins >= 5)
+  checkAndAdd('total_wins_10', playerStats.wins >= 10)
+  checkAndAdd('total_wins_25', playerStats.wins >= 25)
+  checkAndAdd('total_wins_50', playerStats.wins >= 50)
+  checkAndAdd('total_wins_100', playerStats.wins >= 100)
+  checkAndAdd('total_wins_250', playerStats.wins >= 250)
+  checkAndAdd('total_wins_500', playerStats.wins >= 500)
+
+  // === BATTLE VETERAN ===
+  checkAndAdd('battle_veteran_10', playerStats.totalBattles >= 10)
+  checkAndAdd('battle_veteran_50', playerStats.totalBattles >= 50)
+  checkAndAdd('battle_veteran_100', playerStats.totalBattles >= 100)
+  checkAndAdd('battle_veteran_500', playerStats.totalBattles >= 500)
+
+  // === DAMAGE ACHIEVEMENTS ===
+  // Single battle damage
+  checkAndAdd('damage_dealer_500', battleResult.damageDealt >= 500)
+  checkAndAdd('damage_dealer_1000', battleResult.damageDealt >= 1000)
+  checkAndAdd('damage_dealer_2000', battleResult.damageDealt >= 2000)
+  
+  // Total damage dealt
+  checkAndAdd('damage_total_10000', playerStats.totalDamageDealt >= 10000)
+  checkAndAdd('damage_total_50000', playerStats.totalDamageDealt >= 50000)
+  checkAndAdd('damage_total_100000', playerStats.totalDamageDealt >= 100000)
+  checkAndAdd('damage_total_500000', playerStats.totalDamageDealt >= 500000)
+
+  // === PERFECT VICTORIES ===
+  checkAndAdd('perfect_victory', 
+    battleResult.result === 'victory' && battleResult.damageReceived === 0)
+  
+  // Perfect streak (would need to track this separately)
+  // For now, check if last 3 battles were perfect
+  if (battleResult.result === 'victory' && 
+      battleResult.damageReceived === 0 &&
       playerStats.winStreak >= 3) {
-    newAchievements.push('winning_streak_3')
+    // Simple heuristic: if on a 3+ win streak with no damage
+    checkAndAdd('perfect_streak_3', true)
   }
 
-  if (!currentAchievements.includes('winning_streak_5') && 
-      playerStats.winStreak >= 5) {
-    newAchievements.push('winning_streak_5')
+  // === SPEED ACHIEVEMENTS ===
+  if (battleResult.result === 'victory') {
+    checkAndAdd('speed_demon_60', battleResult.duration < 60)
+    checkAndAdd('speed_demon_30', battleResult.duration < 30)
+    checkAndAdd('speed_demon_15', battleResult.duration < 15)
   }
 
-  if (!currentAchievements.includes('winning_streak_10') && 
-      playerStats.winStreak >= 10) {
-    newAchievements.push('winning_streak_10')
-  }
-
-  // Battle Veteran achievements
-  if (!currentAchievements.includes('battle_veteran_10') && 
-      playerStats.totalBattles >= 10) {
-    newAchievements.push('battle_veteran_10')
-  }
-
-  if (!currentAchievements.includes('battle_veteran_50') && 
-      playerStats.totalBattles >= 50) {
-    newAchievements.push('battle_veteran_50')
-  }
-
-  if (!currentAchievements.includes('battle_veteran_100') && 
-      playerStats.totalBattles >= 100) {
-    newAchievements.push('battle_veteran_100')
-  }
-
-  // Perfect Victory - Win without losing units
-  if (!currentAchievements.includes('perfect_victory') && 
-      battleResult.result === 'victory') {
-    // Check if all team members survived (needs additional data from battle)
-    // For now, check if damage received is very low
-    if (battleResult.damageReceived === 0) {
-      newAchievements.push('perfect_victory')
-    }
-  }
-
-  // Speed Demon - Win in under 60 seconds
-  if (!currentAchievements.includes('speed_demon') && 
-      battleResult.result === 'victory' && 
-      battleResult.duration < 60) {
-    newAchievements.push('speed_demon')
-  }
-
-  // Element Diversity - Use all 4 elements
-  if (!currentAchievements.includes('element_diversity') && 
-      battleResult.result === 'victory') {
+  // === ELEMENT ACHIEVEMENTS ===
+  // Element diversity
+  if (battleResult.result === 'victory') {
     const uniqueElements = new Set(battleResult.elementsUsed)
-    if (uniqueElements.size >= 4) {
-      newAchievements.push('element_diversity')
+    checkAndAdd('element_diversity', uniqueElements.size >= 4)
+    
+    // Element mastery (need to track element-specific wins)
+    // For now, check if favorite element matches and has enough wins
+    if (playerStats.favoriteElement === 'SURGE' && playerStats.wins >= 10) {
+      checkAndAdd('element_master_surge', true)
+    }
+    if (playerStats.favoriteElement === 'CODE' && playerStats.wins >= 10) {
+      checkAndAdd('element_master_code', true)
+    }
+    if (playerStats.favoriteElement === 'METAL' && playerStats.wins >= 10) {
+      checkAndAdd('element_master_metal', true)
+    }
+    if (playerStats.favoriteElement === 'GLITCH' && playerStats.wins >= 10) {
+      checkAndAdd('element_master_glitch', true)
     }
   }
 
-  // Companion Synergy - Win with 3+ companion pairs
-  if (!currentAchievements.includes('companion_synergy') && 
-      battleResult.result === 'victory') {
-    // Count companion pairs in team
+  // === SPECIAL ACHIEVEMENTS ===
+  // Comeback Kid - Win after being down to 1 unit
+  // This would need additional battle state tracking
+  checkAndAdd('comeback_kid', 
+    battleResult.result === 'victory' && 
+    battleResult.unitsRemaining === 1)
+
+  // Time-based achievements
+  const battleTime = new Date(battleResult.timestamp)
+  const hour = battleTime.getHours()
+  const day = battleTime.getDay()
+  
+  checkAndAdd('early_bird', hour < 8 && playerStats.totalBattles === 1)
+  checkAndAdd('night_owl', hour >= 0 && hour < 6)
+  checkAndAdd('weekend_warrior', 
+    (day === 0 || day === 6) && battleResult.result === 'victory' && playerStats.wins >= 10)
+
+  // Companion Synergy
+  if (battleResult.result === 'victory') {
     const robotos = battleResult.teamUsed.filter(u => u.type === 'roboto')
     const robopets = battleResult.teamUsed.filter(u => u.type === 'robopet')
     
@@ -96,22 +135,30 @@ export function checkAchievements(
       }
     })
     
-    if (companionPairs >= 3) {
-      newAchievements.push('companion_synergy')
-    }
+    checkAndAdd('companion_synergy', companionPairs >= 3)
   }
 
-  // Damage Dealer - Deal 500+ damage
-  if (!currentAchievements.includes('damage_dealer_500') && 
-      battleResult.damageDealt >= 500) {
-    newAchievements.push('damage_dealer_500')
-  }
+  // Tank Master
+  checkAndAdd('tank_master', 
+    battleResult.result === 'victory' && battleResult.damageReceived < 100)
 
-  // Tank Master - Win while taking less than 100 damage
-  if (!currentAchievements.includes('tank_master') && 
-      battleResult.result === 'victory' && 
-      battleResult.damageReceived < 100) {
-    newAchievements.push('tank_master')
+  // Survivor - Win with all units under 20 HP
+  // Would need additional battle state
+  checkAndAdd('survivor', 
+    battleResult.result === 'victory' && 
+    battleResult.avgRemainingHP && 
+    battleResult.avgRemainingHP < 20)
+
+  // Critical Striker, Status Master, Dodge Master
+  // These would need additional battle event tracking
+  if (battleResult.criticalHits && battleResult.criticalHits >= 10) {
+    checkAndAdd('critical_striker', true)
+  }
+  if (battleResult.statusEffectsApplied && battleResult.statusEffectsApplied >= 5) {
+    checkAndAdd('status_master', true)
+  }
+  if (battleResult.dodges && battleResult.dodges >= 10) {
+    checkAndAdd('dodge_master', true)
   }
 
   return newAchievements
@@ -123,4 +170,15 @@ export function getAchievementDetails(achievementId: string): Achievement | null
 
 export function getAllAchievements(): Achievement[] {
   return Object.values(achievements)
+}
+
+export function getAchievementsByTier(tier: string): Achievement[] {
+  return Object.values(achievements).filter((a: any) => a.tier === tier)
+}
+
+export function calculateTotalPoints(achievementIds: string[]): number {
+  return achievementIds.reduce((total, id) => {
+    const achievement = getAchievementDetails(id)
+    return total + (achievement?.points || 0)
+  }, 0)
 }

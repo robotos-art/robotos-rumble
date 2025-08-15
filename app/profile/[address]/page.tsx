@@ -232,23 +232,38 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               <CardTitle>Achievements ({profile.achievements.length}/{Object.keys(achievementsData).length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.values(achievementsData).map((achievement: any) => {
                   const earned = profile.achievements.includes(achievement.id)
+                  const tierColors = {
+                    bronze: 'border-orange-600 bg-orange-600/10 text-orange-400',
+                    silver: 'border-gray-400 bg-gray-400/10 text-gray-300',
+                    gold: 'border-yellow-500 bg-yellow-500/10 text-yellow-400',
+                    platinum: 'border-purple-400 bg-purple-400/10 text-purple-300',
+                    diamond: 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+                  }
+                  const tierColor = tierColors[achievement.tier as keyof typeof tierColors] || tierColors.bronze
+                  
                   return (
                     <div
                       key={achievement.id}
-                      className={`p-3 rounded border ${
+                      className={`p-3 rounded border transition-all ${
                         earned 
-                          ? 'border-green-500 bg-green-500/10' 
+                          ? tierColor
                           : 'border-gray-700 bg-gray-800/50 opacity-50'
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Award className={`w-4 h-4 ${earned ? 'text-green-400' : 'text-gray-500'}`} />
-                        <div className="text-sm font-bold">{achievement.name}</div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{achievement.icon}</span>
+                          <div>
+                            <div className="text-sm font-bold">{achievement.name}</div>
+                            <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
+                          </div>
+                        </div>
+                        <div className="text-xs font-bold">+{achievement.points}</div>
                       </div>
-                      <div className="text-xs text-gray-400">{achievement.description}</div>
+                      <div className="text-xs opacity-70">{achievement.description}</div>
                     </div>
                   )
                 })}
