@@ -179,6 +179,7 @@ export class StorageService {
           address: profile.walletAddress,  // Changed from walletAddress to address
           displayName: profile.displayName,
           ensName: profile.ensName,
+          avatar: profile.avatar,
           wins: profile.stats.wins,
           losses: profile.stats.losses,
           winRate: profile.stats.totalBattles > 0 

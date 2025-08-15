@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
-import { Trophy, Zap, Shield, Swords } from 'lucide-react'
+import { Trophy, Zap, Shield, Swords, User } from 'lucide-react'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { GameHeader } from '../../components/shared/GameHeader'
 import { PageLayout } from '../../components/shared/PageLayout'
@@ -126,14 +126,43 @@ export default function Leaderboard() {
                         <td className="p-4 font-mono">
                           <Link 
                             href={`/profile/${entry.address}`}
-                            className="flex flex-col hover:underline"
+                            className="flex items-center gap-3 hover:underline"
                           >
-                            <span className="text-green-400">
-                              {entry.ensName || entry.displayName || formatAddress(entry.address, 'medium')}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {formatAddress(entry.address, 'short')}
-                            </span>
+                            {/* Avatar */}
+                            <div className="flex-shrink-0">
+                              {entry.avatar ? (
+                                <img
+                                  src={
+                                    entry.avatar.type === 'roboto'
+                                      ? `https://d2lp2vbc3umjmr.cloudfront.net/${entry.avatar.tokenId}/roboto-transparent.png`
+                                      : entry.avatar.imageUrl || ''
+                                  }
+                                  alt="Avatar"
+                                  className="w-10 h-10 rounded border border-green-500/30"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement
+                                    target.style.display = 'none'
+                                    const fallback = target.nextElementSibling as HTMLElement
+                                    if (fallback) fallback.style.display = 'flex'
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className="w-10 h-10 rounded border border-green-500/30 bg-green-500/10 items-center justify-center"
+                                style={{ display: entry.avatar ? 'none' : 'flex' }}
+                              >
+                                <User className="w-5 h-5 text-green-500/50" />
+                              </div>
+                            </div>
+                            {/* Name */}
+                            <div className="flex flex-col">
+                              <span className="text-green-400">
+                                {entry.ensName || entry.displayName || formatAddress(entry.address, 'medium')}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatAddress(entry.address, 'short')}
+                              </span>
+                            </div>
                           </Link>
                         </td>
                         <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>
