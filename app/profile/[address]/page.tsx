@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useEnsName } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
-import { Trophy, Target, Zap, Shield, Award, TrendingUp, Clock, Swords, Share2, ArrowLeft } from 'lucide-react'
+import { Trophy, Target, Zap, Shield, Award, TrendingUp, Clock, Swords, Share2, ArrowLeft, ExternalLink, Pencil } from 'lucide-react'
 import { GameHeader } from '../../../components/shared/GameHeader'
 import { PageLayout } from '../../../components/shared/PageLayout'
+import { AvatarSelector } from '../../../components/profile/AvatarSelector'
 import type { PlayerProfile } from '../../../lib/storage/types'
 import achievementsData from '../../../lib/data/achievements.json'
 
@@ -23,9 +24,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
   
   const profileAddress = params.address
   const isOwnProfile = connectedAddress?.toLowerCase() === profileAddress?.toLowerCase()
+  
+  // Get ENS name for the profile address
+  const { data: ensName } = useEnsName({
+    address: profileAddress as `0x${string}`,
+    enabled: !!profileAddress,
+  })
 
   useEffect(() => {
     if (profileAddress) {
@@ -38,6 +46,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       const response = await fetch(`/api/player/${profileAddress}`)
       if (response.ok) {
         const data = await response.json()
+        // Store ENS name if available
+        if (ensName && (!data.ensName || data.ensName !== ensName)) {
+          data.ensName = ensName
+        }
         setProfile(data)
       }
     } catch (error) {
@@ -45,6 +57,36 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     } finally {
       setLoading(false)
     }
+  }
+  
+  const handleAvatarSelect = async (avatar: { type: 'roboto' | 'robopet', tokenId: string }) => {
+    if (!isOwnProfile || !profile) return
+    
+    try {
+      const response = await fetch('/api/player/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          address: profileAddress,
+          avatar 
+        })
+      })
+      
+      if (response.ok) {
+        setProfile({ ...profile, avatar })
+      }
+    } catch (error) {
+      console.error('Error updating avatar:', error)
+    }
+  }
+  
+  const getAvatarUrl = () => {
+    if (!profile?.avatar) return null
+    if (profile.avatar.type === 'roboto') {
+      return `https://d2lp2vbc3umjmr.cloudfront.net/${profile.avatar.tokenId}/roboto-transparent.png`
+    }
+    // For robopets, we'd need to fetch from metadata
+    return null
   }
 
   const handleShare = async () => {
@@ -104,20 +146,55 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <Card className="terminal-card">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl">
-                    {profile.displayName || `${profileAddress?.slice(0, 6)}...${profileAddress?.slice(-4)}`}
-                  </CardTitle>
-                  <CardDescription>
-                    Member since {new Date(profile.createdAt).toLocaleDateString()}
-                  </CardDescription>
-                  {!isOwnProfile && (
-                    <div className="mt-2 text-xs text-green-400/70">
-                      Viewing {profileAddress}
-                    </div>
-                  )}
-                </div>
                 <div className="flex items-center gap-4">
+                  {/* Avatar */}
+                  <div className="relative group">
+                    {profile.avatar ? (
+                      <img
+                        src={getAvatarUrl() || ''}
+                        alt="Profile"
+                        className="w-20 h-20 rounded-lg border-2 border-green-500/50"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-lg border-2 border-green-500/50 bg-green-500/10 flex items-center justify-center">
+                        <span className="text-2xl text-green-500/50">?</span>
+                      </div>
+                    )}
+                    {isOwnProfile && (
+                      <button
+                        onClick={() => setShowAvatarSelector(true)}
+                        className="absolute inset-0 rounded-lg bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      >
+                        <Pencil className="w-5 h-5 text-white" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <CardTitle className="text-2xl">
+                      {ensName || `${profileAddress?.slice(0, 6)}...${profileAddress?.slice(-4)}`}
+                    </CardTitle>
+                    <div className="text-sm text-gray-400 font-mono mb-1">
+                      {profileAddress}
+                    </div>
+                    <CardDescription>
+                      Member since {new Date(profile.createdAt).toLocaleDateString()}
+                    </CardDescription>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`https://opensea.io/${profileAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-400 hover:text-green-300 transition-colors"
+                  >
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4" />
+                      OpenSea
+                    </Button>
+                  </a>
                   <Button
                     onClick={handleShare}
                     variant="outline"
@@ -323,6 +400,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           </div>
         </div>
       </div>
+      
+      {/* Avatar Selector Dialog */}
+      {isOwnProfile && (
+        <AvatarSelector
+          open={showAvatarSelector}
+          onClose={() => setShowAvatarSelector(false)}
+          currentAvatar={profile.avatar}
+          onSelect={handleAvatarSelect}
+        />
+      )}
     </PageLayout>
   )
 }

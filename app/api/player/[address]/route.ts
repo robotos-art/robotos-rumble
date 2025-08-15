@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { StorageService } from '@/lib/storage/storage-service'
 import { normalizeAddress } from '@/lib/utils/address'
+import { getRobotoContract, getRobopetContract } from '@/lib/contracts'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +21,36 @@ export async function GET(
     // Create new profile if doesn't exist
     if (!profile) {
       profile = await storage.createNewProfile(normalizedAddress)
+      
+      // Auto-select first NFT as avatar
+      try {
+        const robotoContract = getRobotoContract()
+        const robopetContract = getRobopetContract()
+        
+        // Check Robotos first
+        const robotoBalance = await robotoContract.methods.balanceOf(normalizedAddress).call()
+        if (Number(robotoBalance) > 0) {
+          const tokenId = await robotoContract.methods.tokenOfOwnerByIndex(normalizedAddress, 0).call()
+          profile.avatar = {
+            type: 'roboto',
+            tokenId: String(tokenId)
+          }
+          await storage.saveProfile(profile)
+        } else {
+          // Check Robopets
+          const robopetBalance = await robopetContract.methods.balanceOf(normalizedAddress).call()
+          if (Number(robopetBalance) > 0) {
+            const tokenId = await robopetContract.methods.tokenOfOwnerByIndex(normalizedAddress, 0).call()
+            profile.avatar = {
+              type: 'robopet',
+              tokenId: String(tokenId)
+            }
+            await storage.saveProfile(profile)
+          }
+        }
+      } catch (error) {
+        console.error('Error auto-selecting avatar:', error)
+      }
     }
     
     return NextResponse.json(profile)

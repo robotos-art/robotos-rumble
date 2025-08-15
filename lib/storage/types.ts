@@ -1,6 +1,11 @@
 export interface PlayerProfile {
   walletAddress: string
   displayName?: string | null
+  ensName?: string | null
+  avatar?: {
+    type: 'roboto' | 'robopet'
+    tokenId: string
+  } | null
   createdAt: string
   lastSeenAt: string
   stats: PlayerStats
