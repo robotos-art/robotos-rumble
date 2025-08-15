@@ -74,7 +74,6 @@ export default function BattleSelect() {
         title="BATTLE MODE"
         showBackButton
         backHref="/"
-        showBackgroundSelector
       />
       
       <div className="mt-8">

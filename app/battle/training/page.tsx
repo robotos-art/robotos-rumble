@@ -60,7 +60,6 @@ export default function TrainingBattle() {
       <GameHeader 
         showBackButton
         backHref="/battle"
-        showBackgroundSelector
         className="absolute top-0 left-0 right-0 z-50"
       />
       
