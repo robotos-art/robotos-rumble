@@ -33,22 +33,11 @@ export default function Leaderboard() {
       const response = await fetch('/api/leaderboard?type=global')
       const data = await response.json()
       
-      // If no real data yet, use mock data for display
-      if (!data || data.length === 0) {
-        // Use mock data as fallback
-        const mockData: LeaderboardEntry[] = [
-          { address: '0x1234567890123456789012345678901234567890', wins: 147, losses: 23, winRate: 86.5, winStreak: 8, favoriteElement: 'SURGE', lastUpdated: new Date().toISOString() },
-          { address: '0xABCDEF1234567890ABCDEF1234567890ABCDEF12', wins: 132, losses: 31, winRate: 81.0, winStreak: 5, favoriteElement: 'CODE', lastUpdated: new Date().toISOString() },
-          { address: '0x9876543210987654321098765432109876543210', wins: 128, losses: 35, winRate: 78.5, winStreak: 3, favoriteElement: 'METAL', lastUpdated: new Date().toISOString() },
-          { address: '0xFEDCBA9876543210FEDCBA9876543210FEDCBA98', wins: 115, losses: 42, winRate: 73.2, winStreak: 2, favoriteElement: 'GLITCH', lastUpdated: new Date().toISOString() },
-          { address: '0x1111222233334444555566667777888899990000', wins: 98, losses: 47, winRate: 67.6, winStreak: 1, favoriteElement: 'SURGE', lastUpdated: new Date().toISOString() },
-        ]
-        setLeaderboardData(mockData)
-      } else {
-        setLeaderboardData(data)
-      }
+      // Always use real data from Vercel Blob
+      setLeaderboardData(data || [])
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error)
+      setLeaderboardData([])
     } finally {
       setLoading(false)
     }
