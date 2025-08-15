@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { useAccount, useDisconnect, useEnsName } from 'wagmi'
 import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext'
-import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle } from 'lucide-react'
+import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle, Trophy } from 'lucide-react'
 import { Button } from '../ui/button'
 import { TutorialDialog } from './TutorialDialog'
 
@@ -140,6 +141,15 @@ export function WalletMenu() {
               
               {/* Actions */}
               <div className="p-6">
+                <Link
+                  href="/leaderboard"
+                  onClick={() => setShowDropdown(false)}
+                  className="flex items-center justify-between w-full px-4 py-3 text-base hover:bg-green-500/10 rounded transition-colors mb-3"
+                >
+                  <span>Leaderboard</span>
+                  <Trophy className="w-5 h-5 text-green-400" />
+                </Link>
+                
                 <button
                   onClick={() => {
                     setShowTutorial(true)
@@ -220,12 +230,21 @@ export function WalletMenu() {
             
             {/* Actions */}
             <div className="p-2">
+              <Link
+                href="/leaderboard"
+                onClick={() => setShowDropdown(false)}
+                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors"
+              >
+                <span>Leaderboard</span>
+                <Trophy className="w-4 h-4 text-green-400" />
+              </Link>
+              
               <button
                 onClick={() => {
                   setShowTutorial(true)
                   setShowDropdown(false)
                 }}
-                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors"
+                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors mt-1"
               >
                 <span>Game Help</span>
                 <HelpCircle className="w-4 h-4 text-green-400" />
