@@ -106,12 +106,6 @@ export function checkAchievements(
   }
 
   // === SPECIAL ACHIEVEMENTS ===
-  // Comeback Kid - Win after being down to 1 unit
-  // This would need additional battle state tracking
-  checkAndAdd('comeback_kid', 
-    battleResult.result === 'victory' && 
-    battleResult.unitsRemaining === 1)
-
   // Time-based achievements
   const battleTime = new Date(battleResult.timestamp)
   const hour = battleTime.getHours()
@@ -142,24 +136,13 @@ export function checkAchievements(
   checkAndAdd('tank_master', 
     battleResult.result === 'victory' && battleResult.damageReceived < 100)
 
-  // Survivor - Win with all units under 20 HP
-  // Would need additional battle state
-  checkAndAdd('survivor', 
-    battleResult.result === 'victory' && 
-    battleResult.avgRemainingHP && 
-    battleResult.avgRemainingHP < 20)
-
-  // Critical Striker, Status Master, Dodge Master
-  // These would need additional battle event tracking
-  if (battleResult.criticalHits && battleResult.criticalHits >= 10) {
-    checkAndAdd('critical_striker', true)
-  }
-  if (battleResult.statusEffectsApplied && battleResult.statusEffectsApplied >= 5) {
-    checkAndAdd('status_master', true)
-  }
-  if (battleResult.dodges && battleResult.dodges >= 10) {
-    checkAndAdd('dodge_master', true)
-  }
+  // Note: The following achievements would need additional battle tracking:
+  // - comeback_kid (need to track units remaining)
+  // - survivor (need to track remaining HP)
+  // - critical_striker (need to track critical hits)
+  // - status_master (need to track status effects)
+  // - dodge_master (need to track dodges)
+  // These can be implemented when we add more detailed battle tracking
 
   return newAchievements
 }
