@@ -15,8 +15,8 @@ import { cn } from '../../lib/utils'
 interface AvatarSelectorProps {
   open: boolean
   onClose: () => void
-  currentAvatar?: { type: 'roboto' | 'robopet', tokenId: string } | null
-  onSelect: (avatar: { type: 'roboto' | 'robopet', tokenId: string }) => void
+  currentAvatar?: { type: 'roboto' | 'robopet', tokenId: string, imageUrl?: string } | null
+  onSelect: (avatar: { type: 'roboto' | 'robopet', tokenId: string, imageUrl?: string }) => void
 }
 
 export function AvatarSelector({ open, onClose, currentAvatar, onSelect }: AvatarSelectorProps) {
@@ -57,49 +57,55 @@ export function AvatarSelector({ open, onClose, currentAvatar, onSelect }: Avata
           
           <TabsContent value="robotos" className="mt-4">
             <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
-              {robotos.map((roboto) => (
-                <button
-                  key={roboto.tokenId}
-                  onClick={() => setSelected({ type: 'roboto', tokenId: roboto.tokenId })}
-                  className={cn(
-                    "relative p-2 border-2 rounded-lg transition-all",
-                    selected?.type === 'roboto' && selected?.tokenId === roboto.tokenId
-                      ? "border-green-500 bg-green-500/20"
-                      : "border-gray-700 hover:border-gray-500"
-                  )}
-                >
-                  <img
-                    src={getImageUrl('roboto', roboto.tokenId)}
-                    alt={`Roboto #${roboto.tokenId}`}
-                    className="w-full h-auto"
-                  />
-                  <p className="text-xs text-green-400 mt-1 truncate">Roboto #{roboto.tokenId}</p>
-                </button>
-              ))}
+              {robotos.map((roboto) => {
+                const imageUrl = getImageUrl('roboto', roboto.tokenId)
+                return (
+                  <button
+                    key={roboto.tokenId}
+                    onClick={() => setSelected({ type: 'roboto', tokenId: roboto.tokenId, imageUrl })}
+                    className={cn(
+                      "relative p-2 border-2 rounded-lg transition-all",
+                      selected?.type === 'roboto' && selected?.tokenId === roboto.tokenId
+                        ? "border-green-500 bg-green-500/20"
+                        : "border-gray-700 hover:border-gray-500"
+                    )}
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={`Roboto #${roboto.tokenId}`}
+                      className="w-full h-auto"
+                    />
+                    <p className="text-xs text-green-400 mt-1 truncate">Roboto #{roboto.tokenId}</p>
+                  </button>
+                )
+              })}
             </div>
           </TabsContent>
           
           <TabsContent value="robopets" className="mt-4">
             <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
-              {robopets.map((pet) => (
-                <button
-                  key={pet.tokenId}
-                  onClick={() => setSelected({ type: 'robopet', tokenId: pet.tokenId })}
-                  className={cn(
-                    "relative p-2 border-2 rounded-lg transition-all",
-                    selected?.type === 'robopet' && selected?.tokenId === pet.tokenId
-                      ? "border-green-500 bg-green-500/20"
-                      : "border-gray-700 hover:border-gray-500"
-                  )}
-                >
-                  <img
-                    src={getImageUrl('robopet', pet.tokenId, pet.metadata)}
-                    alt={`Robopet #${pet.tokenId}`}
-                    className="w-full h-auto"
-                  />
-                  <p className="text-xs text-green-400 mt-1 truncate">Robopet #{pet.tokenId}</p>
-                </button>
-              ))}
+              {robopets.map((pet) => {
+                const imageUrl = getImageUrl('robopet', pet.tokenId, pet.metadata)
+                return (
+                  <button
+                    key={pet.tokenId}
+                    onClick={() => setSelected({ type: 'robopet', tokenId: pet.tokenId, imageUrl })}
+                    className={cn(
+                      "relative p-2 border-2 rounded-lg transition-all",
+                      selected?.type === 'robopet' && selected?.tokenId === pet.tokenId
+                        ? "border-green-500 bg-green-500/20"
+                        : "border-gray-700 hover:border-gray-500"
+                    )}
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={`Robopet #${pet.tokenId}`}
+                      className="w-full h-auto"
+                    />
+                    <p className="text-xs text-green-400 mt-1 truncate">Robopet #{pet.tokenId}</p>
+                  </button>
+                )
+              })}
             </div>
           </TabsContent>
         </Tabs>

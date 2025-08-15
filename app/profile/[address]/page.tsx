@@ -65,7 +65,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
   }
   
-  const handleAvatarSelect = async (avatar: { type: 'roboto' | 'robopet', tokenId: string }) => {
+  const handleAvatarSelect = async (avatar: { type: 'roboto' | 'robopet', tokenId: string, imageUrl?: string }) => {
     if (!isOwnProfile || !profile) return
     
     try {
@@ -91,8 +91,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     if (profile.avatar.type === 'roboto') {
       return `https://d2lp2vbc3umjmr.cloudfront.net/${profile.avatar.tokenId}/roboto-transparent.png`
     }
-    // For robopets, we'd need to fetch from metadata
-    return null
+    // For robopets, use the stored imageUrl
+    return profile.avatar.imageUrl || null
   }
 
   const handleShare = async () => {

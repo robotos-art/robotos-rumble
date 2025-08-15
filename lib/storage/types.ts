@@ -5,6 +5,7 @@ export interface PlayerProfile {
   avatar?: {
     type: 'roboto' | 'robopet'
     tokenId: string
+    imageUrl?: string
   } | null
   createdAt: string
   lastSeenAt: string

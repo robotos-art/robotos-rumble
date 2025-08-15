@@ -41,9 +41,22 @@ export async function GET(
           const robopetBalance = await robopetContract.methods.balanceOf(normalizedAddress).call()
           if (Number(robopetBalance) > 0) {
             const tokenId = await robopetContract.methods.tokenOfOwnerByIndex(normalizedAddress, 0).call()
-            profile.avatar = {
-              type: 'robopet',
-              tokenId: String(tokenId)
+            // Get metadata for image URL
+            try {
+              const tokenURI = await robopetContract.methods.tokenURI(tokenId).call()
+              const metadataUrl = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/')
+              const metadataResponse = await fetch(metadataUrl)
+              const metadata = await metadataResponse.json()
+              profile.avatar = {
+                type: 'robopet',
+                tokenId: String(tokenId),
+                imageUrl: metadata.image?.replace('ipfs://', 'https://ipfs.io/ipfs/') || ''
+              }
+            } catch {
+              profile.avatar = {
+                type: 'robopet',
+                tokenId: String(tokenId)
+              }
             }
             await storage.saveProfile(profile)
           }
