@@ -51,10 +51,11 @@ export function SoundToggle() {
   }
   
   const getVolumeIcon = () => {
-    if (!isEnabled || volume === 0) return <VolumeX className="w-4 h-4" />
-    if (volume < 30) return <Volume className="w-4 h-4" />
-    if (volume < 70) return <Volume1 className="w-4 h-4" />
-    return <Volume2 className="w-4 h-4" />
+    const iconClass = "w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors"
+    if (!isEnabled || volume === 0) return <VolumeX className={iconClass} />
+    if (volume < 30) return <Volume className={iconClass} />
+    if (volume < 70) return <Volume1 className={iconClass} />
+    return <Volume2 className={iconClass} />
   }
   
   return (
@@ -63,6 +64,7 @@ export function SoundToggle() {
         <Button
           variant="terminal"
           size="icon"
+          className="group"
           onClick={(e) => {
             // If clicking when popover is closed, just toggle mute
             if (!isOpen) {

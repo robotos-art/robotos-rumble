@@ -59,8 +59,9 @@ export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorPro
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
         title="Background Settings"
+        className="group"
       >
-        <Palette className="w-4 h-4" />
+        <Palette className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
       </Button>
       
       {isOpen && (

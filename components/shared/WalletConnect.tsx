@@ -18,9 +18,9 @@ export function WalletConnect() {
 
   if (!mounted) {
     return (
-      <Button variant="terminal" disabled className="gap-2">
-        <Wallet className="w-4 h-4" />
-        LOADING...
+      <Button variant="terminal" disabled className="gap-2 group">
+        <Wallet className="w-4 h-4 text-green-500/60" />
+        <span className="text-green-500/60">LOADING...</span>
       </Button>
     )
   }
@@ -41,10 +41,10 @@ export function WalletConnect() {
     <Button
       variant="terminal"
       onClick={handleConnect}
-      className="gap-2"
+      className="gap-2 group"
     >
-      <Wallet className="w-4 h-4" />
-      CONNECT
+      <Wallet className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
+      <span className="text-green-500/60 group-hover:text-green-400 transition-colors">CONNECT</span>
     </Button>
   )
 }

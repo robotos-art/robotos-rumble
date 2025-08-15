@@ -55,10 +55,9 @@ export function GameHeader({
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Home"
-              className="relative group"
+              className="group"
             >
-              <Zap className="w-5 h-5 text-green-400 group-hover:animate-pulse" />
-              <div className="absolute inset-0 bg-green-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Zap className="w-5 h-5 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
           </Link>
         )}
@@ -71,8 +70,9 @@ export function GameHeader({
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Back"
+              className="group"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
           </Link>
         )}
@@ -96,10 +96,9 @@ export function GameHeader({
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Start Battle"
-              className="relative group"
+              className="group"
             >
-              <Swords className="w-5 h-5 text-green-400 group-hover:animate-pulse" />
-              <div className="absolute inset-0 bg-green-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Swords className="w-5 h-5 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
           </Link>
         )}
