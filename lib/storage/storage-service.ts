@@ -1,4 +1,3 @@
-import { get } from '@vercel/edge-config'
 import { put, list, del, head } from '@vercel/blob'
 import type {
   PlayerProfile,
@@ -125,7 +124,7 @@ export class StorageService {
     }
   }
 
-  // === LEADERBOARD OPERATIONS (Edge Config) ===
+  // === LEADERBOARD OPERATIONS ===
   
   async getLeaderboard(type: 'global' | 'weekly' | 'monthly' = 'global'): Promise<LeaderboardEntry[]> {
     try {
@@ -191,28 +190,13 @@ export class StorageService {
   }
 
   async getElementLeaderboard(element: string): Promise<LeaderboardEntry[]> {
-    try {
-      const config = await get('leaderboard')
-      if (!config || typeof config !== 'object') {
-        return []
-      }
-      
-      const leaderboard = config as any
-      return leaderboard.elements?.[element] || []
-    } catch (error) {
-      console.error('Error fetching element leaderboard:', error)
-      return []
-    }
+    // Not implemented - could filter leaderboard by element
+    return []
   }
 
   async getGlobalStats(): Promise<GlobalStats | null> {
-    try {
-      const config = await get('globalStats')
-      return config as unknown as GlobalStats
-    } catch (error) {
-      console.error('Error fetching global stats:', error)
-      return null
-    }
+    // Could calculate from all profiles if needed
+    return null
   }
 
   // === HELPER METHODS ===
