@@ -1,5 +1,5 @@
 import { get } from '@vercel/edge-config'
-import { put, list } from '@vercel/blob'
+import { put, list, del, head } from '@vercel/blob'
 import type {
   PlayerProfile,
   BattleRecord,
@@ -46,9 +46,20 @@ export class StorageService {
       const normalizedAddress = profile.walletAddress.toLowerCase()
       const blobName = `players/${normalizedAddress}/profile.json`
       
+      // Check if profile exists and delete it first to allow overwrite
+      try {
+        const existing = await head(blobName, { token: this.blobToken })
+        if (existing) {
+          await del(existing.url, { token: this.blobToken })
+        }
+      } catch (e) {
+        // Profile doesn't exist, which is fine
+      }
+      
       await put(blobName, JSON.stringify(profile, null, 2), {
         access: 'public',
         addRandomSuffix: false,
+        contentType: 'application/json',
         token: this.blobToken
       })
     } catch (error) {
@@ -118,13 +129,61 @@ export class StorageService {
   
   async getLeaderboard(type: 'global' | 'weekly' | 'monthly' = 'global'): Promise<LeaderboardEntry[]> {
     try {
-      const config = await get('leaderboard')
-      if (!config || typeof config !== 'object') {
+      // For now, fetch all player profiles and sort them
+      // In production, this would be cached or use a proper database
+      const { blobs } = await list({
+        prefix: 'players/',
+        limit: 100,
+        token: this.blobToken
+      })
+      
+      if (!blobs || blobs.length === 0) {
         return []
       }
       
-      const leaderboard = config as any
-      return leaderboard[type] || []
+      const profiles = await Promise.all(
+        blobs
+          .filter(blob => blob.pathname.endsWith('/profile.json'))
+          .map(async (blob) => {
+            try {
+              const response = await fetch(blob.url)
+              return await response.json() as PlayerProfile
+            } catch (e) {
+              console.error('Error fetching profile from blob:', e)
+              return null
+            }
+          })
+      )
+      
+      // Filter out nulls and sort by wins
+      const validProfiles = profiles.filter(p => p !== null) as PlayerProfile[]
+      
+      const sorted = validProfiles
+        .filter(p => p.stats.totalBattles > 0)
+        .sort((a, b) => {
+          // Sort by wins, then by win rate
+          if (b.stats.wins !== a.stats.wins) {
+            return b.stats.wins - a.stats.wins
+          }
+          const bWinRate = b.stats.wins / b.stats.totalBattles
+          const aWinRate = a.stats.wins / a.stats.totalBattles
+          return bWinRate - aWinRate
+        })
+        .slice(0, 20) // Top 20
+        .map((profile, index) => ({
+          rank: index + 1,
+          walletAddress: profile.walletAddress,
+          displayName: profile.displayName,
+          wins: profile.stats.wins,
+          losses: profile.stats.losses,
+          winRate: profile.stats.totalBattles > 0 
+            ? Math.round((profile.stats.wins / profile.stats.totalBattles) * 100)
+            : 0,
+          totalBattles: profile.stats.totalBattles,
+          favoriteElement: profile.stats.favoriteElement
+        }))
+      
+      return sorted
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
       return []

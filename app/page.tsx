@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '../components/ui/button'
-import { Swords, Trophy, Users } from 'lucide-react'
+import { Swords, Trophy, Users, User } from 'lucide-react'
 import { gameSounds } from '../lib/sounds/gameSounds'
 import FuzzyText from '../components/ui/FuzzyText'
 import { GameHeader } from '../components/shared/GameHeader'
@@ -160,6 +160,21 @@ PRESS ANY KEY TO CONTINUE`
                 LEADERBOARD
               </Button>
             </Link>
+
+            {isConnected && (
+              <Link href="/profile">
+                <Button
+                  variant="terminal"
+                  size="lg"
+                  className="w-full max-w-sm mx-auto text-xl py-6 gap-3"
+                  onClick={() => gameSounds.playConfirm()}
+                  onMouseEnter={() => gameSounds.playHover()}
+                >
+                  <User className="w-6 h-6" />
+                  PROFILE
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Status */}
