@@ -25,6 +25,7 @@ export interface PlayerStats {
   favoriteElement: string | null
   favoriteRoboto: string | null
   averageBattleDuration: number
+  pairedVictories?: number
 }
 
 export interface BattleRecord {

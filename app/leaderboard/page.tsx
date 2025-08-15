@@ -12,16 +12,8 @@ import { formatAddress } from '../../lib/utils/address'
 import type { LeaderboardEntry } from '../../lib/storage/types'
 
 export default function Leaderboard() {
-  const [selectedTab, setSelectedTab] = useState<'global' | 'elements'>('global')
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
-  
-  const elementColors = {
-    SURGE: '#FFD700',
-    CODE: '#00CED1',
-    METAL: '#C0C0C0',
-    GLITCH: '#FF1493'
-  }
   
   useEffect(() => {
     fetchLeaderboard()
@@ -54,33 +46,7 @@ export default function Leaderboard() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
         
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant="terminal"
-            size="sm"
-            onClick={() => {
-              setSelectedTab('global')
-              gameSounds.playClick()
-            }}
-            className={selectedTab === 'global' ? 'bg-green-500/20' : 'opacity-60'}
-          >
-            GLOBAL RANKINGS
-          </Button>
-          <Button
-            variant="terminal"
-            size="sm"
-            onClick={() => {
-              setSelectedTab('elements')
-              gameSounds.playClick()
-            }}
-            className={selectedTab === 'elements' ? 'bg-green-500/20' : 'opacity-60'}
-          >
-            ELEMENT STATISTICS
-          </Button>
-        </div>
-        
-        {selectedTab === 'global' ? (
+        {/* Global Rankings */}
           <Card className="bg-black/80 border-2 border-green-500 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -170,10 +136,7 @@ export default function Leaderboard() {
                         <td className="p-4 text-center font-mono">{entry.winRate.toFixed(1)}%</td>
                         <td className="p-4 text-center">
                           {entry.favoriteElement && (
-                            <span 
-                              className="font-mono"
-                              style={{ color: elementColors[entry.favoriteElement as keyof typeof elementColors] }}
-                            >
+                            <span className="font-mono text-green-400">
                               {entry.favoriteElement}
                             </span>
                           )}
@@ -185,28 +148,6 @@ export default function Leaderboard() {
               </table>
             </div>
           </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(elementColors).map(([element, color]) => (
-              <Card 
-                key={element}
-                className="bg-black/80 border-2 rounded-lg p-6 text-center"
-                style={{ borderColor: color + '80' }}
-                onMouseEnter={() => gameSounds.playHover()}
-              >
-                <h3 className="text-2xl font-bold mb-4" style={{ color }}>
-                  {element}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <p className="text-green-400">TOTAL BATTLES: 1,245</p>
-                  <p className="text-green-400">WIN RATE: 52.3%</p>
-                  <p className="text-green-400">MOST USED: 18.5%</p>
-                  <p className="text-green-400">TOP ABILITY: SURGE STRIKE</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
         
         {/* Live Data Notice */}
         <div className="mt-8 text-center p-4 bg-green-500/10 border border-green-500/30 rounded-lg">

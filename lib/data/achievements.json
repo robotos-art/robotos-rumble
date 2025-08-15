@@ -368,5 +368,54 @@
     "points": 35,
     "icon": "💨",
     "tier": "silver"
+  },
+  
+  "paired_victory": {
+    "id": "paired_victory",
+    "name": "Perfect Pair",
+    "description": "Win a battle with a paired Roboto & Robopet (matching IDs)",
+    "points": 20,
+    "icon": "👥",
+    "tier": "bronze"
+  },
+  "paired_champion_5": {
+    "id": "paired_champion_5",
+    "name": "Paired Champion I",
+    "description": "Win 5 battles with paired Roboto & Robopet teams",
+    "points": 40,
+    "icon": "🏆",
+    "tier": "silver"
+  },
+  "paired_champion_10": {
+    "id": "paired_champion_10",
+    "name": "Paired Champion II",
+    "description": "Win 10 battles with paired Roboto & Robopet teams",
+    "points": 60,
+    "icon": "🏆",
+    "tier": "silver"
+  },
+  "paired_champion_25": {
+    "id": "paired_champion_25",
+    "name": "Paired Champion III",
+    "description": "Win 25 battles with paired Roboto & Robopet teams",
+    "points": 100,
+    "icon": "🏆",
+    "tier": "gold"
+  },
+  "paired_champion_50": {
+    "id": "paired_champion_50",
+    "name": "Soulmates",
+    "description": "Win 50 battles with paired Roboto & Robopet teams",
+    "points": 200,
+    "icon": "💞",
+    "tier": "platinum"
+  },
+  "paired_perfect": {
+    "id": "paired_perfect",
+    "name": "Flawless Harmony",
+    "description": "Win a perfect battle (no damage) with a paired team",
+    "points": 50,
+    "icon": "✨",
+    "tier": "gold"
   }
 }

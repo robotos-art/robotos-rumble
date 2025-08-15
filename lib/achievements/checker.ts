@@ -116,7 +116,7 @@ export function checkAchievements(
   checkAndAdd('weekend_warrior', 
     (day === 0 || day === 6) && battleResult.result === 'victory' && playerStats.wins >= 10)
 
-  // Companion Synergy
+  // Companion Synergy and Paired Victories
   if (battleResult.result === 'victory') {
     const robotos = battleResult.teamUsed.filter(u => u.type === 'roboto')
     const robopets = battleResult.teamUsed.filter(u => u.type === 'robopet')
@@ -129,7 +129,24 @@ export function checkAchievements(
       }
     })
     
+    // Check for any paired victory
+    const hasPairedTeam = companionPairs > 0
+    checkAndAdd('paired_victory', hasPairedTeam)
+    
+    // Check for 3+ pairs
     checkAndAdd('companion_synergy', companionPairs >= 3)
+    
+    // Check for paired victories milestones
+    const pairedVictories = playerStats.pairedVictories || 0
+    if (hasPairedTeam) {
+      checkAndAdd('paired_champion_5', pairedVictories >= 5)
+      checkAndAdd('paired_champion_10', pairedVictories >= 10)
+      checkAndAdd('paired_champion_25', pairedVictories >= 25)
+      checkAndAdd('paired_champion_50', pairedVictories >= 50)
+      
+      // Check for perfect paired victory
+      checkAndAdd('paired_perfect', battleResult.damageReceived === 0)
+    }
   }
 
   // Tank Master

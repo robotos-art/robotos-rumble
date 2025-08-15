@@ -72,6 +72,24 @@ export async function POST(request: NextRequest) {
       profile.stats.favoriteElement = mostUsedElement
     }
     
+    // Check for paired team victory
+    if (battleData.result === 'victory') {
+      const robotos = battleData.teamUsed.filter(u => u.type === 'roboto')
+      const robopets = battleData.teamUsed.filter(u => u.type === 'robopet')
+      
+      let hasPairedTeam = false
+      robotos.forEach(roboto => {
+        const robotoId = roboto.id.replace(/^roboto-/, '')
+        if (robopets.some(pet => pet.id.replace(/^robopet-/, '') === robotoId)) {
+          hasPairedTeam = true
+        }
+      })
+      
+      if (hasPairedTeam) {
+        profile.stats.pairedVictories = (profile.stats.pairedVictories || 0) + 1
+      }
+    }
+    
     // Update last seen
     profile.lastSeenAt = new Date().toISOString()
     

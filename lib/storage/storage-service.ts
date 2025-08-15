@@ -225,7 +225,8 @@ export class StorageService {
         totalDamageReceived: 0,
         favoriteElement: null,
         favoriteRoboto: null,
-        averageBattleDuration: 0
+        averageBattleDuration: 0,
+        pairedVictories: 0
       },
       achievements: [],
       badges: []
