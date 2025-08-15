@@ -5,7 +5,6 @@ import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 import { Trophy, Target, Zap, Shield, Award, TrendingUp, Clock, Swords } from 'lucide-react'
 import { GameHeader } from '../../components/shared/GameHeader'
 import { PageLayout } from '../../components/shared/PageLayout'
@@ -233,13 +232,18 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {profile.badges.map((badge) => (
-                    <Badge
+                    <div
                       key={badge.id}
-                      variant={badge.tier === 'gold' ? 'default' : badge.tier === 'silver' ? 'secondary' : 'outline'}
-                      className="px-3 py-1"
+                      className={`px-3 py-1 rounded border ${
+                        badge.tier === 'gold' 
+                          ? 'border-yellow-500 bg-yellow-500/20 text-yellow-300' 
+                          : badge.tier === 'silver' 
+                          ? 'border-gray-400 bg-gray-400/20 text-gray-300'
+                          : 'border-orange-600 bg-orange-600/20 text-orange-300'
+                      }`}
                     >
                       {badge.id.replace('_', ' ').toUpperCase()} - {badge.tier}
-                    </Badge>
+                    </div>
                   ))}
                 </div>
               </CardContent>

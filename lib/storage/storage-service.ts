@@ -171,15 +171,16 @@ export class StorageService {
         .slice(0, 20) // Top 20
         .map((profile, index) => ({
           rank: index + 1,
-          walletAddress: profile.walletAddress,
+          address: profile.walletAddress,  // Changed from walletAddress to address
           displayName: profile.displayName,
           wins: profile.stats.wins,
           losses: profile.stats.losses,
           winRate: profile.stats.totalBattles > 0 
             ? Math.round((profile.stats.wins / profile.stats.totalBattles) * 100)
             : 0,
-          totalBattles: profile.stats.totalBattles,
-          favoriteElement: profile.stats.favoriteElement
+          winStreak: profile.stats.winStreak,
+          favoriteElement: profile.stats.favoriteElement,
+          lastUpdated: profile.lastSeenAt
         }))
       
       return sorted
