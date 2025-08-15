@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { StorageService } from '@/lib/storage/storage-service'
 import { checkAchievements } from '@/lib/achievements/checker'
 import { normalizeAddress } from '@/lib/utils/address'
+import { getEnsNameForAddress } from '@/lib/utils/ens'
 import type { BattleRecord } from '@/lib/storage/types'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,14 @@ export async function POST(request: NextRequest) {
     let profile = await storage.getProfile(normalizedAddress)
     if (!profile) {
       profile = await storage.createNewProfile(normalizedAddress)
+    }
+    
+    // Fetch and update ENS name if not already set
+    if (!profile.ensName) {
+      const ensName = await getEnsNameForAddress(normalizedAddress)
+      if (ensName) {
+        profile.ensName = ensName
+      }
     }
     
     // Update stats

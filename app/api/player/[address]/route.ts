@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { StorageService } from '@/lib/storage/storage-service'
 import { normalizeAddress } from '@/lib/utils/address'
 import { getRobotoContract, getRobopetContract } from '@/lib/contracts'
+import { getEnsNameForAddress } from '@/lib/utils/ens'
 
 export const dynamic = 'force-dynamic'
 
@@ -104,6 +105,11 @@ export async function PATCH(
         )
       }
       profile.displayName = displayName
+    }
+    
+    // Allow updating ENS name
+    if (updates.ensName !== undefined) {
+      profile.ensName = updates.ensName || null
     }
     
     // Update last seen

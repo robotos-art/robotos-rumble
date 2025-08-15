@@ -1,4 +1,5 @@
 import { put, list, del, head } from '@vercel/blob'
+import { getEnsNameForAddress } from '../utils/ens'
 import type {
   PlayerProfile,
   BattleRecord,
@@ -210,9 +211,13 @@ export class StorageService {
   // === HELPER METHODS ===
 
   async createNewProfile(address: string): Promise<PlayerProfile> {
+    // Fetch ENS name for the address
+    const ensName = await getEnsNameForAddress(address)
+    
     const profile: PlayerProfile = {
       walletAddress: address,
       displayName: null,
+      ensName: ensName,
       createdAt: new Date().toISOString(),
       lastSeenAt: new Date().toISOString(),
       stats: {
