@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useAccount, useDisconnect, useEnsName } from 'wagmi'
 import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext'
-import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle, Trophy } from 'lucide-react'
+import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle, Trophy, User } from 'lucide-react'
 import { Button } from '../ui/button'
 import { TutorialDialog } from './TutorialDialog'
 
@@ -73,15 +73,27 @@ export function WalletMenu() {
   
   return (
     <div className="relative" ref={dropdownRef}>
-      <Button
-        variant="terminal"
-        onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-2 px-4 py-2"
-      >
-        <Wallet className="w-4 h-4" />
-        <span className="font-mono">{displayName}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-      </Button>
+      <div className="flex items-center gap-2">
+        <Link
+          href={`/profile/${address}`}
+          className="flex items-center gap-2"
+        >
+          <Button
+            variant="terminal"
+            className="flex items-center gap-2 px-4 py-2"
+          >
+            <Wallet className="w-4 h-4" />
+            <span className="font-mono">{displayName}</span>
+          </Button>
+        </Link>
+        <Button
+          variant="terminal"
+          onClick={() => setShowDropdown(!showDropdown)}
+          className="px-2 py-2"
+        >
+          <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        </Button>
+      </div>
       
       {showDropdown && (
         isMobile ? (
@@ -101,7 +113,11 @@ export function WalletMenu() {
               {/* Wallet Address */}
               <div className="p-6 border-b border-green-500/30">
                 <p className="text-sm text-green-400 mb-2">CONNECTED WALLET</p>
-                <p className="font-mono text-green-500 break-all">
+                <Link 
+                  href={`/profile/${address}`}
+                  onClick={() => setShowDropdown(false)}
+                  className="block font-mono text-green-500 break-all mb-4 hover:text-green-400 transition-colors"
+                >
                   {ensName ? (
                     <>
                       <span className="text-green-300 text-lg">{ensName}</span>
@@ -111,7 +127,15 @@ export function WalletMenu() {
                   ) : (
                     address
                   )}
-                </p>
+                </Link>
+                <Link
+                  href={`/profile/${address}`}
+                  onClick={() => setShowDropdown(false)}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 text-base bg-green-500/10 hover:bg-green-500/20 rounded transition-colors text-green-400"
+                >
+                  <User className="w-5 h-5" />
+                  <span>View Profile</span>
+                </Link>
               </div>
               
               {/* Collection */}
@@ -186,11 +210,15 @@ export function WalletMenu() {
           </div>
         ) : (
           /* Desktop Dropdown */
-          <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 border-2 border-green-500 rounded-lg shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-1">
+          <div className="absolute top-full -right-24 mt-2 w-64 bg-black/95 border-2 border-green-500 rounded-lg shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-1">
             {/* Wallet Address */}
             <div className="p-4 border-b border-green-500/30">
               <p className="text-xs text-green-400 mb-1">Connected Wallet</p>
-              <p className="font-mono text-sm text-green-500 break-all">
+              <Link 
+                href={`/profile/${address}`}
+                onClick={() => setShowDropdown(false)}
+                className="block font-mono text-sm text-green-500 break-all mb-3 hover:text-green-400 transition-colors"
+              >
                 {ensName ? (
                   <>
                     <span className="text-green-300">{ensName}</span>
@@ -200,7 +228,15 @@ export function WalletMenu() {
                 ) : (
                   address
                 )}
-              </p>
+              </Link>
+              <Link
+                href={`/profile/${address}`}
+                onClick={() => setShowDropdown(false)}
+                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm bg-green-500/10 hover:bg-green-500/20 rounded transition-colors text-green-400"
+              >
+                <User className="w-4 h-4" />
+                <span>View Profile</span>
+              </Link>
             </div>
             
             {/* Collection */}

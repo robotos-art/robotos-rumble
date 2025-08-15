@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
 import { Trophy, Zap, Shield, Swords } from 'lucide-react'
@@ -121,8 +122,9 @@ export default function Leaderboard() {
                     leaderboardData.map((entry, index) => (
                       <tr 
                         key={entry.address}
-                        className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors"
+                        className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors cursor-pointer"
                         onMouseEnter={() => gameSounds.playHover()}
+                        onClick={() => gameSounds.playClick()}
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-2">
@@ -133,7 +135,10 @@ export default function Leaderboard() {
                           </div>
                         </td>
                         <td className="p-4 font-mono">
-                          <div className="flex flex-col">
+                          <Link 
+                            href={`/profile/${entry.address}`}
+                            className="flex flex-col hover:underline"
+                          >
                             <span className="text-green-400">
                               {entry.displayName || formatAddress(entry.address, 'medium')}
                             </span>
@@ -142,7 +147,7 @@ export default function Leaderboard() {
                                 {formatAddress(entry.address, 'short')}
                               </span>
                             )}
-                          </div>
+                          </Link>
                         </td>
                         <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>
                         <td className="p-4 text-center font-mono text-red-400">{entry.losses}</td>
