@@ -140,13 +140,11 @@ export default function Leaderboard() {
                             className="flex flex-col hover:underline"
                           >
                             <span className="text-green-400">
-                              {entry.displayName || formatAddress(entry.address, 'medium')}
+                              {entry.ensName || entry.displayName || formatAddress(entry.address, 'medium')}
                             </span>
-                            {entry.displayName && (
-                              <span className="text-xs text-gray-500">
-                                {formatAddress(entry.address, 'short')}
-                              </span>
-                            )}
+                            <span className="text-xs text-gray-500">
+                              {formatAddress(entry.address, 'short')}
+                            </span>
                           </Link>
                         </td>
                         <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>

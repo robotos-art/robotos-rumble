@@ -46,9 +46,15 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       const response = await fetch(`/api/player/${profileAddress}`)
       if (response.ok) {
         const data = await response.json()
-        // Store ENS name if available
+        // Store ENS name if available and different
         if (ensName && (!data.ensName || data.ensName !== ensName)) {
           data.ensName = ensName
+          // Update profile with ENS name
+          fetch(`/api/player/${profileAddress}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ensName })
+          })
         }
         setProfile(data)
       }

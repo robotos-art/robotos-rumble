@@ -178,6 +178,7 @@ export class StorageService {
           rank: index + 1,
           address: profile.walletAddress,  // Changed from walletAddress to address
           displayName: profile.displayName,
+          ensName: profile.ensName,
           wins: profile.stats.wins,
           losses: profile.stats.losses,
           winRate: profile.stats.totalBattles > 0 

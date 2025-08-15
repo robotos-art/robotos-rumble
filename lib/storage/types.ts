@@ -58,6 +58,7 @@ export interface Badge {
 export interface LeaderboardEntry {
   address: string
   displayName?: string | null
+  ensName?: string | null
   wins: number
   losses: number
   winRate: number
