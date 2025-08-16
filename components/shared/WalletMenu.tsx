@@ -76,7 +76,7 @@ export function WalletMenu() {
       <Button
         variant="terminal"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 group"
+        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 h-9 md:h-10 group"
       >
         <Wallet className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
         {/* Only show shortened address on mobile, full ENS/address on desktop */}
