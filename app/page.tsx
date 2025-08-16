@@ -71,21 +71,21 @@ PRESS ANY KEY TO CONTINUE`
       {/* Full width header */}
       <GameHeader />
 
-      {/* Constrained content */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-6 flex-1 flex items-center justify-center">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Logo with FuzzyText */}
-          <div className="mb-8 flex justify-center w-full" style={{
+      {/* Constrained content with better mobile padding */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 flex-1 flex items-center justify-center">
+        <div className="text-center max-w-4xl mx-auto w-full">
+          {/* Logo with FuzzyText - responsive wrapper */}
+          <div className="mb-6 sm:mb-8 flex justify-center w-full" style={{
             perspective: '300px',
           }}>
-            <div className="flex flex-col items-center" style={{
+            <div className="flex flex-col items-center w-full" style={{
               transform: 'rotateX(30deg)',
               transformOrigin: 'center top',
             }}>
-              <div className="mb-4 flex justify-center">
-                <div>
+              <div className="mb-2 sm:mb-4 flex justify-center w-full">
+                <div className="w-full">
                   <FuzzyText
-                    fontSize="clamp(2.5rem, 7vw, 5rem)"
+                    fontSize="clamp(2rem, 6vw, 5rem)"
                     fontWeight={400}
                     fontFamily="Space Mono, monospace"
                     color="#86efac"
@@ -97,12 +97,12 @@ PRESS ANY KEY TO CONTINUE`
                   </FuzzyText>
                 </div>
               </div>
-              <div className="flex justify-center">
-                <div style={{
+              <div className="flex justify-center w-full">
+                <div className="w-full" style={{
                   letterSpacing: '-0.05em',
                 }}>
                   <FuzzyText
-                    fontSize="clamp(3rem, 10vw, 10rem)"
+                    fontSize="clamp(2.5rem, 9vw, 10rem)"
                     fontWeight={900}
                     fontFamily="Space Mono, monospace"
                     color="#22c55e"
@@ -117,7 +117,7 @@ PRESS ANY KEY TO CONTINUE`
             </div>
           </div>
 
-          <p className="text-green-400 text-lg mb-12">
+          <p className="text-green-400 text-sm sm:text-lg mb-8 sm:mb-12 px-4">
             ANCIENT COMBAT PROTOCOL v1.0
           </p>
 
@@ -127,7 +127,7 @@ PRESS ANY KEY TO CONTINUE`
               <Button
                 variant="terminal"
                 size="lg"
-                className="w-full max-w-sm mx-auto text-xl py-6 gap-3"
+                className="w-full max-w-sm mx-auto text-lg sm:text-xl py-4 sm:py-6 gap-2 sm:gap-3"
                 onClick={() => gameSounds.playConfirm()}
                 onMouseEnter={() => gameSounds.playHover()}
               >
@@ -139,7 +139,7 @@ PRESS ANY KEY TO CONTINUE`
             <Button
               variant="terminal"
               size="lg"
-              className="w-full max-w-sm mx-auto text-xl py-6 gap-3 opacity-50 cursor-not-allowed"
+              className="w-full max-w-sm mx-auto text-lg sm:text-xl py-4 sm:py-6 gap-2 sm:gap-3 opacity-50 cursor-not-allowed"
               disabled
               onMouseEnter={() => gameSounds.playHover()}
             >
@@ -152,7 +152,7 @@ PRESS ANY KEY TO CONTINUE`
               <Button
                 variant="terminal"
                 size="lg"
-                className="w-full max-w-sm mx-auto text-xl py-6 gap-3"
+                className="w-full max-w-sm mx-auto text-lg sm:text-xl py-4 sm:py-6 gap-2 sm:gap-3"
                 onClick={() => gameSounds.playConfirm()}
                 onMouseEnter={() => gameSounds.playHover()}
               >
@@ -166,7 +166,7 @@ PRESS ANY KEY TO CONTINUE`
                 <Button
                   variant="terminal"
                   size="lg"
-                  className="w-full max-w-sm mx-auto text-xl py-6 gap-3"
+                  className="w-full max-w-sm mx-auto text-lg sm:text-xl py-4 sm:py-6 gap-2 sm:gap-3"
                   onClick={() => gameSounds.playConfirm()}
                   onMouseEnter={() => gameSounds.playHover()}
                 >
@@ -178,7 +178,7 @@ PRESS ANY KEY TO CONTINUE`
           </div>
 
           {/* Status */}
-          <div className="mt-12 text-green-400/60 text-sm space-y-1">
+          <div className="mt-8 sm:mt-12 text-green-400/60 text-xs sm:text-sm space-y-1">
             <p>SYSTEM STATUS: OPERATIONAL</p>
             <p className={isConnected ? 'text-green-400' : ''}>
               WALLET: {isConnected ? 'CONNECTED' : 'NOT CONNECTED'}
