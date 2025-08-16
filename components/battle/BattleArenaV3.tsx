@@ -120,6 +120,16 @@ export default function BattleArenaV3({
 
   // UI focus state
   const [focusedActionIndex, setFocusedActionIndex] = useState(0)
+  
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Timing states
   const [attackScore, setAttackScore] = useState(1.0)
@@ -758,25 +768,26 @@ export default function BattleArenaV3({
       </div>
 
       {/* Battle Arena */}
-      <div className="flex-1 relative overflow-hidden pb-32">
+      <div className="flex-1 relative overflow-hidden pb-32 pt-16 sm:pt-0 z-0">
 
-        {/* Battle Field */}
-        <div className="h-full flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-          {/* Player Team */}
-          <div className="grid grid-rows-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
-            {/* Back row (3 units) */}
-            <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5">
+        {/* Battle Field - Responsive: Vertical on mobile, Horizontal on desktop */}
+        <div className="h-full flex flex-col-reverse sm:flex-row items-center justify-between px-2 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 relative z-0">
+          {/* Player Team - Bottom on mobile, Left on desktop */}
+          <div className="grid grid-rows-2 gap-4 sm:gap-4 md:gap-6 lg:gap-8 mb-8 sm:mb-0">
+            {/* Mobile: Back row (3 units behind), Desktop: Back row (3 units) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 order-2 sm:order-1">
               {playerTeam.slice(0, 3).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? 20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? 20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? -10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <div data-unit-id={unit.id} className="inline-block">
                       <RobotoUnit
@@ -800,7 +811,7 @@ export default function BattleArenaV3({
                           animate={{ opacity: 1, y: -30 }}
                           exit={{ opacity: 0 }}
                           className={cn(
-                            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-center whitespace-nowrap",
+                            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-center whitespace-nowrap z-[100] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]",
                             damage.type === 'miss' && "text-gray-400",
                             damage.type === 'normal' && "text-yellow-400",
                             damage.type === 'critical' && "text-red-500",
@@ -820,19 +831,20 @@ export default function BattleArenaV3({
                 )
               })}
             </div>
-            {/* Front row (2 units) */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto">
+            {/* Mobile: Front row (2 units in front), Desktop: Front row (2 units) */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto order-1 sm:order-2">
               {playerTeam.slice(3, 5).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? 20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? 20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? -10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <RobotoUnit
                       unit={unit}
@@ -875,21 +887,22 @@ export default function BattleArenaV3({
             </div>
           </div>
 
-          {/* Enemy Team */}
-          <div className="grid grid-rows-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
-            {/* Back row (3 units) */}
-            <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5">
+          {/* Enemy Team - Top on mobile, Right on desktop */}
+          <div className="grid grid-rows-2 gap-4 sm:gap-4 md:gap-6 lg:gap-8 mt-8 sm:mt-0">
+            {/* Mobile: Back row (3 units behind), Desktop: Back row (3 units) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 order-2 sm:order-1">
               {enemyTeam.slice(0, 3).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? -20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? -20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? 10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <div data-unit-id={unit.id} className="inline-block">
                       <RobotoUnit
@@ -934,19 +947,20 @@ export default function BattleArenaV3({
                 )
               })}
             </div>
-            {/* Front row (2 units) */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto">
+            {/* Mobile: Front row (2 units in front), Desktop: Front row (2 units) */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto order-1 sm:order-2">
               {enemyTeam.slice(3, 5).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? -20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? -20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? 10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <RobotoUnit
                       unit={unit}

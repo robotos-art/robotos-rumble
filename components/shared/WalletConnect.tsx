@@ -24,11 +24,11 @@ export function WalletConnect() {
       </Button>
     )
   }
-  
+
   if (isConnected && address) {
     return <WalletMenu />
   }
-  
+
   // Connect with the first available connector (usually MetaMask)
   const handleConnect = () => {
     const connector = connectors[0]
@@ -41,10 +41,11 @@ export function WalletConnect() {
     <Button
       variant="terminal"
       onClick={handleConnect}
-      className="gap-2"
+      className="gap-1 sm:gap-2 px-2 sm:px-4 text-xs sm:text-sm h-9 md:h-10"
     >
       <Wallet className="w-4 h-4" />
-      CONNECT
+      <span className="hidden sm:inline">CONNECT</span>
+      <span className="sm:hidden">CONNECT</span>
     </Button>
   )
 }

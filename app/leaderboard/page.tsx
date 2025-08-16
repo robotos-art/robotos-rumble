@@ -64,44 +64,90 @@ export default function Leaderboard() {
         </div>
         
         {selectedTab === 'global' ? (
-          <Card className="bg-black/80 border-2 border-green-500 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-green-500/30 text-green-400">
-                    <th className="text-left p-4">RANK</th>
-                    <th className="text-left p-4">PILOT</th>
-                    <th className="text-center p-4">WINS</th>
-                    <th className="text-center p-4">LOSSES</th>
-                    <th className="text-center p-4">WIN RATE</th>
-                    <th className="text-center p-4">MAIN ELEMENT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockLeaderboard.map((entry) => (
-                    <tr 
-                      key={entry.rank}
-                      className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors"
-                      onMouseEnter={() => gameSounds.playHover()}
+          <>
+            {/* Mobile View - Cards */}
+            <div className="sm:hidden space-y-3">
+              {mockLeaderboard.map((entry) => (
+                <Card 
+                  key={entry.rank}
+                  className="bg-black/80 border-2 border-green-500/50 p-4"
+                  onMouseEnter={() => gameSounds.playHover()}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                      {entry.rank === 2 && <Trophy className="w-5 h-5 text-gray-400" />}
+                      {entry.rank === 3 && <Trophy className="w-5 h-5 text-orange-600" />}
+                      <span className="font-mono text-lg font-bold">#{entry.rank}</span>
+                    </div>
+                    <span 
+                      className="px-2 py-1 rounded text-xs font-bold"
+                      style={{ 
+                        backgroundColor: elementColors[entry.topElement] + '20',
+                        color: elementColors[entry.topElement]
+                      }}
                     >
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
-                          {entry.rank === 2 && <Trophy className="w-5 h-5 text-gray-400" />}
-                          {entry.rank === 3 && <Trophy className="w-5 h-5 text-orange-600" />}
-                          <span className="font-mono text-lg">#{entry.rank}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 font-mono">{entry.address}</td>
-                      <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>
-                      <td className="p-4 text-center font-mono text-red-400">{entry.losses}</td>
-                      <td className="p-4 text-center font-mono">{entry.winRate}%</td>
-                      <td className="p-4 text-center">
-                        <span 
-                          className="font-mono"
-                          style={{ color: elementColors[entry.topElement as keyof typeof elementColors] }}
-                        >
-                          {entry.topElement}
+                      {entry.topElement}
+                    </span>
+                  </div>
+                  <div className="font-mono text-sm mb-3 text-green-400">{entry.address}</div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <div className="text-xs text-green-400/60">WINS</div>
+                      <div className="font-mono text-green-400">{entry.wins}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-green-400/60">LOSSES</div>
+                      <div className="font-mono text-red-400">{entry.losses}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-green-400/60">WIN RATE</div>
+                      <div className="font-mono">{entry.winRate}%</div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Desktop View - Table */}
+            <Card className="hidden sm:block bg-black/80 border-2 border-green-500 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-green-500/30 text-green-400">
+                      <th className="text-left p-4">RANK</th>
+                      <th className="text-left p-4">PILOT</th>
+                      <th className="text-center p-4">WINS</th>
+                      <th className="text-center p-4">LOSSES</th>
+                      <th className="text-center p-4">WIN RATE</th>
+                      <th className="text-center p-4">MAIN ELEMENT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockLeaderboard.map((entry) => (
+                      <tr 
+                        key={entry.rank}
+                        className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors"
+                        onMouseEnter={() => gameSounds.playHover()}
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                            {entry.rank === 2 && <Trophy className="w-5 h-5 text-gray-400" />}
+                            {entry.rank === 3 && <Trophy className="w-5 h-5 text-orange-600" />}
+                            <span className="font-mono text-lg">#{entry.rank}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 font-mono">{entry.address}</td>
+                        <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>
+                        <td className="p-4 text-center font-mono text-red-400">{entry.losses}</td>
+                        <td className="p-4 text-center font-mono">{entry.winRate}%</td>
+                        <td className="p-4 text-center">
+                          <span 
+                            className="font-mono"
+                            style={{ color: elementColors[entry.topElement as keyof typeof elementColors] }}
+                          >
+                            {entry.topElement}
                         </span>
                       </td>
                     </tr>
@@ -110,6 +156,7 @@ export default function Leaderboard() {
               </table>
             </div>
           </Card>
+          </>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(elementColors).map(([element, color]) => (

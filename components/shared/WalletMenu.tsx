@@ -75,11 +75,15 @@ export function WalletMenu() {
       <Button
         variant="terminal"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-2 px-4 py-2"
+        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2"
       >
         <Wallet className="w-4 h-4" />
-        <span className="font-mono">{displayName}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        {/* Only show shortened address on mobile, full ENS/address on desktop */}
+        <span className="font-mono text-xs sm:text-sm">
+          <span className="sm:hidden">{addressShortened}</span>
+          <span className="hidden sm:inline">{displayName}</span>
+        </span>
+        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
       </Button>
       
       {showDropdown && (

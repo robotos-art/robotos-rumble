@@ -44,17 +44,17 @@ export function TeamFooter({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-black/95 border-t-2 border-green-500/50 backdrop-blur-sm">
-      <div className="flex items-center justify-between h-16 px-4">
+      <div className="flex items-center justify-between h-12 sm:h-16 px-2 sm:px-4">
         {/* Left: Settings */}
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="terminal" 
               size="icon"
-              className="flex-shrink-0"
+              className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10"
               onMouseEnter={() => gameSounds.playHover()}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
@@ -92,7 +92,7 @@ export function TeamFooter({
         </DropdownMenu>
 
         {/* Center: Team Slots */}
-        <div className="flex items-center gap-2 mx-4">
+        <div className="flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
           {[...Array(settings.teamSize)].map((_, index) => {
             const unit = selectedTeam[index]
             const companion = unit ? getCompanion(unit) : null
@@ -100,7 +100,7 @@ export function TeamFooter({
             return (
               <div
                 key={`footer-slot-${index}`}
-                className={`relative w-10 h-10 border-2 rounded ${
+                className={`relative w-8 h-8 sm:w-10 sm:h-10 border-2 rounded ${
                   unit 
                     ? 'border-green-500 bg-black cursor-pointer hover:border-red-500 transition-colors' 
                     : 'border-green-500/30 border-dashed bg-black/50'
@@ -141,12 +141,13 @@ export function TeamFooter({
           size="sm"
           onClick={onStartBattle}
           disabled={selectedTeam.length !== settings.teamSize}
-          className={`flex-shrink-0 ${
+          className={`flex-shrink-0 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm ${
             selectedTeam.length === settings.teamSize ? 'animate-pulse' : ''
           }`}
           onMouseEnter={() => selectedTeam.length === settings.teamSize && gameSounds.playHover()}
         >
-          START BATTLE →
+          <span className="hidden sm:inline">START BATTLE →</span>
+          <span className="sm:hidden">START →</span>
         </Button>
       </div>
     </div>

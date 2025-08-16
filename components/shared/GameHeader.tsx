@@ -35,26 +35,27 @@ export function GameHeader({
   return (
     <header className={cn(
       "flex items-center justify-between",
-      "px-4 md:px-8",
-      "py-4 md:py-6",
+      "px-2 sm:px-4 md:px-8",
+      "py-2 sm:py-4 md:py-6",
       className
     )}>
       {/* Left section */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {showBackButton && backHref && (
           <Link href={backHref}>
-            <Button 
-              variant="terminal" 
+            <Button
+              variant="terminal"
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Back"
+              className='h-9 w-9 md:h-10 md:w-10'
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
         )}
         {title && (
-          <h1 className="text-2xl md:text-3xl font-bold text-green-400 glow">
+          <h1 className="text-lg sm:text-xl md:text-2xl leading-none font-bold text-green-400 glow">
             {title}
           </h1>
         )}

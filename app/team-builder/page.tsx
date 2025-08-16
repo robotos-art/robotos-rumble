@@ -378,7 +378,7 @@ export default function TeamBuilder() {
       />
 
       {/* Constrained content */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-2 sm:py-4 md:py-6">
         {!isConnected ? (
           <Card className="bg-black/80 border-2 border-green-500 rounded-lg max-w-md mx-auto">
             <CardHeader>
@@ -394,19 +394,19 @@ export default function TeamBuilder() {
         ) : (
           <>
             {/* Settings Bar */}
-            <Card className="bg-black/80 border-2 border-green-500/50 mb-6">
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="flex items-center gap-6">
+            <Card className="bg-black/80 border-2 border-green-500/50 mb-3 sm:mb-6">
+              <CardContent className="py-2 sm:py-4 px-3 sm:px-6">
+                <div className="flex items-center justify-between gap-2 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-6">
                     {/* Team Size Setting */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <Users className="w-4 h-4 text-green-400" />
-                      <span className="text-sm font-bold text-green-400">TEAM SIZE:</span>
-                      <div className="flex gap-2">
+                      <span className="hidden sm:inline text-xs sm:text-sm font-bold text-green-400 whitespace-nowrap">TEAM SIZE:</span>
+                      <div className="flex gap-1 sm:gap-2">
                         <Button
                           variant={settings.teamSize === 3 ? "default" : "outline"}
                           size="sm"
-                          className={`${settings.teamSize === 3 ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm ${settings.teamSize === 3 ? 'bg-green-600 hover:bg-green-700' : ''}`}
                           onClick={() => updateSetting('teamSize', 3)}
                           onMouseEnter={() => gameSounds.playHover()}
                         >
@@ -415,7 +415,7 @@ export default function TeamBuilder() {
                         <Button
                           variant={settings.teamSize === 5 ? "default" : "outline"}
                           size="sm"
-                          className={`${settings.teamSize === 5 ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm ${settings.teamSize === 5 ? 'bg-green-600 hover:bg-green-700' : ''}`}
                           onClick={() => updateSetting('teamSize', 5)}
                           onMouseEnter={() => gameSounds.playHover()}
                         >
@@ -424,14 +424,14 @@ export default function TeamBuilder() {
                       </div>
                     </div>
                     {/* Timer Speed Setting */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <Clock className="w-4 h-4 text-green-400" />
-                      <span className="text-sm font-bold text-green-400">TIMER:</span>
-                      <div className="flex gap-2">
+                      <span className="hidden sm:inline text-xs sm:text-sm font-bold text-green-400 whitespace-nowrap">TIMER:</span>
+                      <div className="flex gap-1 sm:gap-2">
                         <Button
                           variant={settings.speed === 'calm' ? "default" : "outline"}
                           size="sm"
-                          className={`${settings.speed === 'calm' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm ${settings.speed === 'calm' ? 'bg-green-600 hover:bg-green-700' : ''}`}
                           onClick={() => updateSetting('speed', 'calm')}
                           onMouseEnter={() => gameSounds.playHover()}
                         >
@@ -440,7 +440,7 @@ export default function TeamBuilder() {
                         <Button
                           variant={settings.speed === 'speedy' ? "default" : "outline"}
                           size="sm"
-                          className={`${settings.speed === 'speedy' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                          className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm ${settings.speed === 'speedy' ? 'bg-green-600 hover:bg-green-700' : ''}`}
                           onClick={() => updateSetting('speed', 'speedy')}
                           onMouseEnter={() => gameSounds.playHover()}
                         >
@@ -468,7 +468,7 @@ export default function TeamBuilder() {
                   </span>
                 )}
               </div>
-              <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-3' : 'grid-cols-5'} gap-4`}>
+              <div className={`grid ${settings.teamSize === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5'} gap-2 sm:gap-4`}>
                 {[...Array(settings.teamSize)].map((_, index) => {
                   const unit = selectedTeam[index]
                   const companion = unit ? selectedTeam.find(u => {
@@ -523,11 +523,11 @@ export default function TeamBuilder() {
               {/* Team Elements */}
               {selectedTeam.length > 0 && (
                 <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                  <h3 className="font-bold text-green-400 mb-2 justify-center text-center">
+                  <h3 className="font-bold text-green-400 mb-2 justify-center text-center text-sm sm:text-base">
                     TEAM ELEMENTS
                   </h3>
                   <TooltipProvider>
-                    <div className="flex gap-8 justify-center">
+                    <div className="flex gap-2 sm:gap-4 md:gap-8 justify-center flex-wrap">
                       {selectedTeam.map((unit) => (
                         <Tooltip key={`element-${unit.id}-${unit.element}`}>
                           <TooltipTrigger asChild>
@@ -535,10 +535,10 @@ export default function TeamBuilder() {
                               className="text-center cursor-crosshair"
                               style={{ color: TraitProcessorV3.getElementColor(unit.element) }}
                             >
-                              <div className="text-3xl">
+                              <div className="text-xl sm:text-2xl md:text-3xl">
                                 {TraitProcessorV3.getElementSymbol(unit.element)}
                               </div>
-                              <div className="text-md">
+                              <div className="text-xs sm:text-sm md:text-md">
                                 {unit.element}
                               </div>
                             </div>
@@ -608,7 +608,7 @@ export default function TeamBuilder() {
               )}
 
               {/* Units Grid */}
-              <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
                 {filteredUnits.map((unit, index) => {
                   const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
                   const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '')
@@ -633,19 +633,19 @@ export default function TeamBuilder() {
                       <Button
                         variant="terminal"
                         size="icon"
-                        className="absolute top-2 right-2 z-10 opacity-60 hover:opacity-100"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 opacity-60 hover:opacity-100 w-6 h-6 sm:w-8 sm:h-8"
                         onClick={(e) => {
                           e.stopPropagation()
                           setLightboxIndex(index)
                           gameSounds.playClick()
                         }}
                       >
-                        <Expand className="w-4 h-4" />
+                        <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
 
-                      <div className="flex cursor-pointer" onClick={() => toggleUnitSelection(unit)}>
-                        {/* Left side - Image with companion */}
-                        <div className="w-48 h-48 flex-shrink-0 bg-black/50 border-r border-green-500/20 relative">
+                      <div className="flex flex-col sm:flex-row cursor-pointer" onClick={() => toggleUnitSelection(unit)}>
+                        {/* Top/Left side - Image */}
+                        <div className="w-full sm:w-48 h-32 sm:h-48 flex-shrink-0 bg-black/50 sm:border-r border-b sm:border-b-0 border-green-500/20 relative">
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -653,12 +653,12 @@ export default function TeamBuilder() {
                           />
                         </div>
 
-                        {/* Right side - Metadata */}
-                        <div className="flex-1 p-4">
+                        {/* Bottom/Right side - Metadata */}
+                        <div className="flex-1 p-2 sm:p-4">
                           {/* Header */}
-                          <div className="mb-3 pr-12">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className="text-lg font-bold">{unit.name}</h3>
+                          <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
+                            <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
+                              <h3 className="text-sm sm:text-lg font-bold truncate">{unit.name}</h3>
                               {isSelected && companionInTeam && (
                                 <span className="text-xs text-green-400 px-2 py-1 bg-green-400/10 rounded">
                                   +2% BOOST
@@ -670,19 +670,19 @@ export default function TeamBuilder() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-sm" style={{ color: TraitProcessorV3.getElementColor(unit.element) }}>
+                            <div className="text-xs sm:text-sm" style={{ color: TraitProcessorV3.getElementColor(unit.element) }}>
                               {TraitProcessorV3.getElementSymbol(unit.element)} {unit.element}
                             </div>
                           </div>
 
                           {/* Stats */}
                           <TooltipProvider>
-                            <div className="grid grid-cols-3 gap-2 mb-4">
+                            <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-2 sm:mb-4">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Heart className="w-4 h-4 text-red-500" />
-                                    <span className="text-sm font-mono">{unit.stats.hp}</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.hp}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -692,9 +692,9 @@ export default function TeamBuilder() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Swords className="w-4 h-4 text-orange-500" />
-                                    <span className="text-sm font-mono">{unit.stats.attack}</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Swords className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.attack}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -704,9 +704,9 @@ export default function TeamBuilder() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Shield className="w-4 h-4 text-blue-500" />
-                                    <span className="text-sm font-mono">{unit.stats.defense}</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.defense}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -716,9 +716,9 @@ export default function TeamBuilder() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Zap className="w-4 h-4 text-yellow-500" />
-                                    <span className="text-sm font-mono">{unit.stats.speed}</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.speed}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -728,9 +728,9 @@ export default function TeamBuilder() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Gauge className="w-4 h-4 text-purple-500" />
-                                    <span className="text-sm font-mono">{unit.stats.energy}</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.energy}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -740,9 +740,9 @@ export default function TeamBuilder() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <Sparkles className="w-4 h-4 text-pink-500" />
-                                    <span className="text-sm font-mono">{unit.stats.crit}%</span>
+                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-500" />
+                                    <span className="text-xs sm:text-sm font-mono">{unit.stats.crit}%</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -753,13 +753,13 @@ export default function TeamBuilder() {
                           </TooltipProvider>
 
                           {/* Abilities */}
-                          <div className="flex flex-wrap gap-1 mb-3">
+                          <div className="hidden sm:flex flex-wrap gap-1 mb-3">
                             {unit.abilities.map(abilityId => {
                               const ability = TraitProcessorV3.getAbilityData(abilityId)
                               return ability ? (
                                 <div
                                   key={abilityId}
-                                  className="text-xs px-2 py-1 bg-black/50 border border-green-500/30 rounded"
+                                  className="text-xs px-1 sm:px-2 py-0.5 sm:py-1 bg-black/50 border border-green-500/30 rounded"
                                   style={{
                                     borderColor: TraitProcessorV3.getElementColor(ability.element) + '40',
                                     backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A'
@@ -771,9 +771,9 @@ export default function TeamBuilder() {
                             })}
                           </div>
                           
-                          {/* Companion Checkbox */}
+                          {/* Companion Checkbox - Hidden on mobile for cleaner UI */}
                           {companion && (
-                            <div className="mt-3 flex items-center gap-3 p-2 bg-black/50 rounded border border-yellow-500/30 hover:border-yellow-500/50 transition-colors">
+                            <div className="hidden sm:flex mt-3 items-center gap-3 p-2 bg-black/50 rounded border border-yellow-500/30 hover:border-yellow-500/50 transition-colors">
                               <input
                                 type="checkbox"
                                 id={`companion-${unit.type}-${unit.id}`}
