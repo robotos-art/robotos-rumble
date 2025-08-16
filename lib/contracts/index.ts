@@ -18,7 +18,11 @@ let web3Instance: Web3 | null = null
 
 function getWeb3Instance() {
   if (!web3Instance) {
-    web3Instance = new Web3(ALCHEMY_URL)
+    // Ensure the Alchemy key is in the correct format (full URL)
+    const alchemyUrl = ALCHEMY_KEY.startsWith('http') 
+      ? ALCHEMY_KEY 
+      : ALCHEMY_URL
+    web3Instance = new Web3(alchemyUrl)
   }
   return web3Instance
 }
