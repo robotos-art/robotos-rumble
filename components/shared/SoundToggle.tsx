@@ -11,29 +11,29 @@ export function SoundToggle() {
   const [isEnabled, setIsEnabled] = useState(true)
   const [volume, setVolume] = useState(50)
   const [isOpen, setIsOpen] = useState(false)
-  
+
   useEffect(() => {
     // Get initial state from sound system
     setIsEnabled(gameSounds.getEnabled())
     setVolume(Math.round(gameSounds.getVolume() * 100))
   }, [])
-  
+
   const toggleSound = () => {
     const newState = !isEnabled
     setIsEnabled(newState)
     gameSounds.setEnabled(newState)
-    
+
     // Play a click sound on enable
     if (newState) {
       setTimeout(() => gameSounds.playClick(), 100)
     }
   }
-  
+
   const handleVolumeChange = (value: number[]) => {
     const newVolume = value[0]
     setVolume(newVolume)
     gameSounds.setVolume(newVolume / 100)
-    
+
     // If volume is 0, disable sound
     if (newVolume === 0) {
       setIsEnabled(false)
@@ -43,13 +43,13 @@ export function SoundToggle() {
       setIsEnabled(true)
       gameSounds.setEnabled(true)
     }
-    
+
     // Play a test sound when adjusting volume (not at 0)
     if (newVolume > 0) {
       gameSounds.playClick()
     }
   }
-  
+
   const getVolumeIcon = () => {
     const iconClass = "w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors"
     if (!isEnabled || volume === 0) return <VolumeX className={iconClass} />
@@ -57,14 +57,14 @@ export function SoundToggle() {
     if (volume < 70) return <Volume1 className={iconClass} />
     return <Volume2 className={iconClass} />
   }
-  
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="terminal"
           size="icon"
-          className="group"
+          className="group h-9 w-9 md:h-10 md:w-10"
           onClick={(e) => {
             // If clicking when popover is closed, just toggle mute
             if (!isOpen) {
@@ -79,7 +79,7 @@ export function SoundToggle() {
           {getVolumeIcon()}
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
+      <PopoverContent
         className="w-48 bg-black/90 border-green-500/50 text-green-500"
         align="end"
         onMouseEnter={() => setIsOpen(true)}

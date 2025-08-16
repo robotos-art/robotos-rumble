@@ -72,7 +72,7 @@ PRESS ANY KEY TO CONTINUE`
       <GameHeader />
 
       {/* Constrained content */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 flex-1 flex items-center justify-center">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 md:py-6 flex-1 flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto">
           {/* Logo with FuzzyText */}
           <div className="mb-8 flex justify-center w-full" style={{

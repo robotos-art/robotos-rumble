@@ -175,7 +175,7 @@ export default function BattleFooter({
   }, [phase, isPlayerTurn, currentUnit, onCancel, onTargetConfirm, focusIndex, setFocusIndex, handleAttack, handleAbility, enemyTeam, targetUnit, onTargetSelect, unitStatuses])
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/90 border-t-2 border-green-800">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/90 border-t-2 border-green-800 z-50">
       <div className="container mx-auto px-4">
         {/* Main Footer Content */}
         <div className="py-4 space-y-3">
@@ -221,18 +221,19 @@ export default function BattleFooter({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="flex items-center gap-4"
+                className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4"
               >
                 <Button
                   onClick={handleAttack}
                   className={cn(
-                    "flex items-center gap-2 transition-all",
+                    "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto",
                     focusIndex === 0 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black"
                   )}
                   variant={focusIndex === 0 ? "default" : "outline"}
                 >
                   <Zap className="w-4 h-4" />
-                  Attack (A)
+                  <span className="sm:hidden">Attack</span>
+                  <span className="hidden sm:inline">Attack (A)</span>
                 </Button>
                 
                 {currentUnit?.abilities.map((ability, index) => {
@@ -244,11 +245,11 @@ export default function BattleFooter({
                     <TooltipProvider key={ability}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="relative">
+                          <div className="relative w-full sm:w-auto">
                             <Button
                               onClick={() => !isOnCooldown && handleAbility(index)}
                               className={cn(
-                                "flex items-center gap-2 transition-all",
+                                "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto",
                                 focusIndex === index + 1 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black",
                                 isOnCooldown && "opacity-50 cursor-not-allowed"
                               )}
@@ -256,7 +257,8 @@ export default function BattleFooter({
                               disabled={isOnCooldown}
                             >
                               <Target className="w-4 h-4" />
-                              {ability} ({index === 0 ? 'S' : 'D'})
+                              <span className="sm:hidden">{ability}</span>
+                              <span className="hidden sm:inline">{ability} ({index === 0 ? 'S' : 'D'})</span>
                             </Button>
                             {isOnCooldown && (
                               <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
@@ -279,7 +281,7 @@ export default function BattleFooter({
                   )
                 })}
                 
-                <div className="ml-auto text-sm text-gray-400">
+                <div className="hidden lg:block ml-auto text-sm text-gray-400">
                   Use ←→ or ↑↓ to navigate • <kbd className="text-xs">ENTER</kbd>/<kbd className="text-xs">SPACE</kbd> to select • Number keys for quick select
                 </div>
               </motion.div>

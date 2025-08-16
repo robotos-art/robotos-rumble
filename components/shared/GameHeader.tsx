@@ -41,12 +41,12 @@ export function GameHeader({
   return (
     <header className={cn(
       "flex items-center justify-between",
-      "px-4 md:px-8",
-      "py-4 md:py-6",
+      "px-2 sm:px-4 md:px-8",
+      "py-2 sm:py-4 md:py-6",
       className
     )}>
       {/* Left section */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Home Logo - always visible except on home page */}
         {!isHomePage && (
           <Link href="/">
@@ -55,7 +55,7 @@ export function GameHeader({
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Home"
-              className="group"
+              className="group h-9 w-9 md:h-10 md:w-10"
             >
               <Zap className="w-5 h-5 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
@@ -65,12 +65,12 @@ export function GameHeader({
         {/* Back button - only show if not going back to home */}
         {showBackButton && backHref && backHref !== '/' && (
           <Link href={backHref}>
-            <Button 
-              variant="terminal" 
+            <Button
+              variant="terminal"
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Back"
-              className="group"
+              className="group h-9 w-9 md:h-10 md:w-10"
             >
               <ArrowLeft className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
@@ -78,7 +78,7 @@ export function GameHeader({
         )}
         
         {title && (
-          <h1 className="text-2xl md:text-3xl font-bold text-green-400 glow">
+          <h1 className="text-lg sm:text-xl md:text-2xl leading-none font-bold text-green-400 glow">
             {title}
           </h1>
         )}

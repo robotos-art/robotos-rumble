@@ -57,13 +57,14 @@ export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorPro
       <Button
         variant="terminal"
         size="icon"
+        className='h-9 w-9 md:h-10 md:w-10'
         onClick={() => setIsOpen(!isOpen)}
         title="Background Settings"
         className="group"
       >
         <Palette className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
       </Button>
-      
+
       {isOpen && (
         <div className="absolute top-full right-0 mt-1 bg-black/95 border border-green-800 rounded overflow-hidden min-w-[150px] z-50">
           <div className="px-3 py-1 text-xs text-green-600 border-b border-green-800/50">

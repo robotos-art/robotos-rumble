@@ -61,6 +61,7 @@ export default function Leaderboard() {
                     <tr>
                       <td colSpan={6} className="p-8 text-center text-green-400">
                         Loading leaderboard data...
+        {/* Tabs */}
                       </td>
                     </tr>
                   ) : leaderboardData.length === 0 ? (
