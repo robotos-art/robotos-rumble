@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Button } from '../components/ui/button'
 import { Swords, Trophy, Users, User } from 'lucide-react'
 import { gameSounds } from '../lib/sounds/gameSounds'
-import FuzzyText from '../components/ui/FuzzyText'
 import { GameHeader } from '../components/shared/GameHeader'
 import { PageLayout } from '../components/shared/PageLayout'
 import { useAccount } from 'wagmi'
@@ -74,46 +73,23 @@ PRESS ANY KEY TO CONTINUE`
       {/* Constrained content with better mobile padding */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 flex-1 flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto w-full">
-          {/* Logo with FuzzyText - responsive wrapper */}
-          <div className="mb-6 sm:mb-8 flex justify-center w-full" style={{
+          {/* Logo with responsive text */}
+          <div className="mb-6 sm:mb-8" style={{
             perspective: '300px',
           }}>
-            <div className="flex flex-col items-center w-full" style={{
+            <div className="flex flex-col items-center" style={{
               transform: 'rotateX(30deg)',
               transformOrigin: 'center top',
             }}>
-              <div className="mb-2 sm:mb-4 flex justify-center w-full">
-                <div className="w-full">
-                  <FuzzyText
-                    fontSize="clamp(2rem, 6vw, 5rem)"
-                    fontWeight={400}
-                    fontFamily="Space Mono, monospace"
-                    color="#86efac"
-                    baseIntensity={0.1}
-                    hoverIntensity={0.4}
-                    enableHover={true}
-                  >
-                    ROBOTOS
-                  </FuzzyText>
-                </div>
-              </div>
-              <div className="flex justify-center w-full">
-                <div className="w-full" style={{
-                  letterSpacing: '-0.05em',
-                }}>
-                  <FuzzyText
-                    fontSize="clamp(2.5rem, 9vw, 10rem)"
-                    fontWeight={900}
-                    fontFamily="Space Mono, monospace"
-                    color="#22c55e"
-                    baseIntensity={0.2}
-                    hoverIntensity={0.8}
-                    enableHover={true}
-                  >
-                    RUMBLE
-                  </FuzzyText>
-                </div>
-              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal mb-2 text-green-300 glow tracking-wider">
+                ROBOTOS
+              </h1>
+              <h2 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-green-500 glow-lg" style={{
+                letterSpacing: '-0.05em',
+                lineHeight: '0.9',
+              }}>
+                RUMBLE
+              </h2>
             </div>
           </div>
 
