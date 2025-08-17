@@ -1085,7 +1085,8 @@ export default function BattleArenaV3({
             : 'precision' // Default for basic attacks
 
           return (
-            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-96 bg-black/90 p-4 rounded-lg border-2 border-green-800 z-50">
+            <div className="absolute top-1/2 sm:bottom-32 sm:top-auto left-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-y-0 w-full sm:w-96 max-w-sm px-4 sm:px-0 z-50">
+              <div className="bg-black/90 p-4 rounded-lg border-2 border-green-800">
               {timingType === 'charge' ? (
                 <TimingMeterCharge
                   active={phase === 'attack-timing'}
@@ -1112,20 +1113,23 @@ export default function BattleArenaV3({
                   keepVisibleAfterInput={true}
                 />
               )}
+              </div>
             </div>
           )
         })()}
 
         {/* Defense Timing Meter */}
         {phase === 'defending' && defenseActive && (
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 w-96 bg-black/90 p-4 rounded-lg border-2 border-yellow-800 z-50">
-            <TimingMeter
-              active={!defenseCommitted}
-              onInput={handleDefenseTiming}
-              type="defense"
-              showCountdown={false}
-              keepVisibleAfterInput={true}
-            />
+          <div className="absolute top-1/2 sm:top-32 left-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-y-0 w-full sm:w-96 max-w-sm px-4 sm:px-0">
+            <div className="bg-black/90 p-4 rounded-lg border-2 border-yellow-800 z-50">
+              <TimingMeter
+                active={!defenseCommitted}
+                onInput={handleDefenseTiming}
+                type="defense"
+                showCountdown={false}
+                keepVisibleAfterInput={true}
+              />
+            </div>
           </div>
         )}
 
