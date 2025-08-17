@@ -330,23 +330,35 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   return (
                     <div
                       key={achievement.id}
-                      className={`p-2 sm:p-3 rounded border transition-all ${
+                      className={`p-3 rounded border transition-all min-h-[140px] sm:min-h-0 flex flex-col justify-center ${
                         earned 
                           ? tierColor
                           : 'border-gray-700 bg-gray-800/50 opacity-50'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1 sm:mb-2">
-                        <div className="flex items-center gap-1 sm:gap-2">
-                          <span className="text-lg sm:text-xl">{achievement.icon}</span>
-                          <div>
-                            <div className="text-xs sm:text-sm font-bold line-clamp-1">{achievement.name}</div>
-                            <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
-                          </div>
-                        </div>
-                        <div className="text-xs font-bold">+{achievement.points}</div>
+                      {/* Mobile: Centered vertical layout */}
+                      <div className="sm:hidden flex flex-col items-center text-center space-y-1">
+                        <span className="text-2xl">{achievement.icon}</span>
+                        <div className="text-xs font-bold">{achievement.name}</div>
+                        <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
+                        <div className="text-xs font-bold">+{achievement.points} pts</div>
+                        <div className="text-xs opacity-70 line-clamp-2">{achievement.description}</div>
                       </div>
-                      <div className="text-xs opacity-70 line-clamp-2 sm:line-clamp-none">{achievement.description}</div>
+                      
+                      {/* Desktop: Original horizontal layout */}
+                      <div className="hidden sm:block">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{achievement.icon}</span>
+                            <div>
+                              <div className="text-sm font-bold">{achievement.name}</div>
+                              <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
+                            </div>
+                          </div>
+                          <div className="text-xs font-bold">+{achievement.points}</div>
+                        </div>
+                        <div className="text-xs opacity-70">{achievement.description}</div>
+                      </div>
                     </div>
                   )
                 })}
