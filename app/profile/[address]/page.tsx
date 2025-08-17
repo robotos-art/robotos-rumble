@@ -219,51 +219,51 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             </CardHeader>
           </Card>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Stats Grid - 2 columns on mobile */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <Card className="terminal-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Trophy className="w-8 h-8 text-yellow-400" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+                  <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 mb-1 sm:mb-0" />
                   <div>
-                    <div className="text-2xl font-bold">{profile.stats.wins}</div>
-                    <div className="text-sm text-gray-400">Victories</div>
+                    <div className="text-xl sm:text-2xl font-bold">{profile.stats.wins}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Victories</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="terminal-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Swords className="w-8 h-8 text-blue-400" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+                  <Swords className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 mb-1 sm:mb-0" />
                   <div>
-                    <div className="text-2xl font-bold">{profile.stats.totalBattles}</div>
-                    <div className="text-sm text-gray-400">Total Battles</div>
+                    <div className="text-xl sm:text-2xl font-bold">{profile.stats.totalBattles}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Total Battles</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="terminal-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-8 h-8 text-green-400" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 mb-1 sm:mb-0" />
                   <div>
-                    <div className="text-2xl font-bold">{profile.stats.winStreak}</div>
-                    <div className="text-sm text-gray-400">Current Streak</div>
+                    <div className="text-xl sm:text-2xl font-bold">{profile.stats.winStreak}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Current Streak</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="terminal-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-8 h-8 text-purple-400" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+                  <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 mb-1 sm:mb-0" />
                   <div>
-                    <div className="text-2xl font-bold">{profile.stats.totalDamageDealt}</div>
-                    <div className="text-sm text-gray-400">Damage Dealt</div>
+                    <div className="text-xl sm:text-2xl font-bold">{profile.stats.totalDamageDealt}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Damage Dealt</div>
                   </div>
                 </div>
               </CardContent>
@@ -276,7 +276,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               <CardTitle>Combat Statistics</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <div className="text-sm text-gray-400">Best Win Streak</div>
                   <div className="text-xl font-bold">{profile.stats.bestWinStreak}</div>
@@ -315,7 +315,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               <CardTitle>Achievements ({profile.achievements.length}/{Object.keys(achievementsData).length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                 {Object.values(achievementsData).map((achievement: any) => {
                   const earned = profile.achievements.includes(achievement.id)
                   const tierColors = {
@@ -330,23 +330,23 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   return (
                     <div
                       key={achievement.id}
-                      className={`p-3 rounded border transition-all ${
+                      className={`p-2 sm:p-3 rounded border transition-all ${
                         earned 
                           ? tierColor
                           : 'border-gray-700 bg-gray-800/50 opacity-50'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{achievement.icon}</span>
+                      <div className="flex items-center justify-between mb-1 sm:mb-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <span className="text-lg sm:text-xl">{achievement.icon}</span>
                           <div>
-                            <div className="text-sm font-bold">{achievement.name}</div>
+                            <div className="text-xs sm:text-sm font-bold line-clamp-1">{achievement.name}</div>
                             <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
                           </div>
                         </div>
                         <div className="text-xs font-bold">+{achievement.points}</div>
                       </div>
-                      <div className="text-xs opacity-70">{achievement.description}</div>
+                      <div className="text-xs opacity-70 line-clamp-2 sm:line-clamp-none">{achievement.description}</div>
                     </div>
                   )
                 })}
