@@ -330,7 +330,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   return (
                     <div
                       key={achievement.id}
-                      className={`p-3 rounded border transition-all min-h-[140px] sm:min-h-0 flex flex-col justify-center ${
+                      className={`p-3 rounded border transition-all min-h-[150px] sm:min-h-0 flex flex-col justify-center ${
                         earned 
                           ? tierColor
                           : 'border-gray-700 bg-gray-800/50 opacity-50'
@@ -338,11 +338,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     >
                       {/* Mobile: Centered vertical layout */}
                       <div className="sm:hidden flex flex-col items-center text-center space-y-1">
-                        <span className="text-2xl">{achievement.icon}</span>
-                        <div className="text-xs font-bold">{achievement.name}</div>
+                        <span className="text-3xl mb-1">{achievement.icon}</span>
+                        <div className="text-sm font-bold">{achievement.name}</div>
                         <div className="text-xs opacity-80">{achievement.tier?.toUpperCase() || 'BRONZE'}</div>
-                        <div className="text-xs font-bold">+{achievement.points} pts</div>
-                        <div className="text-xs opacity-70 line-clamp-2">{achievement.description}</div>
+                        <div className="text-sm font-bold text-yellow-400">+{achievement.points} pts</div>
+                        <div className="text-xs opacity-70 line-clamp-2 mt-1">{achievement.description}</div>
                       </div>
                       
                       {/* Desktop: Original horizontal layout */}
