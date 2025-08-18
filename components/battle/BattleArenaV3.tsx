@@ -272,7 +272,22 @@ export default function BattleArenaV3({
     setDefendingUnitId(target.id)
     setAttackingUnitId(unit.id)
 
-    showMessage(`${unit.name} is attacking ${target.name}!`)
+    // Determine if AI will use ability or basic attack
+    const availableAbilities = battleEngine.getAvailableAbilities(unit.id)
+      .filter(a => battleEngine.canUseAbility(unit.id, a.id))
+    
+    const willUseAbility = availableAbilities.length > 0 && Math.random() < 0.35 // 35% chance to use ability
+    const selectedAbility = willUseAbility ? availableAbilities[Math.floor(Math.random() * availableAbilities.length)] : null
+
+    // Show attack message with attack type
+    if (selectedAbility) {
+      showMessage(`${unit.name} prepares ${selectedAbility.ability.name}!`)
+    } else {
+      // Pick a random basic attack name based on element
+      const attackNames = getElementAttackNames(unit.element)
+      const attackName = attackNames[Math.floor(Math.random() * attackNames.length)]
+      showMessage(`${unit.name} uses ${attackName}!`)
+    }
 
     // AI takes 1-2 seconds to "decide" and attack
     // During this time, player can time their defense
@@ -287,8 +302,40 @@ export default function BattleArenaV3({
       // Use player's defense score if they defended, otherwise weak defense
       const finalDefenseScore = defenseCommitted ? defenseScore : 0.8
 
+      // Store the action for executeAttack
+      if (selectedAbility) {
+        setPendingAction({
+          type: 'ability',
+          abilityId: selectedAbility.id
+        })
+      } else {
+        setPendingAction({
+          type: 'attack'
+        })
+      }
+
       executeAttack(unit, target, aiAttackScore, finalDefenseScore)
     }, aiDelay)
+  }
+
+  // Helper function to get attack names based on element
+  const getElementAttackNames = (element: string): string[] => {
+    switch(element.toUpperCase()) {
+      case 'SURGE':
+        return ['Lightning Strike', 'Thunder Bolt', 'Electric Surge', 'Volt Tackle']
+      case 'CODE':
+        return ['Data Breach', 'System Crash', 'Binary Blast', 'Firewall Break']
+      case 'METAL':
+        return ['Iron Bash', 'Steel Strike', 'Metal Claw', 'Titanium Punch']
+      case 'GLITCH':
+        return ['Chaos Strike', 'Corruption Wave', 'Error Cascade', 'System Glitch']
+      case 'BOND':
+        return ['Unity Strike', 'Harmony Blast', 'Friendship Power', 'Loyalty Attack']
+      case 'WILD':
+        return ['Primal Strike', 'Feral Claw', 'Nature\'s Wrath', 'Savage Bite']
+      default:
+        return ['Basic Strike', 'Quick Attack', 'Standard Blow', 'Normal Hit']
+    }
   }
 
   const handleBattleEnd = async (won: boolean) => {
