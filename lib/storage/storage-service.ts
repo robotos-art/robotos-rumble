@@ -51,19 +51,52 @@ export class StorageService {
       const normalizedAddress = profile.walletAddress.toLowerCase()
       const blobName = `players/${normalizedAddress}/profile.json`
       
-      // Check if profile exists and delete it first to allow overwrite
+      // CRITICAL FIX: Do NOT delete the existing profile!
+      // Vercel Blob handles overwrites automatically
+      // Deleting first causes race conditions and data loss
+      
+      // Save backup before updating (keep last 5 backups)
       try {
-        const existing = await head(blobName, { token: this.blobToken })
-        if (existing) {
-          await del(existing.url, { token: this.blobToken })
+        const existing = await this.getProfile(profile.walletAddress)
+        if (existing && existing.stats.totalBattles > 0) {
+          const backupName = `players/${normalizedAddress}/backups/${Date.now()}.json`
+          await put(backupName, JSON.stringify(existing, null, 2), {
+            access: 'public',
+            contentType: 'application/json',
+            token: this.blobToken
+          })
+          
+          // Clean up old backups (keep only last 5)
+          const { blobs } = await list({
+            prefix: `players/${normalizedAddress}/backups/`,
+            token: this.blobToken
+          })
+          
+          if (blobs && blobs.length > 5) {
+            // Sort by name (timestamp) and delete oldest
+            const sortedBlobs = blobs.sort((a, b) => a.pathname.localeCompare(b.pathname))
+            const toDelete = sortedBlobs.slice(0, blobs.length - 5)
+            for (const blob of toDelete) {
+              try {
+                await del(blob.url, { token: this.blobToken })
+              } catch (e) {
+                console.error('Error deleting old backup:', e)
+              }
+            }
+          }
         }
       } catch (e) {
-        // Profile doesn't exist, which is fine
+        console.error('Error creating backup:', e)
+        // Continue with save even if backup fails
       }
       
+      // Add timestamp for version control
+      profile.lastUpdated = new Date().toISOString()
+      
+      // Save profile - Vercel Blob will overwrite if it exists
       await put(blobName, JSON.stringify(profile, null, 2), {
         access: 'public',
-        addRandomSuffix: false,
+        addRandomSuffix: false, // Important: keep the same filename
         contentType: 'application/json',
         token: this.blobToken
       })

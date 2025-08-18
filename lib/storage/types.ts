@@ -9,6 +9,7 @@ export interface PlayerProfile {
   } | null
   createdAt: string
   lastSeenAt: string
+  lastUpdated?: string  // Added for version control
   stats: PlayerStats
   achievements: string[]
   badges: Badge[]
