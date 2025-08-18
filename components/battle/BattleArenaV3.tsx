@@ -573,6 +573,13 @@ export default function BattleArenaV3({
   }
 
   const executeAttack = (attacker: BattleUnitV3, defender: BattleUnitV3, atkScore: number = 1.0, defScore: number = 1.0) => {
+    
+    // Get attack/ability name for display
+    let attackName = 'Basic Attack'
+    if (pendingAction?.type === 'ability' && pendingAction.abilityId) {
+      const abilityData = TraitProcessorV3.getAbilityData(pendingAction.abilityId)
+      attackName = abilityData?.name || 'Special Attack'
+    }
 
     // Get positions for animation
     const attackerPos = getUnitPosition(attacker.id)
@@ -700,10 +707,19 @@ export default function BattleArenaV3({
       }, 1500)
     }, 500) // 500ms projectile travel time
 
+    // Show what attack was used (especially for enemy attacks)
+    const isPlayerAttacking = playerTeam.some(u => u.id === attacker.id)
+    if (!isPlayerAttacking && actualDamage > 0) {
+      const attackMessage = `${attacker.name} used ${attackName} for ${actualDamage} damage!`
+      showMessage(attackMessage)
+    }
+
     // Check if defender was defeated
     if (!targetStatus?.isAlive) {
-      showMessage(`${defender.name} has been defeated!`)
-      gameSounds.play('defeat')
+      setTimeout(() => {
+        showMessage(`${defender.name} has been defeated!`)
+        gameSounds.play('defeat')
+      }, 1000)
     }
 
     // Reset states and continue to next turn
