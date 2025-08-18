@@ -338,8 +338,8 @@ export default function BattleArenaV3({
       const difficultyScale = Math.min(turnNumber / 10, 1) // Scales up over 10 turns
       
       // Better timing as battle progresses
-      const baseScore = timerDuration === 3000 ? 1.2 : 1.0 // Speedy mode gets better base
-      const skillRange = timerDuration === 3000 ? 0.6 : 0.5 // Speedy: 1.2-1.8x, Calm: 1.0-1.5x
+      const baseScore = timerDuration === 3 ? 1.2 : 1.0 // Speedy mode gets better base
+      const skillRange = timerDuration === 3 ? 0.6 : 0.5 // Speedy: 1.2-1.8x, Calm: 1.0-1.5x
       const aiAttackScore = baseScore + (Math.random() * skillRange * (0.5 + difficultyScale * 0.5))
       
       // Occasionally hit perfect timing (5% chance)
