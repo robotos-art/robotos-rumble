@@ -292,10 +292,16 @@ export default function BattleArenaV3({
       }
     } else if (aiIntelligence > 0.4) {
       // Medium AI (30% chance): Consider element advantages
-      const advantageTargets = aliveTargets.filter(t => {
-        const effectiveness = TraitProcessorV3.getElementEffectiveness(unit.element, t.element)
-        return effectiveness > 1
-      })
+      // Simple element advantage check (SURGE > METAL, CODE > SURGE, METAL > GLITCH, GLITCH > CODE)
+      const hasAdvantage = (attacker: string, defender: string): boolean => {
+        if (attacker === 'SURGE' && defender === 'METAL') return true
+        if (attacker === 'CODE' && defender === 'SURGE') return true
+        if (attacker === 'METAL' && defender === 'GLITCH') return true
+        if (attacker === 'GLITCH' && defender === 'CODE') return true
+        return false
+      }
+      
+      const advantageTargets = aliveTargets.filter(t => hasAdvantage(unit.element, t.element))
       target = advantageTargets.length > 0 
         ? advantageTargets[Math.floor(Math.random() * advantageTargets.length)]
         : aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
