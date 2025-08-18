@@ -263,31 +263,93 @@ export default function BattleArenaV3({
     // Get fresh state
     const currentState = battleEngine.getState()
 
-    // Simple AI: randomly select a player unit to attack
+    // Get alive targets
     const aliveTargets = playerTeam.filter(u => currentState.unitStatuses.get(u.id)?.isAlive)
     if (aliveTargets.length === 0) return
 
-    const target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    // Smarter AI target selection
+    let target: BattleUnitV3
+    const aiIntelligence = Math.random() // Random intelligence level for variety
+    
+    if (aiIntelligence > 0.7) {
+      // Smart AI (30% chance): Target based on strategy
+      const targetsWithHealth = aliveTargets.map(t => ({
+        unit: t,
+        hp: currentState.unitStatuses.get(t.id)?.currentHp || 0,
+        maxHp: t.stats.hp,
+        hpPercent: ((currentState.unitStatuses.get(t.id)?.currentHp || 0) / t.stats.hp) * 100
+      }))
+      
+      // Prioritize low health targets (under 30% HP)
+      const lowHealthTargets = targetsWithHealth.filter(t => t.hpPercent < 30)
+      if (lowHealthTargets.length > 0) {
+        target = lowHealthTargets[0].unit
+      } else {
+        // Otherwise target the highest damage dealer
+        target = aliveTargets.reduce((prev, curr) => 
+          curr.stats.attack > prev.stats.attack ? curr : prev
+        )
+      }
+    } else if (aiIntelligence > 0.4) {
+      // Medium AI (30% chance): Consider element advantages
+      const advantageTargets = aliveTargets.filter(t => {
+        const effectiveness = TraitProcessorV3.getElementEffectiveness(unit.element, t.element)
+        return effectiveness > 1
+      })
+      target = advantageTargets.length > 0 
+        ? advantageTargets[Math.floor(Math.random() * advantageTargets.length)]
+        : aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    } else {
+      // Basic AI (40% chance): Random selection (original behavior)
+      target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    }
+
     setTargetUnit(target)
     setDefendingUnitId(target.id)
     setAttackingUnitId(unit.id)
 
-    showMessage(`${unit.name} is attacking ${target.name}!`)
+    // Decide between ability or basic attack
+    const useAbility = Math.random() < 0.35 // 35% chance to use ability
+    let selectedAbility: string | null = null
+    
+    if (useAbility && unit.abilities.length > 0) {
+      // Pick a random ability
+      selectedAbility = unit.abilities[Math.floor(Math.random() * unit.abilities.length)]
+      const abilityData = TraitProcessorV3.getAbilityData(selectedAbility)
+      showMessage(`${unit.name} prepares ${abilityData?.name || 'ability'}!`)
+    } else {
+      showMessage(`${unit.name} is attacking ${target.name}!`)
+    }
 
-    // AI takes 1-2 seconds to "decide" and attack
-    // During this time, player can time their defense
-    const aiDelay = 1500 + Math.random() * 1000 // 1.5-2.5 seconds
+    // AI delay varies based on "thinking" time
+    const aiDelay = 1200 + Math.random() * 1300 // 1.2-2.5 seconds
 
     setTimeout(() => {
       setPhase('executing')
 
-      // AI has random timing skill
-      const aiAttackScore = 1.0 + Math.random() * 0.3 // 1.0-1.3x
+      // Improved AI timing skill based on battle progress
+      const turnNumber = currentState.turnCount || 1
+      const difficultyScale = Math.min(turnNumber / 10, 1) // Scales up over 10 turns
+      
+      // Better timing as battle progresses
+      const baseScore = timerDuration === 3000 ? 1.2 : 1.0 // Speedy mode gets better base
+      const skillRange = timerDuration === 3000 ? 0.6 : 0.5 // Speedy: 1.2-1.8x, Calm: 1.0-1.5x
+      const aiAttackScore = baseScore + (Math.random() * skillRange * (0.5 + difficultyScale * 0.5))
+      
+      // Occasionally hit perfect timing (5% chance)
+      const perfectHit = Math.random() < 0.05
+      const finalAttackScore = perfectHit ? 2.0 : aiAttackScore
 
       // Use player's defense score if they defended, otherwise weak defense
       const finalDefenseScore = defenseCommitted ? defenseScore : 0.8
 
-      executeAttack(unit, target, aiAttackScore, finalDefenseScore)
+      if (selectedAbility) {
+        // Execute ability instead of basic attack
+        setPendingAction({ type: 'ability', abilityId: selectedAbility })
+        executeAttack(unit, target, finalAttackScore, finalDefenseScore)
+      } else {
+        executeAttack(unit, target, finalAttackScore, finalDefenseScore)
+      }
     }, aiDelay)
   }
 
