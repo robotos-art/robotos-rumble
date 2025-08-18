@@ -42,7 +42,9 @@ export default function TeamBuilder() {
         e.preventDefault()
         if (selectedTeam.length > 0) {
           setSelectedTeam([])
-          localStorage.setItem('roboto_rumble_team', JSON.stringify([]))
+          // Clear teams for all sizes when wallet disconnects
+          localStorage.setItem('roboto_rumble_team_3', JSON.stringify([]))
+          localStorage.setItem('roboto_rumble_team_5', JSON.stringify([]))
           gameSounds.play('cancel')
         }
       }
@@ -110,7 +112,9 @@ export default function TeamBuilder() {
   // Load saved team after units are processed
   useEffect(() => {
     if (processedUnits.length > 0 && selectedTeam.length === 0) {
-      const savedTeam = localStorage.getItem('roboto_rumble_team')
+      // Load team for current team size
+      const teamKey = `roboto_rumble_team_${settings.teamSize}`
+      const savedTeam = localStorage.getItem(teamKey)
       if (savedTeam) {
         try {
           const team = JSON.parse(savedTeam)
@@ -274,8 +278,9 @@ export default function TeamBuilder() {
       return
     }
     
-    // Save team to localStorage
-    localStorage.setItem('roboto_rumble_team', JSON.stringify(newTeam))
+    // Save team to localStorage with team size key
+    const teamKey = `roboto_rumble_team_${settings.teamSize}`
+    localStorage.setItem(teamKey, JSON.stringify(newTeam))
     
     // Show saved feedback
     setTeamSaved(true)
@@ -308,13 +313,15 @@ export default function TeamBuilder() {
     setSelectedTeam(newTeam)
     gameSounds.play('teamComplete')
     
-    // Save team to localStorage
-    localStorage.setItem('roboto_rumble_team', JSON.stringify(newTeam))
+    // Save team to localStorage with team size key
+    const teamKey = `roboto_rumble_team_${settings.teamSize}`
+    localStorage.setItem(teamKey, JSON.stringify(newTeam))
   }, [processedUnits, selectedTeam, settings.teamSize])
 
   const saveTeamAndBattle = useCallback(() => {
-    // Save team to localStorage
-    localStorage.setItem('roboto_rumble_team', JSON.stringify(selectedTeam))
+    // Save team to localStorage with team size key
+    const teamKey = `roboto_rumble_team_${settings.teamSize}`
+    localStorage.setItem(teamKey, JSON.stringify(selectedTeam))
     gameSounds.play('confirm')
 
     // Navigate to battle vs computer
@@ -332,9 +339,29 @@ export default function TeamBuilder() {
     localStorage.setItem('battle_settings', JSON.stringify(newSettings))
     gameSounds.play('menuNavigate')
     
-    // Clear team if changing team size and current team is too large
-    if (key === 'teamSize' && typeof value === 'number' && selectedTeam.length > value) {
-      setSelectedTeam([])
+    // Handle team size changes
+    if (key === 'teamSize' && typeof value === 'number') {
+      // Save current team before switching
+      const currentTeamKey = `roboto_rumble_team_${settings.teamSize}`
+      localStorage.setItem(currentTeamKey, JSON.stringify(selectedTeam))
+      
+      // Load the team for the new size
+      const newTeamKey = `roboto_rumble_team_${value}`
+      const savedNewTeam = localStorage.getItem(newTeamKey)
+      
+      if (savedNewTeam) {
+        try {
+          const team = JSON.parse(savedNewTeam)
+          // Ensure loaded team fits the new size
+          setSelectedTeam(team.slice(0, value))
+        } catch (e) {
+          // Failed to parse, start fresh
+          setSelectedTeam([])
+        }
+      } else {
+        // No saved team for this size, start fresh
+        setSelectedTeam([])
+      }
     }
   }
 
