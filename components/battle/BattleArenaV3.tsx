@@ -334,7 +334,7 @@ export default function BattleArenaV3({
       setPhase('executing')
 
       // Improved AI timing skill based on battle progress
-      const turnNumber = currentState.turnCount || 1
+      const turnNumber = currentState.turn || 1
       const difficultyScale = Math.min(turnNumber / 10, 1) // Scales up over 10 turns
       
       // Better timing as battle progresses
