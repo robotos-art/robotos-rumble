@@ -635,7 +635,7 @@ export default function TeamBuilder() {
               )}
 
               {/* Units Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredUnits.map((unit, index) => {
                   const isSelected = selectedTeam.find(u => u.id === unit.id && u.type === unit.type)
                   const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '')
@@ -648,12 +648,13 @@ export default function TeamBuilder() {
                   return (
                     <Card
                       key={`${unit.type}-${unit.id}`}
-                      className={`bg-black/60 border-2 rounded-lg transition-all overflow-hidden relative ${isSelected
+                      className={`bg-black/60 border-2 rounded-lg transition-all overflow-hidden relative cursor-pointer ${isSelected
                         ? 'border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]'
                         : companionInTeam
                         ? 'border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]'
                         : 'border-green-500/30 hover:border-green-500/60'
                         }`}
+                      onClick={() => toggleUnitSelection(unit)}
                       onMouseEnter={() => gameSounds.playHover()}
                     >
                       {/* Expand button */}
@@ -670,9 +671,9 @@ export default function TeamBuilder() {
                         <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
 
-                      <div className="flex flex-col sm:flex-row cursor-pointer" onClick={() => toggleUnitSelection(unit)}>
-                        {/* Top/Left side - Image */}
-                        <div className="w-full sm:w-48 h-32 sm:h-48 flex-shrink-0 bg-black/50 sm:border-r border-b sm:border-b-0 border-green-500/20 relative">
+                      <div className="flex">
+                        {/* Left side - Image */}
+                        <div className="w-32 h-32 sm:w-48 sm:h-48 flex-shrink-0 bg-black/50 border-r border-green-500/20 relative">
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -680,22 +681,12 @@ export default function TeamBuilder() {
                           />
                         </div>
 
-                        {/* Bottom/Right side - Metadata */}
-                        <div className="flex-1 p-2 sm:p-4">
+                        {/* Right side - Metadata */}
+                        <div className="flex-1 p-3 sm:p-4 min-h-[128px] sm:min-h-[192px] flex flex-col">
                           {/* Header */}
                           <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
                             <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
                               <h3 className="text-sm sm:text-lg font-bold truncate">{unit.name}</h3>
-                              {isSelected && companionInTeam && (
-                                <span className="text-xs text-green-400 px-2 py-1 bg-green-400/10 rounded">
-                                  +2% BOOST
-                                </span>
-                              )}
-                              {!isSelected && companionInTeam && (
-                                <span className="text-xs text-yellow-400 px-2 py-1 bg-yellow-400/10 rounded">
-                                  COMPANION
-                                </span>
-                              )}
                             </div>
                             <div className="text-xs sm:text-sm" style={{ color: TraitProcessorV3.getElementColor(unit.element) }}>
                               {TraitProcessorV3.getElementSymbol(unit.element)} {unit.element}
@@ -779,57 +770,67 @@ export default function TeamBuilder() {
                             </div>
                           </TooltipProvider>
 
-                          {/* Abilities */}
-                          <div className="hidden sm:flex flex-wrap gap-1 mb-3">
-                            {unit.abilities.map(abilityId => {
-                              const ability = TraitProcessorV3.getAbilityData(abilityId)
-                              return ability ? (
-                                <div
-                                  key={abilityId}
-                                  className="text-xs px-1 sm:px-2 py-0.5 sm:py-1 bg-black/50 border border-green-500/30 rounded"
-                                  style={{
-                                    borderColor: TraitProcessorV3.getElementColor(ability.element) + '40',
-                                    backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A'
-                                  }}
-                                >
-                                  {ability.name}
-                                </div>
-                              ) : null
-                            })}
+                          {/* Content area that grows */}
+                          <div className="flex-grow">
+                            {/* Abilities */}
+                            <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
+                              {unit.abilities.map(abilityId => {
+                                const ability = TraitProcessorV3.getAbilityData(abilityId)
+                                return ability ? (
+                                  <div
+                                    key={abilityId}
+                                    className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 bg-black/50 border border-green-500/30 rounded"
+                                    style={{
+                                      borderColor: TraitProcessorV3.getElementColor(ability.element) + '40',
+                                      backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A'
+                                    }}
+                                  >
+                                    {ability.name}
+                                  </div>
+                                ) : null
+                              })}
+                            </div>
                           </div>
                           
-                          {/* Companion Checkbox - Hidden on mobile for cleaner UI */}
+                          {/* Companion Toggle */}
                           {companion && (
-                            <div className="hidden sm:flex mt-3 items-center gap-3 p-2 bg-black/50 rounded border border-yellow-500/30 hover:border-yellow-500/50 transition-colors">
-                              <input
-                                type="checkbox"
-                                id={`companion-${unit.type}-${unit.id}`}
-                                checked={!!companionInTeam}
-                                onChange={(e) => {
-                                  e.stopPropagation()
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (!(!companionInTeam && selectedTeam.length >= settings.teamSize)) {
                                   toggleUnitSelection(companion)
-                                }}
-                                disabled={!companionInTeam && selectedTeam.length >= settings.teamSize}
-                                className="companion-checkbox flex-shrink-0"
-                                onClick={(e) => e.stopPropagation()}
+                                  gameSounds.playClick()
+                                }
+                              }}
+                              className={`
+                                flex mt-2 sm:mt-3 items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded border transition-all w-full
+                                ${companionInTeam 
+                                  ? 'bg-yellow-500 border-yellow-400 hover:bg-yellow-400' 
+                                  : 'bg-black/50 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/10'
+                                }
+                                ${!companionInTeam && selectedTeam.length >= settings.teamSize 
+                                  ? 'opacity-50 cursor-not-allowed' 
+                                  : 'cursor-pointer'
+                                }
+                              `}
+                            >
+                              <img
+                                src={companion.imageUrl}
+                                alt={companion.name}
+                                className="w-6 h-6 sm:w-8 sm:h-8 object-cover pixelated rounded flex-shrink-0"
                               />
-                              <label 
-                                htmlFor={`companion-${unit.type}-${unit.id}`}
-                                className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <img
-                                  src={companion.imageUrl}
-                                  alt={companion.name}
-                                  className="w-8 h-8 object-cover pixelated rounded flex-shrink-0"
-                                />
-                                <div className="text-xs min-w-0">
-                                  <div className="text-yellow-400 truncate">{companion.name}</div>
-                                  {companionInTeam && isSelected && (
-                                    <div className="text-green-400 text-xs">+2% BOOST ACTIVE</div>
-                                  )}
+                              <div className="text-[10px] sm:text-xs min-w-0 text-left flex-1">
+                                <div className={`truncate font-semibold ${companionInTeam ? 'text-black' : 'text-yellow-400'}`}>
+                                  {companion.name}
                                 </div>
-                              </label>
+                                <div className={`font-bold ${companionInTeam ? 'text-black/80' : 'text-green-400/60'}`}>
+                                  {companionInTeam && isSelected 
+                                    ? '2% BOOST ✓' 
+                                    : companionInTeam 
+                                      ? 'Companion ✓' 
+                                      : 'Add Companion'}
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>

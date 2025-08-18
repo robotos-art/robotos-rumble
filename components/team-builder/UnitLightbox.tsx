@@ -62,12 +62,12 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-4xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+      <div className="relative max-w-4xl w-full mx-2 sm:mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
         <Button
           variant="terminal"
           size="icon"
-          className="absolute -top-12 right-0"
+          className="absolute -top-10 sm:-top-12 right-0 z-10"
           onClick={onClose}
         >
           <X className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         <Button
           variant="terminal"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16"
+          className="absolute left-0 sm:-left-16 top-1/2 -translate-y-1/2 z-10"
           onClick={navigatePrev}
           disabled={currentIndex === 0}
         >
@@ -87,7 +87,7 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         <Button
           variant="terminal"
           size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16"
+          className="absolute right-0 sm:-right-16 top-1/2 -translate-y-1/2 z-10"
           onClick={navigateNext}
           disabled={currentIndex === units.length - 1}
         >
@@ -98,78 +98,78 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         <div className="bg-black/95 border-2 border-green-500 rounded-lg overflow-hidden">
           <div className="grid md:grid-cols-2 gap-0">
             {/* Left side - Image */}
-            <div className="bg-black/50 border-r border-green-500/20 p-8 flex items-center justify-center">
+            <div className="bg-black/50 md:border-r border-b md:border-b-0 border-green-500/20 p-4 sm:p-8 flex items-center justify-center">
               <img 
                 src={currentUnit.imageUrl} 
                 alt={currentUnit.name}
-                className="w-full max-w-sm h-auto pixelated"
+                className="w-full max-w-xs sm:max-w-sm h-auto pixelated"
               />
             </div>
 
             {/* Right side - Details */}
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               {/* Header */}
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold mb-2">{currentUnit.name}</h2>
-                <div className="text-xl" style={{ color: TraitProcessorV3.getElementColor(currentUnit.element) }}>
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2">{currentUnit.name}</h2>
+                <div className="text-lg sm:text-xl" style={{ color: TraitProcessorV3.getElementColor(currentUnit.element) }}>
                   {TraitProcessorV3.getElementSymbol(currentUnit.element)} {currentUnit.element}
                 </div>
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-red-500 mb-2">
-                    <Heart className="w-5 h-5" />
-                    <span className="text-sm">HEALTH</span>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-red-500 mb-1 sm:mb-2">
+                    <Heart className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">HEALTH</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.hp}</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.hp}</div>
                 </div>
 
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-orange-500 mb-2">
-                    <Swords className="w-5 h-5" />
-                    <span className="text-sm">ATTACK</span>
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-orange-500 mb-1 sm:mb-2">
+                    <Swords className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">ATTACK</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.attack}</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.attack}</div>
                 </div>
 
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-blue-500 mb-2">
-                    <Shield className="w-5 h-5" />
-                    <span className="text-sm">DEFENSE</span>
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-blue-500 mb-1 sm:mb-2">
+                    <Shield className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">DEFENSE</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.defense}</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.defense}</div>
                 </div>
 
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-yellow-500 mb-2">
-                    <Zap className="w-5 h-5" />
-                    <span className="text-sm">SPEED</span>
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-yellow-500 mb-1 sm:mb-2">
+                    <Zap className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">SPEED</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.speed}</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.speed}</div>
                 </div>
 
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-purple-500 mb-2">
-                    <Gauge className="w-5 h-5" />
-                    <span className="text-sm">ENERGY</span>
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-purple-500 mb-1 sm:mb-2">
+                    <Gauge className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">ENERGY</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.energy}</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.energy}</div>
                 </div>
 
-                <div className="bg-black/50 border border-green-500/30 rounded p-4">
-                  <div className="flex items-center gap-2 text-pink-500 mb-2">
-                    <Sparkles className="w-5 h-5" />
-                    <span className="text-sm">CRITICAL</span>
+                <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 text-pink-500 mb-1 sm:mb-2">
+                    <Sparkles className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span className="text-xs sm:text-sm">CRITICAL</span>
                   </div>
-                  <div className="text-2xl font-mono">{currentUnit.stats.crit}%</div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.crit}%</div>
                 </div>
               </div>
 
               {/* Abilities */}
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-green-400 mb-3">ABILITIES</h3>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-bold text-green-400 mb-2 sm:mb-3">ABILITIES</h3>
                 <div className="space-y-2">
                   {currentUnit.abilities.map(abilityId => {
                     const ability = TraitProcessorV3.getAbilityData(abilityId)
