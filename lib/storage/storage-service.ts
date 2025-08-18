@@ -55,13 +55,27 @@ export class StorageService {
       // Vercel Blob handles overwrites automatically
       // Deleting first causes race conditions and data loss
       
+      // Validate against stat decreases to prevent data loss
+      const existing = await this.getProfile(profile.walletAddress)
+      if (existing && existing.stats.wins > profile.stats.wins) {
+        console.error('WARNING: Rejected profile update - wins decreased!', {
+          address: profile.walletAddress,
+          oldWins: existing.stats.wins,
+          newWins: profile.stats.wins,
+          oldTotal: existing.stats.totalBattles,
+          newTotal: profile.stats.totalBattles,
+          timestamp: new Date().toISOString()
+        })
+        throw new Error(`Cannot decrease win count from ${existing.stats.wins} to ${profile.stats.wins}`)
+      }
+      
       // Save backup before updating (keep last 5 backups)
       try {
-        const existing = await this.getProfile(profile.walletAddress)
         if (existing && existing.stats.totalBattles > 0) {
           const backupName = `players/${normalizedAddress}/backups/${Date.now()}.json`
           await put(backupName, JSON.stringify(existing, null, 2), {
             access: 'public',
+            allowOverwrite: true,  // Allow overwriting backups
             contentType: 'application/json',
             token: this.blobToken
           })
@@ -97,6 +111,7 @@ export class StorageService {
       await put(blobName, JSON.stringify(profile, null, 2), {
         access: 'public',
         addRandomSuffix: false, // Important: keep the same filename
+        allowOverwrite: true,   // Required to update existing profiles
         contentType: 'application/json',
         token: this.blobToken
       })
