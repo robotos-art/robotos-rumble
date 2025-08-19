@@ -50,13 +50,13 @@ export default function BattleSelect() {
   }
   
   const handleModeSelect = (mode: 'computer' | 'player') => {
+    gameSounds.playConfirm()
+    
     if (mode === 'player') {
-      // Player vs Player coming soon
-      gameSounds.play('cancel')
+      // Navigate to PvP lobby
+      router.push('/battle/pvp')
       return
     }
-    
-    gameSounds.playConfirm()
     
     // Save settings before navigating
     localStorage.setItem('battle_settings', JSON.stringify(settings))
@@ -183,13 +183,15 @@ export default function BattleSelect() {
           </Card>
           
           <Card 
-            className="bg-black/80 border-2 border-green-500/50 rounded-lg opacity-50 cursor-not-allowed"
+            className="bg-black/80 border-2 border-green-500 rounded-lg hover:bg-green-500/10 transition-all cursor-pointer"
+            onClick={() => handleModeSelect('player')}
             onMouseEnter={() => gameSounds.playHover()}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-2xl">
                 <UserCircle className="w-6 h-6" />
                 VS PLAYER
+                <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">BETA</span>
               </CardTitle>
               <CardDescription className="text-green-400">
                 Challenge other Roboto holders
@@ -203,8 +205,8 @@ export default function BattleSelect() {
                 <li>• Stake entry fees</li>
               </ul>
               <div className="pt-4">
-                <Button className="w-full terminal-button" disabled>
-                  SOON
+                <Button className="w-full terminal-button">
+                  PLAY
                 </Button>
               </div>
             </CardContent>
