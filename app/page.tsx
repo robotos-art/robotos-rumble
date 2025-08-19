@@ -77,19 +77,45 @@ PRESS ANY KEY TO CONTINUE`
           <div className="mb-6 sm:mb-8" style={{
             perspective: '300px',
           }}>
-            <div className="flex flex-col items-center" style={{
+            <div className="flex flex-col items-center relative" style={{
               transform: 'rotateX(30deg)',
               transformOrigin: 'center top',
             }}>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal mb-2 text-green-300 glow tracking-wider">
-                ROBOTOS
+              {/* Cyber scanlines effect */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-500/5 to-transparent animate-scan" />
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal mb-2 text-green-300 glow tracking-wider relative">
+                {/* Data corruption effect */}
+                <span className="absolute inset-0 text-cyan-400/20 animate-glitch-1" aria-hidden="true">
+                  ROBOTOS
+                </span>
+                <span className="relative">
+                  ROBOTOS
+                </span>
               </h1>
-              <h2 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-green-500 glow-lg" style={{
+              <h2 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-green-500 relative" style={{
                 letterSpacing: '-0.05em',
                 lineHeight: '0.9',
+                textShadow: '0 0 16px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.4)',
               }}>
-                RUMBLE
+                {/* Reduced glow and added glitch layers */}
+                <span className="absolute inset-0 text-red-500/10 animate-glitch-2" aria-hidden="true">
+                  RUMBLE
+                </span>
+                <span className="relative">
+                  RUMBLE
+                </span>
               </h2>
+
+              {/* Digital grid overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent)',
+                  backgroundSize: '50px 50px',
+                }} />
+              </div>
             </div>
           </div>
 
@@ -98,7 +124,7 @@ PRESS ANY KEY TO CONTINUE`
           </p>
 
           {/* Main Menu Buttons */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Link href="/battle">
               <Button
                 variant="terminal"
