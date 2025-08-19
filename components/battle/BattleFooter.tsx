@@ -190,7 +190,7 @@ export default function BattleFooter({
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               {message && (
                 <motion.span
                   initial={{ opacity: 0, y: 10 }}
@@ -200,17 +200,14 @@ export default function BattleFooter({
                   {message}
                 </motion.span>
               )}
+              {/* Countdown Timer on the right */}
+              {(phase === 'selecting-action' || phase === 'selecting-target') && (
+                <span className="text-yellow-400 text-lg font-bold animate-pulse">
+                  Time: {phase === 'selecting-action' ? actionCountdown : targetCountdown}s
+                </span>
+              )}
             </div>
           </div>
-          
-          {/* Countdown Timer */}
-          {(phase === 'selecting-action' || phase === 'selecting-target') && (
-            <div className="text-center mb-2">
-              <span className="text-yellow-400 text-lg font-bold animate-pulse">
-                Time: {phase === 'selecting-action' ? actionCountdown : targetCountdown}s
-              </span>
-            </div>
-          )}
           
           {/* Action Area */}
           <AnimatePresence mode="wait">

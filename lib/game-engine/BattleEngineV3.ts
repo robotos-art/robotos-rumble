@@ -800,7 +800,10 @@ export class BattleEngineV3 {
     const availableAbilities = this.getAvailableAbilities(currentUnit.id)
       .filter(a => this.canUseAbility(currentUnit.id, a.id))
     
-    if (availableAbilities.length > 0) {
+    // 35% chance to use ability if available
+    const useAbility = availableAbilities.length > 0 && Math.random() < 0.35
+    
+    if (useAbility && availableAbilities.length > 0) {
       // Prioritize abilities by element advantage
       const scoredAbilities = availableAbilities.map(ability => {
         let score = 0
@@ -854,11 +857,69 @@ export class BattleEngineV3 {
         target = alivePlayerUnits[0].id // Default target
       }
       
+      // Log ability use with name
+      this.addBattleEvent({
+        type: 'ability',
+        source: currentUnit.id,
+        description: `${currentUnit.name} uses ${chosenAbility.ability.name}!`,
+        timestamp: Date.now()
+      })
+      
       this.executeAbility(currentUnit.id, target, chosenAbility.id)
     } else {
-      // Skip turn if no abilities available
+      // Use basic attack
+      // Smart target selection for basic attacks
+      const targetOptions = alivePlayerUnits.map(player => {
+        const status = this.state.unitStatuses.get(player.id)!
+        const multiplier = this.getElementMultiplier(currentUnit.element, player.element)
+        
+        return {
+          unit: player,
+          score: (100 - status.currentHp) + (multiplier > 1 ? 50 : 0)
+        }
+      })
+      
+      targetOptions.sort((a, b) => b.score - a.score)
+      const target = targetOptions[0].unit
+      
+      // Generate attack name based on element
+      const attackName = this.getElementAttackName(currentUnit.element)
+      
+      // Log the attack with name
+      this.addBattleEvent({
+        type: 'ability',
+        source: currentUnit.id,
+        description: `${currentUnit.name} uses ${attackName}!`,
+        timestamp: Date.now()
+      })
+      
+      // Execute basic attack with timing variation
+      const timingBonus = 0.8 + Math.random() * 0.5 // 0.8x to 1.3x
+      const result = this.executeAction({
+        type: 'attack',
+        sourceId: currentUnit.id,
+        targetId: target.id,
+        timingBonus: timingBonus
+      })
+      
+      // Process next turn
       this.nextTurn()
     }
+  }
+
+  private getElementAttackName(element: string): string {
+    const attackNames: Record<string, string[]> = {
+      'SURGE': ['Lightning Strike', 'Thunder Bolt', 'Electric Surge', 'Volt Tackle'],
+      'CODE': ['Data Breach', 'System Crash', 'Binary Blast', 'Firewall Break'],
+      'METAL': ['Iron Bash', 'Steel Strike', 'Metal Claw', 'Titanium Punch'],
+      'GLITCH': ['Chaos Strike', 'Corruption Wave', 'Error Cascade', 'System Glitch'],
+      'BOND': ['Unity Strike', 'Harmony Blast', 'Friendship Power', 'Loyalty Attack'],
+      'WILD': ['Primal Strike', 'Feral Claw', 'Nature\'s Wrath', 'Savage Bite'],
+      'NEUTRAL': ['Basic Strike', 'Quick Attack', 'Standard Blow', 'Normal Hit']
+    }
+    
+    const names = attackNames[element.toUpperCase()] || attackNames['NEUTRAL']
+    return names[Math.floor(Math.random() * names.length)]
   }
 
   // Add methods for Phaser integration
