@@ -12,6 +12,8 @@ import { Users, Swords, Clock, Search, Shield, Bell } from 'lucide-react'
 import { gameSounds } from '../../../lib/sounds/gameSounds'
 import { BattleNotifications } from '../../../lib/notifications/battleNotifications'
 import BattleArena from '../../../components/battle/BattleArena'
+import TeamFooter from '../../../components/team-builder/TeamFooter'
+import { TraitProcessorV3 } from '../../../lib/game-engine/TraitProcessorV3'
 
 export default function PvPLobby() {
   const router = useRouter()
@@ -27,6 +29,7 @@ export default function PvPLobby() {
   const [battleStarted, setBattleStarted] = useState(false)
   const [playerTeam, setPlayerTeam] = useState<any[]>([])
   const [enemyTeam, setEnemyTeam] = useState<any[]>([])
+  const [loadedTeam, setLoadedTeam] = useState<any[]>([])
   
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: 'speedy' })
@@ -35,7 +38,22 @@ export default function PvPLobby() {
     setMounted(true)
     const savedSettings = localStorage.getItem('battle_settings')
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+      const parsedSettings = JSON.parse(savedSettings)
+      setSettings(parsedSettings)
+      
+      // Load the team for the current settings
+      const teamKey = `roboto_rumble_team_${parsedSettings.teamSize}`
+      const savedTeam = localStorage.getItem(teamKey)
+      if (savedTeam) {
+        try {
+          const team = JSON.parse(savedTeam)
+          // Process team to get battle units
+          const processedTeam = team.map((unit: any) => TraitProcessorV3.processBattleUnit(unit))
+          setLoadedTeam(processedTeam)
+        } catch (e) {
+          console.error('Error loading team:', e)
+        }
+      }
     }
     
     // Initialize Colyseus client
@@ -488,6 +506,16 @@ export default function PvPLobby() {
           </div>
         </div>
       </div>
+      
+      {/* Show team footer when not in battle */}
+      {loadedTeam.length > 0 && !battleStarted && (
+        <TeamFooter 
+          selectedTeam={loadedTeam}
+          teamSize={settings.teamSize}
+          onRemoveUnit={() => {}} // Read-only in lobby
+          isReadOnly={true}
+        />
+      )}
     </PageLayout>
   )
 }
