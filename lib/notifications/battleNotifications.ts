@@ -40,11 +40,8 @@ export class BattleNotifications {
       badge: '/robotos-badge.png',
       tag: 'match-found',
       requireInteraction: true,
-      vibrate: [200, 100, 200],
-      actions: [
-        { action: 'join', title: 'Join Battle' },
-        { action: 'decline', title: 'Cancel' }
-      ]
+      vibrate: [200, 100, 200]
+      // Note: actions are only supported in service worker notifications
     }
     
     const notification = new Notification(title, options)
@@ -77,10 +74,8 @@ export class BattleNotifications {
       badge: '/robotos-badge.png',
       tag: 'player-waiting',
       requireInteraction: false,
-      vibrate: [100],
-      actions: [
-        { action: 'join', title: 'Join Match' }
-      ]
+      vibrate: [100]
+      // Note: actions are only supported in service worker notifications
     }
     
     const notification = new Notification(title, options)

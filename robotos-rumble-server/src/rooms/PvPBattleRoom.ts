@@ -72,13 +72,25 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   handleReady(client: Client) {
     const player = this.state.players.get(client.sessionId)
-    if (!player) return
+    if (!player) {
+      console.log(`handleReady: Player ${client.sessionId} not found`)
+      return
+    }
     
     player.ready = true
+    console.log(`Player ${client.sessionId} is ready. Total players: ${this.state.players.size}`)
+    
+    // Log all players and their ready status
+    this.state.players.forEach((p, id) => {
+      console.log(`  - ${id}: ready=${p.ready}, hasTeam=${p.team !== "[]"}`)
+    })
     
     // Check if both players are ready
     const allReady = Array.from(this.state.players.values()).every(p => p.ready)
+    console.log(`All ready: ${allReady}, Player count: ${this.state.players.size}`)
+    
     if (allReady && this.state.players.size === 2) {
+      console.log("Starting battle!")
       this.startBattle()
     }
   }

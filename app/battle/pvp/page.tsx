@@ -22,11 +22,13 @@ export default function PvPLobby() {
   const [onlineCount, setOnlineCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: 'speedy' })
   
   useEffect(() => {
+    setMounted(true)
     const savedSettings = localStorage.getItem('battle_settings')
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings))
@@ -151,15 +153,20 @@ export default function PvPLobby() {
       }
       
       // Use joinOrCreate which will automatically handle room creation
-      joinedRoom = await client.joinOrCreate("pvp_battle", {
-        address: address,
-        name: `Player ${address.slice(0, 6)}`,
-        team: JSON.parse(savedTeam),
-        teamSize: settings.teamSize,
-        speed: settings.speed
-      })
+      try {
+        joinedRoom = await client.joinOrCreate("pvp_battle", {
+          address: address,
+          name: `Player ${address.slice(0, 6)}`,
+          team: JSON.parse(savedTeam),
+          teamSize: settings.teamSize,
+          speed: settings.speed
+        })
+      } catch (joinError) {
+        console.error("Failed to join/create room:", joinError)
+        throw joinError
+      }
       
-      console.log('Successfully joined room:', joinedRoom.id)
+      console.log('Successfully joined room:', joinedRoom.roomId)
       
       setRoom(joinedRoom)
       setStatus('connected')
@@ -180,8 +187,13 @@ export default function PvPLobby() {
         }
         
         // Navigate to battle arena with room ID
+        // Use joinedRoom.roomId (not .id)
         setTimeout(() => {
-          router.push(`/battle/pvp/${joinedRoom.id}`)
+          if (joinedRoom?.roomId) {
+            router.push(`/battle/pvp/${joinedRoom.roomId}`)
+          } else {
+            console.error('Room ID is undefined!', { room: joinedRoom, roomId: joinedRoom?.roomId })
+          }
         }, 1000)
       })
       
@@ -230,6 +242,26 @@ export default function PvPLobby() {
     }
   }
   
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return (
+      <PageLayout>
+        <GameHeader
+          title="PvP LOBBY"
+          showBackButton
+          backHref="/battle"
+        />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center py-20">
+              <p className="text-green-400">Initializing PvP Arena...</p>
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    )
+  }
+
   return (
     <PageLayout>
       <GameHeader
@@ -286,16 +318,18 @@ export default function PvPLobby() {
                 <>
                   <h2 className="text-2xl text-green-400 mb-4">READY FOR COMBAT?</h2>
                   
-                  <div className="flex justify-center gap-4 mb-6">
-                    <div className="text-sm">
-                      <span className="text-gray-400">Team Size: </span>
-                      <span className="text-green-400">{settings.teamSize}v{settings.teamSize}</span>
+                  {mounted && (
+                    <div className="flex justify-center gap-4 mb-6">
+                      <div className="text-sm">
+                        <span className="text-gray-400">Team Size: </span>
+                        <span className="text-green-400">{settings.teamSize}v{settings.teamSize}</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-gray-400">Speed: </span>
+                        <span className="text-green-400 uppercase">{settings.speed}</span>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <span className="text-gray-400">Speed: </span>
-                      <span className="text-green-400 uppercase">{settings.speed}</span>
-                    </div>
-                  </div>
+                  )}
                   
                   <Button
                     variant="terminal"
@@ -332,7 +366,7 @@ export default function PvPLobby() {
                       {status === 'connected' ? 'WAITING FOR OPPONENT' : 'SEARCHING FOR OPPONENT'}
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Matching you with a pilot of similar skill...
+                      Looking for another Roboto holder to battle...
                     </p>
                   </div>
                   
@@ -372,8 +406,8 @@ export default function PvPLobby() {
               <div className="flex items-center gap-3">
                 <Clock className="w-8 h-8 text-green-400" />
                 <div>
-                  <p className="text-xs text-gray-400">AVG WAIT TIME</p>
-                  <p className="text-lg text-green-400">~30s</p>
+                  <p className="text-xs text-gray-400">BATTLE TIMER</p>
+                  <p className="text-lg text-green-400">{mounted ? (settings.speed === 'speedy' ? '5s' : '10s') : '---'}</p>
                 </div>
               </div>
             </Card>
@@ -383,7 +417,7 @@ export default function PvPLobby() {
                 <Shield className="w-8 h-8 text-green-400" />
                 <div>
                   <p className="text-xs text-gray-400">MODE</p>
-                  <p className="text-lg text-green-400">RANKED</p>
+                  <p className="text-lg text-green-400">CASUAL</p>
                 </div>
               </div>
             </Card>

@@ -68,6 +68,9 @@ export default function PvPBattlePage() {
       
       setRoom(joinedRoom)
       
+      // Send ready signal
+      joinedRoom.send("ready")
+      
       // Set up room event listeners
       joinedRoom.onStateChange((state) => {
         // Update battle state based on Colyseus state
