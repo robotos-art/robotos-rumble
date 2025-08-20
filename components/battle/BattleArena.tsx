@@ -9,11 +9,27 @@ import type { BattleSettings } from '../../app/battle/page'
 interface BattleArenaProps {
   playerTeam: BattleUnitV3[]
   onBattleEnd: (won: boolean) => void
+  // PvP specific props
+  isPvP?: boolean
+  enemyTeam?: BattleUnitV3[]
+  isPlayerTurn?: boolean
+  serverTimer?: number
+  onAction?: (action: any) => void
+  roomState?: any
 }
 
-export default function BattleArena({ playerTeam, onBattleEnd }: BattleArenaProps) {
-  const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>([])
-  const [loading, setLoading] = useState(true)
+export default function BattleArena({ 
+  playerTeam, 
+  onBattleEnd,
+  isPvP = false,
+  enemyTeam: providedEnemyTeam,
+  isPlayerTurn,
+  serverTimer,
+  onAction,
+  roomState
+}: BattleArenaProps) {
+  const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>(providedEnemyTeam || [])
+  const [loading, setLoading] = useState(!isPvP) // No loading for PvP (teams already provided)
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
     speed: 'speedy'
@@ -29,6 +45,12 @@ export default function BattleArena({ playerTeam, onBattleEnd }: BattleArenaProp
       } catch (e) {
         // Use defaults if parsing fails
       }
+    }
+    
+    // Skip enemy generation for PvP (teams already provided)
+    if (isPvP) {
+      setLoading(false)
+      return
     }
     
     // Generate enemy team from sample database
@@ -77,6 +99,11 @@ export default function BattleArena({ playerTeam, onBattleEnd }: BattleArenaProp
       playerTeam={playerTeam}
       enemyTeam={enemyTeam}
       onBattleEnd={onBattleEnd}
+      isPvP={isPvP}
+      isPlayerTurn={isPlayerTurn}
+      serverTimer={serverTimer}
+      onAction={onAction}
+      roomState={roomState}
     />
   )
 }

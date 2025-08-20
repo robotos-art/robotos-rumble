@@ -9,6 +9,9 @@ import { GameHeader } from '../../../../components/shared/GameHeader'
 import { PageLayout } from '../../../../components/shared/PageLayout'
 import { BattleUnitV3 } from '../../../../lib/game-engine/TraitProcessorV3'
 import { gameSounds } from '../../../../lib/sounds/gameSounds'
+import { BattleNotifications } from '../../../../lib/notifications/battleNotifications'
+import { ConfirmDialog } from '../../../../components/ui/confirm-dialog'
+import { Button } from '../../../../components/ui/button'
 
 export default function PvPBattlePage() {
   const params = useParams()
@@ -23,6 +26,7 @@ export default function PvPBattlePage() {
   const [error, setError] = useState<string | null>(null)
   const [isPlayerTurn, setIsPlayerTurn] = useState(false)
   const [battleStarted, setBattleStarted] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
   
   useEffect(() => {
     if (!roomId || !address) {
@@ -89,6 +93,10 @@ export default function PvPBattlePage() {
         if (data.playerId === joinedRoom.sessionId) {
           setIsPlayerTurn(true)
           gameSounds.play('turnStart')
+          // Show notification if tab is not visible
+          if (document.visibilityState !== 'visible') {
+            BattleNotifications.showYourTurn()
+          }
         } else {
           setIsPlayerTurn(false)
         }
@@ -174,6 +182,20 @@ export default function PvPBattlePage() {
     setIsPlayerTurn(false)
   }
   
+  const handleForfeit = () => {
+    if (room) {
+      room.send("forfeit")
+      room.leave()
+    }
+    gameSounds.play('defeat')
+    router.push('/battle')
+  }
+  
+  const handleExitAttempt = () => {
+    // Show confirmation dialog instead of immediately leaving
+    setShowExitDialog(true)
+  }
+  
   if (loading) {
     return (
       <PageLayout>
@@ -225,17 +247,43 @@ export default function PvPBattlePage() {
   
   return (
     <PageLayout noPadding>
+      {/* Exit button overlay */}
+      <div className="absolute top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExitAttempt}
+          className="border-red-500 text-red-400 hover:bg-red-500/10"
+        >
+          EXIT BATTLE
+        </Button>
+      </div>
+      
       <BattleArena
         playerTeam={playerTeam}
         enemyTeam={enemyTeam}
         isPvP={true}
         isPlayerTurn={isPlayerTurn}
+        serverTimer={room?.state?.turnTimer}
         onAction={handleAction}
         roomState={room?.state}
+        onBattleEnd={(won) => {
+          // Battle end is handled by server
+          console.log('Battle ended, won:', won)
+        }}
+      />
+      
+      {/* Exit confirmation dialog */}
+      <ConfirmDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        title="Leave Battle?"
+        description="Leaving the battle will count as a forfeit and you will lose the match. Are you sure you want to leave?"
+        confirmText="Forfeit Match"
+        cancelText="Continue Fighting"
+        variant="warning"
+        onConfirm={handleForfeit}
       />
     </PageLayout>
   )
 }
-
-// Add Button import that was missing
-import { Button } from '../../../../components/ui/button'

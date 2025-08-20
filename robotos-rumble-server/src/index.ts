@@ -3,6 +3,7 @@ import { WebSocketTransport } from "@colyseus/ws-transport"
 import express from "express"
 import cors from "cors"
 import { PvPBattleRoom } from "./rooms/PvPBattleRoom"
+import { LobbyRoom } from "./rooms/LobbyRoom"
 
 const port = Number(process.env.PORT) || 2567
 
@@ -25,6 +26,9 @@ const gameServer = new Server({
 // Register room handlers
 gameServer.define("pvp_battle", PvPBattleRoom)
   .filterBy(["teamSize", "speed"]) // Allow filtering by battle settings
+
+// Register lobby room for tracking waiting players
+gameServer.define("lobby", LobbyRoom)
 
 console.log(`🤖 Robotos Rumble PvP Server is running on port ${port}`)
 console.log(`🏥 Health: http://localhost:${port}/health`)

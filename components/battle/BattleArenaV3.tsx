@@ -25,6 +25,12 @@ interface BattleArenaV3Props {
   playerTeam: BattleUnitV3[]
   enemyTeam: BattleUnitV3[]
   onBattleEnd: (won: boolean) => void
+  // PvP specific props
+  isPvP?: boolean
+  isPlayerTurn?: boolean
+  serverTimer?: number
+  onAction?: (action: any) => void
+  roomState?: any
 }
 
 type BattlePhase = 'waiting' | 'selecting-action' | 'selecting-target' | 'attack-timing' | 'defending' | 'executing'
@@ -55,7 +61,12 @@ const ABILITY_TIMING_MAP: Record<string, 'charge' | 'spinner' | 'precision'> = {
 export default function BattleArenaV3({
   playerTeam,
   enemyTeam,
-  onBattleEnd
+  onBattleEnd,
+  isPvP = false,
+  isPlayerTurn: serverIsPlayerTurn,
+  serverTimer,
+  onAction: onPvPAction,
+  roomState
 }: BattleArenaV3Props) {
   // Load battle settings
   const [settings, setSettings] = useState<BattleSettings>({
@@ -85,7 +96,10 @@ export default function BattleArenaV3({
 
   // UI state
   const [phase, setPhase] = useState<BattlePhase>('waiting')
-  const [isPlayerTurn, setIsPlayerTurn] = useState(false)
+  // In PvP mode, use server's turn state, otherwise manage locally
+  const [localIsPlayerTurn, setLocalIsPlayerTurn] = useState(false)
+  const isPlayerTurn = isPvP ? (serverIsPlayerTurn ?? false) : localIsPlayerTurn
+  const setIsPlayerTurn = isPvP ? () => {} : setLocalIsPlayerTurn
   const [message, setMessage] = useState<string>('')
   const [pendingAction, setPendingAction] = useState<{
     type: 'attack' | 'ability'
@@ -124,8 +138,19 @@ export default function BattleArenaV3({
   // Timing states
   const [attackScore, setAttackScore] = useState(1.0)
   const [defenseScore, setDefenseScore] = useState(1.0)
+  // Use server timer in PvP mode, local timer otherwise
   const [actionCountdown, setActionCountdown] = useState(timerDuration)
   const [targetCountdown, setTargetCountdown] = useState(timerDuration)
+  
+  // Update countdown from server in PvP mode
+  useEffect(() => {
+    if (isPvP && serverTimer !== undefined) {
+      if (phase === 'selecting-action' || phase === 'selecting-target') {
+        setActionCountdown(serverTimer)
+        setTargetCountdown(serverTimer)
+      }
+    }
+  }, [isPvP, serverTimer, phase])
   const [attackCountdown, setAttackCountdown] = useState(5) // Keep at 5 for timing minigame
   const [defenseActive, setDefenseActive] = useState(false)
   const [defenseCommitted, setDefenseCommitted] = useState(false)
@@ -449,7 +474,48 @@ export default function BattleArenaV3({
     // Get defender's HP BEFORE the attack
     const prevHp = battleEngine.getState().unitStatuses.get(defender.id)?.currentHp || defender.stats.hp
 
-    // Update battle state through the engine with timing bonuses
+    // In PvP mode, send action to server; otherwise execute locally
+    if (isPvP && onPvPAction) {
+      onPvPAction({
+        type: pendingAction?.type || 'attack',
+        sourceId: attacker.id,
+        targetId: defender.id,
+        abilityId: pendingAction?.abilityId,
+        timingBonus: atkScore,
+        defenseBonus: defenseBonus
+      })
+      
+      // Server will handle state updates and send them back
+      // For now, just proceed with animation
+      const actualDamage = 50 // Placeholder, will come from server
+      
+      // Play attack animation
+      if (pendingAction?.abilityId) {
+        gameSounds.play('powerAbility')
+      } else {
+        gameSounds.play('attack')
+      }
+      
+      // Show damage animation
+      setAnimationState({
+        type: 'damage',
+        unitId: defender.id,
+        damage: actualDamage,
+        isCritical: false
+      })
+      
+      // Move to next turn (server handles the actual turn logic)
+      setTimeout(() => {
+        setPhase('waiting')
+        setActiveUnit(null)
+        setTargetUnit(null)
+        setPendingAction(null)
+      }, 2000)
+      
+      return // Exit early for PvP
+    }
+    
+    // Local execution for vs Computer battles
     const result = battleEngine.executeAction({
       type: pendingAction?.type || 'attack',
       sourceId: attacker.id,

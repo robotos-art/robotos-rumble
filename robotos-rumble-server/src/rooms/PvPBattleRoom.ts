@@ -18,6 +18,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Set up message handlers
     this.onMessage("ready", this.handleReady.bind(this))
     this.onMessage("action", this.handleAction.bind(this))
+    this.onMessage("forfeit", this.handleForfeit.bind(this))
     this.onMessage("team", this.handleTeamUpdate.bind(this))
     
     console.log("PvP Battle Room created with settings:", {
@@ -332,6 +333,29 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       // Remove player and reset room
       this.state.players.delete(playerId)
       this.state.status = "waiting"
+    }
+  }
+  
+  private handleForfeit(client: Client) {
+    // Find the other player as the winner
+    let winnerId = ""
+    this.state.players.forEach((player, id) => {
+      if (id !== client.sessionId) {
+        winnerId = id
+      }
+    })
+    
+    // Notify all clients about the forfeit
+    this.broadcast("player-forfeited", {
+      playerId: client.sessionId,
+      playerName: this.state.players.get(client.sessionId)?.name || "Player"
+    })
+    
+    console.log(`${client.sessionId} forfeited the match`)
+    
+    // End the battle with the other player as winner
+    if (winnerId) {
+      this.endBattle(winnerId)
     }
   }
 }

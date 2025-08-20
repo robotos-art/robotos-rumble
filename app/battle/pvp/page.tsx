@@ -8,17 +8,20 @@ import { Button } from '../../../components/ui/button'
 import { Card } from '../../../components/ui/card'
 import { GameHeader } from '../../../components/shared/GameHeader'
 import { PageLayout } from '../../../components/shared/PageLayout'
-import { Users, Swords, Clock, Search, Shield } from 'lucide-react'
+import { Users, Swords, Clock, Search, Shield, Bell } from 'lucide-react'
 import { gameSounds } from '../../../lib/sounds/gameSounds'
+import { BattleNotifications } from '../../../lib/notifications/battleNotifications'
 
 export default function PvPLobby() {
   const router = useRouter()
   const { address, isConnected } = useAccount()
   const [client, setClient] = useState<Client | null>(null)
   const [room, setRoom] = useState<Room | null>(null)
+  const [lobbyRoom, setLobbyRoom] = useState<Room | null>(null)
   const [status, setStatus] = useState<'idle' | 'searching' | 'joining' | 'connected'>('idle')
   const [onlineCount, setOnlineCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: 'speedy' })
@@ -32,16 +35,75 @@ export default function PvPLobby() {
     // Initialize Colyseus client
     // Use localhost for development, will need to update for production
     const wsUrl = process.env.NEXT_PUBLIC_COLYSEUS_URL || 'ws://localhost:2567'
+    console.log('Connecting to Colyseus server at:', wsUrl)
     const colyseusClient = new Client(wsUrl)
     setClient(colyseusClient)
+    
+    // Check notification permission status
+    setNotificationsEnabled(BattleNotifications.isEnabled())
+    
+    // Request notification permission if not already asked
+    const checkNotifications = async () => {
+      const notifSetting = localStorage.getItem('pvp_notifications_asked')
+      if (!notifSetting && isConnected) {
+        // Wait a second before asking for permissions
+        setTimeout(() => {
+          requestNotificationPermission()
+        }, 1000)
+      }
+    }
+    checkNotifications()
+    
+    // Join lobby room to track waiting players
+    const joinLobby = async () => {
+      if (!colyseusClient || !isConnected) return
+      
+      try {
+        const lobby = await colyseusClient.joinOrCreate("lobby")
+        setLobbyRoom(lobby)
+        
+        // Listen for lobby updates
+        lobby.onStateChange((state) => {
+          setOnlineCount(state.totalOnline || 0)
+        })
+        
+        // Listen for players looking for matches
+        lobby.onMessage("player-looking", (data) => {
+          // Show notification if we're not searching and settings match
+          if (status === 'idle' && data.teamSize === settings.teamSize && data.speed === settings.speed) {
+            BattleNotifications.showPlayerWaiting(data)
+          }
+        })
+        
+        // Listen for existing waiting players
+        lobby.onMessage("players-waiting", (players) => {
+          // Check if any match our settings
+          const matching = players.find((p: any) => 
+            p.teamSize === settings.teamSize && p.speed === settings.speed
+          )
+          if (matching && status === 'idle') {
+            BattleNotifications.showPlayerWaiting({ teamSize: matching.teamSize, speed: matching.speed })
+          }
+        })
+      } catch (err) {
+        console.error("Failed to join lobby:", err)
+      }
+    }
+    
+    if (isConnected) {
+      joinLobby()
+    }
     
     // Cleanup on unmount
     return () => {
       if (room) {
         room.leave()
       }
+      if (lobbyRoom) {
+        lobbyRoom.leave()
+      }
     }
-  }, [])
+  }, [isConnected])
   
   const findMatch = async () => {
     if (!client || !isConnected || !address) {
@@ -67,46 +129,55 @@ export default function PvPLobby() {
       setError(null)
       gameSounds.play('menuNavigate')
       
-      // Try to join existing room or create new one
-      const availableRooms = await client.getAvailableRooms("pvp_battle")
+      console.log('Attempting to join/create room with settings:', {
+        teamSize: settings.teamSize,
+        speed: settings.speed,
+        address: address
+      })
       
+      // Try to join or create a room
       let joinedRoom: Room | null = null
       
-      // Try to join a room with matching settings
-      const matchingRoom = availableRooms.find(room => 
-        room.metadata?.teamSize === settings.teamSize &&
-        room.metadata?.speed === settings.speed &&
-        room.clients < 2
-      )
+      setStatus('joining')
       
-      if (matchingRoom) {
-        setStatus('joining')
-        joinedRoom = await client.joinById(matchingRoom.roomId, {
+      // Notify lobby that we're looking for a match
+      if (lobbyRoom) {
+        lobbyRoom.send("start-waiting", {
           address: address,
           name: `Player ${address.slice(0, 6)}`,
-          team: JSON.parse(savedTeam),
-          teamSize: settings.teamSize,
-          speed: settings.speed
-        })
-      } else {
-        // Create new room
-        setStatus('joining')
-        joinedRoom = await client.create("pvp_battle", {
-          address: address,
-          name: `Player ${address.slice(0, 6)}`,
-          team: JSON.parse(savedTeam),
           teamSize: settings.teamSize,
           speed: settings.speed
         })
       }
       
+      // Use joinOrCreate which will automatically handle room creation
+      joinedRoom = await client.joinOrCreate("pvp_battle", {
+        address: address,
+        name: `Player ${address.slice(0, 6)}`,
+        team: JSON.parse(savedTeam),
+        teamSize: settings.teamSize,
+        speed: settings.speed
+      })
+      
+      console.log('Successfully joined room:', joinedRoom.id)
+      
       setRoom(joinedRoom)
       setStatus('connected')
+      
+      // Notify lobby that we're now in a match
+      if (lobbyRoom) {
+        lobbyRoom.send("stop-waiting")
+      }
       
       // Set up room event listeners
       joinedRoom.onMessage("match-ready", (message) => {
         gameSounds.play('menuAccept')
         console.log("Match ready!", message)
+        
+        // Show notification if tab is not visible
+        if (document.visibilityState !== 'visible') {
+          BattleNotifications.showMatchFound()
+        }
         
         // Navigate to battle arena with room ID
         setTimeout(() => {
@@ -127,9 +198,10 @@ export default function PvPLobby() {
       // Send ready signal
       joinedRoom.send("ready")
       
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to join room:", err)
-      setError('Failed to connect to battle server')
+      const errorMessage = err.message || 'Failed to connect to battle server'
+      setError(`Connection error: ${errorMessage}`)
       setStatus('idle')
       gameSounds.play('cancel')
     }
@@ -140,8 +212,22 @@ export default function PvPLobby() {
       room.leave()
       setRoom(null)
     }
+    // Notify lobby we stopped waiting
+    if (lobbyRoom) {
+      lobbyRoom.send("stop-waiting")
+    }
     setStatus('idle')
     gameSounds.play('cancel')
+  }
+  
+  const requestNotificationPermission = async () => {
+    const granted = await BattleNotifications.requestPermission()
+    setNotificationsEnabled(granted)
+    localStorage.setItem('pvp_notifications_asked', 'true')
+    
+    if (granted) {
+      gameSounds.play('menuAccept')
+    }
   }
   
   return (
@@ -154,6 +240,31 @@ export default function PvPLobby() {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          
+          {/* Notification Permission Banner */}
+          {!notificationsEnabled && isConnected && (
+            <Card className="bg-yellow-500/10 border-yellow-500/50 p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-yellow-500" />
+                  <div>
+                    <p className="text-yellow-500 font-bold">Enable Battle Notifications</p>
+                    <p className="text-xs text-yellow-500/80">
+                      Get notified when players are looking for matches, even when you're not on this tab!
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={requestNotificationPermission}
+                  className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10"
+                >
+                  Enable Notifications
+                </Button>
+              </div>
+            </Card>
+          )}
           
           {/* Connection Status */}
           <div className="mb-6 text-center">
