@@ -52,16 +52,11 @@ export default function BattleSelect() {
   const handleModeSelect = (mode: 'computer' | 'player') => {
     gameSounds.playConfirm()
     
-    if (mode === 'player') {
-      // Navigate to PvP lobby
-      router.push('/battle/pvp')
-      return
-    }
-    
     // Save settings before navigating
     localStorage.setItem('battle_settings', JSON.stringify(settings))
+    localStorage.setItem('battle_mode', mode)
     
-    // Always go to team builder for computer mode
+    // Both modes go to team builder first
     // Team builder will handle existing teams
     setTimeout(() => {
       router.push('/team-builder')

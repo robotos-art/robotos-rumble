@@ -326,7 +326,13 @@ export default function TeamBuilder() {
 
     // Navigate to battle vs computer
     setTimeout(() => {
-      router.push('/battle/training')
+      // Check battle mode and navigate accordingly
+      const battleMode = localStorage.getItem('battle_mode')
+      if (battleMode === 'player') {
+        router.push('/battle/pvp')
+      } else {
+        router.push('/battle/training')
+      }
     }, 200)
   }, [selectedTeam, router])
 
