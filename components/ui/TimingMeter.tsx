@@ -126,6 +126,13 @@ export default function TimingMeter({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [active, hasInput, disabled, handleInput])
 
+  // Handle click/tap for mobile
+  const handleTapInput = useCallback(() => {
+    if (active && !hasInput && !disabled) {
+      handleInput()
+    }
+  }, [active, hasInput, disabled, handleInput])
+
   // Get zone color based on position
   const getZoneColor = (pos: number) => {
     const distance = Math.abs(pos - 50)
@@ -228,9 +235,29 @@ export default function TimingMeter({
             {type === 'attack' && <span className="text-sm"> {`${(score * 100).toFixed(0)}% power`}</span>}
           </motion.div>
         ) : (
-          <div className="text-sm text-gray-400">
-            Press <span className="text-white font-bold">SPACE</span> to {type === 'attack' ? 'attack' : 'defend'}!
-          </div>
+          <>
+            {/* Desktop instructions */}
+            <div className="hidden sm:block text-sm text-gray-400">
+              Press <span className="text-white font-bold">SPACE</span> to {type === 'attack' ? 'attack' : 'defend'}!
+            </div>
+            {/* Mobile tap button */}
+            <button
+              onClick={handleTapInput}
+              disabled={!active || hasInput || disabled}
+              className={cn(
+                "sm:hidden w-full py-4 px-6 rounded-lg font-bold text-lg transition-all",
+                "bg-green-900/50 border-2 border-green-500",
+                "active:scale-95 active:bg-green-800/50",
+                disabled && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              TAP TO {type === 'attack' ? 'ATTACK' : 'DEFEND'}!
+            </button>
+            {/* Mobile instructions */}
+            <div className="sm:hidden text-xs text-gray-500 mt-1">
+              Tap when the bar is in the center!
+            </div>
+          </>
         )}
       </div>
     </motion.div>

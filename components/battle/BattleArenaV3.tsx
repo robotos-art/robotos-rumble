@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAccount } from 'wagmi'
 import { cn } from '../../lib/utils'
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
+import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3'
 import { BattleEngineV3 } from '../../lib/game-engine/BattleEngineV3'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import RobotoUnit from './RobotoUnit'
@@ -19,6 +20,7 @@ import LightRays from '../backgrounds/LightRays'
 import Galaxy from '../backgrounds/Galaxy'
 import Aurora from '../backgrounds/Aurora'
 import type { BattleSettings } from '../../app/battle/page'
+import type { BattleRecord } from '../../lib/storage/types'
 import { useBackground } from '../shared/BackgroundSelector'
 
 interface BattleArenaV3Props {
@@ -68,6 +70,8 @@ export default function BattleArenaV3({
   onAction: onPvPAction,
   roomState
 }: BattleArenaV3Props) {
+  const { address } = useAccount()
+  
   // Load battle settings
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
@@ -87,6 +91,11 @@ export default function BattleArenaV3({
   
   // Calculate timer duration based on speed setting
   const timerDuration = settings.speed === 'calm' ? 10 : 5
+  
+  // Battle tracking for stats
+  const battleStartTime = useRef<number>(Date.now())
+  const totalDamageDealt = useRef<number>(0)
+  const totalDamageReceived = useRef<number>(0)
   
   // Battle state
   const [battleEngine] = useState(() => new BattleEngineV3())
@@ -134,6 +143,16 @@ export default function BattleArenaV3({
 
   // UI focus state
   const [focusedActionIndex, setFocusedActionIndex] = useState(0)
+  
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Timing states
   const [attackScore, setAttackScore] = useState(1.0)
@@ -269,35 +288,133 @@ export default function BattleArenaV3({
     // Get fresh state
     const currentState = battleEngine.getState()
 
-    // Simple AI: randomly select a player unit to attack
+    // Get alive targets
     const aliveTargets = playerTeam.filter(u => currentState.unitStatuses.get(u.id)?.isAlive)
     if (aliveTargets.length === 0) return
 
-    const target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    // Smarter AI target selection
+    let target: BattleUnitV3
+    const aiIntelligence = Math.random() // Random intelligence level for variety
+    
+    if (aiIntelligence > 0.7) {
+      // Smart AI (30% chance): Target based on strategy
+      const targetsWithHealth = aliveTargets.map(t => ({
+        unit: t,
+        hp: currentState.unitStatuses.get(t.id)?.currentHp || 0,
+        maxHp: t.stats.hp,
+        hpPercent: ((currentState.unitStatuses.get(t.id)?.currentHp || 0) / t.stats.hp) * 100
+      }))
+      
+      // Prioritize low health targets (under 30% HP)
+      const lowHealthTargets = targetsWithHealth.filter(t => t.hpPercent < 30)
+      if (lowHealthTargets.length > 0) {
+        target = lowHealthTargets[0].unit
+      } else {
+        // Otherwise target the highest damage dealer
+        target = aliveTargets.reduce((prev, curr) => 
+          curr.stats.attack > prev.stats.attack ? curr : prev
+        )
+      }
+    } else if (aiIntelligence > 0.4) {
+      // Medium AI (30% chance): Consider element advantages
+      // Simple element advantage check (SURGE > METAL, CODE > SURGE, METAL > GLITCH, GLITCH > CODE)
+      const hasAdvantage = (attacker: string, defender: string): boolean => {
+        if (attacker === 'SURGE' && defender === 'METAL') return true
+        if (attacker === 'CODE' && defender === 'SURGE') return true
+        if (attacker === 'METAL' && defender === 'GLITCH') return true
+        if (attacker === 'GLITCH' && defender === 'CODE') return true
+        return false
+      }
+      
+      const advantageTargets = aliveTargets.filter(t => hasAdvantage(unit.element, t.element))
+      target = advantageTargets.length > 0 
+        ? advantageTargets[Math.floor(Math.random() * advantageTargets.length)]
+        : aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    } else {
+      // Basic AI (40% chance): Random selection (original behavior)
+      target = aliveTargets[Math.floor(Math.random() * aliveTargets.length)]
+    }
+
     setTargetUnit(target)
     setDefendingUnitId(target.id)
     setAttackingUnitId(unit.id)
 
-    showMessage(`${unit.name} is attacking ${target.name}!`)
+    // Determine if AI will use ability or basic attack
+    const availableAbilities = battleEngine.getAvailableAbilities(unit.id)
+      .filter(a => battleEngine.canUseAbility(unit.id, a.id))
+    
+    const willUseAbility = availableAbilities.length > 0 && Math.random() < 0.35 // 35% chance to use ability
+    const selectedAbility = willUseAbility ? availableAbilities[Math.floor(Math.random() * availableAbilities.length)] : null
 
-    // AI takes 1-2 seconds to "decide" and attack
-    // During this time, player can time their defense
-    const aiDelay = 1500 + Math.random() * 1000 // 1.5-2.5 seconds
+    // Show attack message with attack type
+    if (selectedAbility) {
+      showMessage(`${unit.name} prepares ${selectedAbility.ability.name}!`)
+    } else {
+      // Pick a random basic attack name based on element
+      const attackNames = getElementAttackNames(unit.element)
+      const attackName = attackNames[Math.floor(Math.random() * attackNames.length)]
+      showMessage(`${unit.name} uses ${attackName}!`)
+    }
+
+    // AI delay varies based on "thinking" time
+    const aiDelay = 1200 + Math.random() * 1300 // 1.2-2.5 seconds
 
     setTimeout(() => {
       setPhase('executing')
 
-      // AI has random timing skill
-      const aiAttackScore = 1.0 + Math.random() * 0.3 // 1.0-1.3x
+      // Improved AI timing skill based on battle progress
+      const turnNumber = currentState.turn || 1
+      const difficultyScale = Math.min(turnNumber / 10, 1) // Scales up over 10 turns
+      
+      // Better timing as battle progresses
+      const baseScore = timerDuration === 5 ? 1.2 : 1.0 // Speedy mode gets better base
+      const skillRange = timerDuration === 5 ? 0.6 : 0.5 // Speedy: 1.2-1.8x, Calm: 1.0-1.5x
+      const aiAttackScore = baseScore + (Math.random() * skillRange * (0.5 + difficultyScale * 0.5))
+      
+      // Occasionally hit perfect timing (5% chance)
+      const perfectHit = Math.random() < 0.05
+      const finalAttackScore = perfectHit ? 2.0 : aiAttackScore
 
       // Use player's defense score if they defended, otherwise weak defense
       const finalDefenseScore = defenseCommitted ? defenseScore : 0.8
 
-      executeAttack(unit, target, aiAttackScore, finalDefenseScore)
+      // Store the action for executeAttack
+      if (selectedAbility) {
+        setPendingAction({
+          type: 'ability',
+          abilityId: selectedAbility.id
+        })
+      } else {
+        setPendingAction({
+          type: 'attack'
+        })
+      }
+
+      executeAttack(unit, target, finalAttackScore, finalDefenseScore)
     }, aiDelay)
   }
 
-  const handleBattleEnd = (won: boolean) => {
+  // Helper function to get attack names based on element
+  const getElementAttackNames = (element: string): string[] => {
+    switch(element.toUpperCase()) {
+      case 'SURGE':
+        return ['Lightning Strike', 'Thunder Bolt', 'Electric Surge', 'Volt Tackle']
+      case 'CODE':
+        return ['Data Breach', 'System Crash', 'Binary Blast', 'Firewall Break']
+      case 'METAL':
+        return ['Iron Bash', 'Steel Strike', 'Metal Claw', 'Titanium Punch']
+      case 'GLITCH':
+        return ['Chaos Strike', 'Corruption Wave', 'Error Cascade', 'System Glitch']
+      case 'BOND':
+        return ['Unity Strike', 'Harmony Blast', 'Friendship Power', 'Loyalty Attack']
+      case 'WILD':
+        return ['Primal Strike', 'Feral Claw', 'Nature\'s Wrath', 'Savage Bite']
+      default:
+        return ['Basic Strike', 'Quick Attack', 'Standard Blow', 'Normal Hit']
+    }
+  }
+
+  const handleBattleEnd = async (won: boolean) => {
     setPhase('waiting')
     if (won) {
       gameSounds.play('victory')
@@ -305,6 +422,59 @@ export default function BattleArenaV3({
     } else {
       gameSounds.play('defeat')
       showMessage('DEFEAT... Better luck next time.', 0)
+    }
+
+    // Save battle results if player is connected
+    if (address) {
+      try {
+        const battleDuration = Math.floor((Date.now() - battleStartTime.current) / 1000)
+        
+        const battleData: BattleRecord = {
+          id: `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          playerAddress: address,
+          timestamp: new Date().toISOString(),
+          result: won ? 'victory' : 'defeat',
+          duration: battleDuration,
+          teamUsed: playerTeam.map(u => ({
+            id: u.id,
+            name: u.name,
+            element: u.element,
+            type: u.type
+          })),
+          enemyTeam: enemyTeam.map(u => ({
+            id: u.id,
+            name: u.name,
+            element: u.element,
+            type: u.type
+          })),
+          damageDealt: totalDamageDealt.current,
+          damageReceived: totalDamageReceived.current,
+          elementsUsed: Array.from(new Set(playerTeam.map(u => u.element)))
+        }
+        
+        const response = await fetch('/api/battles/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(battleData)
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          
+          // Show achievements if any
+          if (result.newAchievements?.length > 0) {
+            // TODO: Show achievement notifications
+            console.log('New achievements unlocked:', result.newAchievements)
+          }
+          
+          if (result.newBadges?.length > 0) {
+            // TODO: Show badge notifications
+            console.log('New badges earned:', result.newBadges)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to save battle results:', error)
+      }
     }
 
     setTimeout(() => {
@@ -317,9 +487,10 @@ export default function BattleArenaV3({
     setPhase('selecting-target')
     setTargetCountdown(timerDuration)
 
-    // Preselect first alive enemy
+    // Pre-select first alive enemy for keyboard navigation
+    // But still wait for full timer before auto-confirming
     const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
-    if (aliveEnemies.length > 0 && !targetUnit) {
+    if (aliveEnemies.length > 0) {
       setTargetUnit(aliveEnemies[0])
     }
 
@@ -328,7 +499,7 @@ export default function BattleArenaV3({
       clearInterval(actionIntervalRef.current)
       actionIntervalRef.current = null
     }
-  }, [battleState, enemyTeam, targetUnit])
+  }, [battleState, timerDuration, enemyTeam])
 
   const handleAbility = (abilityIndex: number) => {
     const abilityId = currentUnit?.abilities[abilityIndex]
@@ -336,10 +507,12 @@ export default function BattleArenaV3({
 
     setPendingAction({ type: 'ability', abilityId })
     setPhase('selecting-target')
+    setTargetCountdown(timerDuration)
 
-    // Preselect first alive enemy
+    // Pre-select first alive enemy for keyboard navigation
+    // But still wait for full timer before auto-confirming
     const aliveEnemies = enemyTeam.filter(u => battleState.unitStatuses.get(u.id)?.isAlive)
-    if (aliveEnemies.length > 0 && !targetUnit) {
+    if (aliveEnemies.length > 0) {
       setTargetUnit(aliveEnemies[0])
     }
   }
@@ -455,6 +628,13 @@ export default function BattleArenaV3({
   }
 
   const executeAttack = (attacker: BattleUnitV3, defender: BattleUnitV3, atkScore: number = 1.0, defScore: number = 1.0) => {
+    
+    // Get attack/ability name for display
+    let attackName = 'Basic Attack'
+    if (pendingAction?.type === 'ability' && pendingAction.abilityId) {
+      const abilityData = TraitProcessorV3.getAbilityData(pendingAction.abilityId)
+      attackName = abilityData?.name || 'Special Attack'
+    }
 
     // Get positions for animation
     const attackerPos = getUnitPosition(attacker.id)
@@ -533,6 +713,16 @@ export default function BattleArenaV3({
     // Calculate actual damage dealt for display
     const targetStatus = newState.unitStatuses.get(defender.id)
     const actualDamage = prevHp - (targetStatus?.currentHp || 0)
+    
+    // Track damage for stats
+    if (actualDamage > 0) {
+      const isPlayerAttacking = playerTeam.some(u => u.id === attacker.id)
+      if (isPlayerAttacking) {
+        totalDamageDealt.current += actualDamage
+      } else {
+        totalDamageReceived.current += actualDamage
+      }
+    }
 
     // Play attack sound based on damage amount
     if (actualDamage === 0) {
@@ -613,10 +803,19 @@ export default function BattleArenaV3({
       }, 1500)
     }, 500) // 500ms projectile travel time
 
+    // Show what attack was used (especially for enemy attacks)
+    const isPlayerAttacking = playerTeam.some(u => u.id === attacker.id)
+    if (!isPlayerAttacking && actualDamage > 0) {
+      const attackMessage = `${attacker.name} used ${attackName} for ${actualDamage} damage!`
+      showMessage(attackMessage)
+    }
+
     // Check if defender was defeated
     if (!targetStatus?.isAlive) {
-      showMessage(`${defender.name} has been defeated!`)
-      gameSounds.play('defeat')
+      setTimeout(() => {
+        showMessage(`${defender.name} has been defeated!`)
+        gameSounds.play('defeat')
+      }, 1000)
     }
 
     // Reset states and continue to next turn
@@ -662,7 +861,15 @@ export default function BattleArenaV3({
   const isUnitActive = (unitId: string) => currentUnit?.id === unitId
   const isUnitAttacking = (unitId: string) => attackingUnitId === unitId
   const isUnitDefending = (unitId: string) => defendingUnitId === unitId
-  const isUnitTarget = (unitId: string) => targetUnit?.id === unitId && phase === 'selecting-target'
+  const isUnitTarget = (unitId: string) => {
+    // Show unit as selected/selectable during target phase
+    const isEnemy = enemyTeam.some(u => u.id === unitId)
+    if (phase === 'selecting-target' && isEnemy && isAlive(unitId)) {
+      // Show the selected target
+      return targetUnit?.id === unitId
+    }
+    return false
+  }
   const isAlive = (unitId: string) => battleState.unitStatuses.get(unitId)?.isAlive ?? true
 
   // Handle action countdown
@@ -685,7 +892,8 @@ export default function BattleArenaV3({
     if (phase === 'selecting-target' && targetCountdown > 0) {
       const timer = setTimeout(() => {
         if (targetCountdown === 1) {
-          // Auto-confirm target on timeout
+          // Auto-confirm whatever target is selected on timeout
+          // (Target should already be pre-selected from handleAttack/handleAbility)
           handleTargetConfirm()
         } else {
           setTargetCountdown(targetCountdown - 1)
@@ -812,25 +1020,26 @@ export default function BattleArenaV3({
       </div>
 
       {/* Battle Arena */}
-      <div className="flex-1 relative overflow-hidden pb-32">
+      <div className="flex-1 relative overflow-hidden pb-32 pt-16 sm:pt-0 z-0">
 
-        {/* Battle Field */}
-        <div className="h-full flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-          {/* Player Team */}
-          <div className="grid grid-rows-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
-            {/* Back row (3 units) */}
-            <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5">
+        {/* Battle Field - Responsive: Vertical on mobile, Horizontal on desktop */}
+        <div className="h-full flex flex-col-reverse sm:flex-row items-center justify-between px-2 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 relative z-0">
+          {/* Player Team - Bottom on mobile, Left on desktop */}
+          <div className="grid grid-rows-2 gap-4 sm:gap-4 md:gap-6 lg:gap-8 mb-8 sm:mb-0">
+            {/* Mobile: Back row (3 units behind), Desktop: Back row (3 units) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 order-2 sm:order-1">
               {playerTeam.slice(0, 3).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? 20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? 20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? -10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <div data-unit-id={unit.id} className="inline-block">
                       <RobotoUnit
@@ -854,7 +1063,7 @@ export default function BattleArenaV3({
                           animate={{ opacity: 1, y: -30 }}
                           exit={{ opacity: 0 }}
                           className={cn(
-                            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-center whitespace-nowrap",
+                            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-center whitespace-nowrap z-[100] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]",
                             damage.type === 'miss' && "text-gray-400",
                             damage.type === 'normal' && "text-yellow-400",
                             damage.type === 'critical' && "text-red-500",
@@ -874,19 +1083,20 @@ export default function BattleArenaV3({
                 )
               })}
             </div>
-            {/* Front row (2 units) */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto">
+            {/* Mobile: Front row (2 units in front), Desktop: Front row (2 units) */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto order-1 sm:order-2">
               {playerTeam.slice(3, 5).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? 20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? 20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? -10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <RobotoUnit
                       unit={unit}
@@ -929,21 +1139,22 @@ export default function BattleArenaV3({
             </div>
           </div>
 
-          {/* Enemy Team */}
-          <div className="grid grid-rows-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
-            {/* Back row (3 units) */}
-            <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5">
+          {/* Enemy Team - Top on mobile, Right on desktop */}
+          <div className="grid grid-rows-2 gap-4 sm:gap-4 md:gap-6 lg:gap-8 mt-8 sm:mt-0">
+            {/* Mobile: Back row (3 units behind), Desktop: Back row (3 units) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 order-2 sm:order-1">
               {enemyTeam.slice(0, 3).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? -20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? -20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? 10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <div data-unit-id={unit.id} className="inline-block">
                       <RobotoUnit
@@ -988,19 +1199,20 @@ export default function BattleArenaV3({
                 )
               })}
             </div>
-            {/* Front row (2 units) */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto">
+            {/* Mobile: Front row (2 units in front), Desktop: Front row (2 units) */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5 mx-auto order-1 sm:order-2">
               {enemyTeam.slice(3, 5).map((unit, index) => {
                 const status = battleState.unitStatuses.get(unit.id)
                 return (
                   <motion.div
                     key={unit.id}
                     animate={{
-                      x: isUnitActive(unit.id) ? -20 : 0,
+                      x: isMobile ? 0 : (isUnitActive(unit.id) ? -20 : 0),
+                      y: isMobile ? (isUnitActive(unit.id) ? 10 : 0) : 0,
                       scale: isUnitAttacking(unit.id) ? 1.1 : 1
                     }}
                     className="relative"
-                    style={{ zIndex: isUnitDefending(unit.id) ? 20 : isUnitActive(unit.id) ? 10 : 1 }}
+                    style={{ zIndex: isUnitDefending(unit.id) ? 5 : isUnitActive(unit.id) ? 3 : 1 }}
                   >
                     <RobotoUnit
                       unit={unit}
@@ -1053,7 +1265,8 @@ export default function BattleArenaV3({
             : 'precision' // Default for basic attacks
 
           return (
-            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-96 bg-black/90 p-4 rounded-lg border-2 border-green-800 z-50">
+            <div className="absolute top-1/2 sm:bottom-32 sm:top-auto left-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-y-0 w-full sm:w-96 max-w-sm px-4 sm:px-0 z-50">
+              <div className="bg-black/90 p-4 rounded-lg border-2 border-green-800">
               {timingType === 'charge' ? (
                 <TimingMeterCharge
                   active={phase === 'attack-timing'}
@@ -1080,20 +1293,23 @@ export default function BattleArenaV3({
                   keepVisibleAfterInput={true}
                 />
               )}
+              </div>
             </div>
           )
         })()}
 
         {/* Defense Timing Meter */}
         {phase === 'defending' && defenseActive && (
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 w-96 bg-black/90 p-4 rounded-lg border-2 border-yellow-800 z-50">
-            <TimingMeter
-              active={!defenseCommitted}
-              onInput={handleDefenseTiming}
-              type="defense"
-              showCountdown={false}
-              keepVisibleAfterInput={true}
-            />
+          <div className="absolute top-1/2 sm:top-32 left-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-y-0 w-full sm:w-96 max-w-sm px-4 sm:px-0">
+            <div className="bg-black/90 p-4 rounded-lg border-2 border-yellow-800 z-50">
+              <TimingMeter
+                active={!defenseCommitted}
+                onInput={handleDefenseTiming}
+                type="defense"
+                showCountdown={false}
+                keepVisibleAfterInput={true}
+              />
+            </div>
           </div>
         )}
 

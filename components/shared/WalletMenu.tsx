@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { useAccount, useDisconnect, useEnsName } from 'wagmi'
 import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext'
-import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle } from 'lucide-react'
+import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle, Trophy, User } from 'lucide-react'
 import { Button } from '../ui/button'
 import { TutorialDialog } from './TutorialDialog'
 
@@ -75,11 +76,15 @@ export function WalletMenu() {
       <Button
         variant="terminal"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-2 px-4 py-2"
+        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 h-9 md:h-10 group"
       >
-        <Wallet className="w-4 h-4" />
-        <span className="font-mono">{displayName}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        <Wallet className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
+        {/* Only show shortened address on mobile, full ENS/address on desktop */}
+        <span className="font-mono text-xs sm:text-sm text-green-500/60 group-hover:text-green-400 transition-colors">
+          <span className="sm:hidden">{addressShortened}</span>
+          <span className="hidden sm:inline">{displayName}</span>
+        </span>
+        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-green-500/60 group-hover:text-green-400 transition-all ${showDropdown ? 'rotate-180' : ''}`} />
       </Button>
       
       {showDropdown && (
@@ -100,7 +105,11 @@ export function WalletMenu() {
               {/* Wallet Address */}
               <div className="p-6 border-b border-green-500/30">
                 <p className="text-sm text-green-400 mb-2">CONNECTED WALLET</p>
-                <p className="font-mono text-green-500 break-all">
+                <Link 
+                  href={`/profile/${address}`}
+                  onClick={() => setShowDropdown(false)}
+                  className="block font-mono text-green-500 break-all mb-4 hover:text-green-400 transition-colors"
+                >
                   {ensName ? (
                     <>
                       <span className="text-green-300 text-lg">{ensName}</span>
@@ -110,7 +119,15 @@ export function WalletMenu() {
                   ) : (
                     address
                   )}
-                </p>
+                </Link>
+                <Link
+                  href={`/profile/${address}`}
+                  onClick={() => setShowDropdown(false)}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 text-base bg-green-500/10 hover:bg-green-500/20 rounded transition-colors text-green-400"
+                >
+                  <User className="w-5 h-5" />
+                  <span>View Profile</span>
+                </Link>
               </div>
               
               {/* Collection */}
@@ -140,6 +157,15 @@ export function WalletMenu() {
               
               {/* Actions */}
               <div className="p-6">
+                <Link
+                  href="/leaderboard"
+                  onClick={() => setShowDropdown(false)}
+                  className="flex items-center justify-between w-full px-4 py-3 text-base hover:bg-green-500/10 rounded transition-colors mb-3"
+                >
+                  <span>Leaderboard</span>
+                  <Trophy className="w-5 h-5 text-green-400" />
+                </Link>
+                
                 <button
                   onClick={() => {
                     setShowTutorial(true)
@@ -180,7 +206,11 @@ export function WalletMenu() {
             {/* Wallet Address */}
             <div className="p-4 border-b border-green-500/30">
               <p className="text-xs text-green-400 mb-1">Connected Wallet</p>
-              <p className="font-mono text-sm text-green-500 break-all">
+              <Link 
+                href={`/profile/${address}`}
+                onClick={() => setShowDropdown(false)}
+                className="block font-mono text-sm text-green-500 break-all mb-3 hover:text-green-400 transition-colors"
+              >
                 {ensName ? (
                   <>
                     <span className="text-green-300">{ensName}</span>
@@ -190,7 +220,15 @@ export function WalletMenu() {
                 ) : (
                   address
                 )}
-              </p>
+              </Link>
+              <Link
+                href={`/profile/${address}`}
+                onClick={() => setShowDropdown(false)}
+                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm bg-green-500/10 hover:bg-green-500/20 rounded transition-colors text-green-400"
+              >
+                <User className="w-4 h-4" />
+                <span>View Profile</span>
+              </Link>
             </div>
             
             {/* Collection */}
@@ -220,12 +258,21 @@ export function WalletMenu() {
             
             {/* Actions */}
             <div className="p-2">
+              <Link
+                href="/leaderboard"
+                onClick={() => setShowDropdown(false)}
+                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors"
+              >
+                <span>Leaderboard</span>
+                <Trophy className="w-4 h-4 text-green-400" />
+              </Link>
+              
               <button
                 onClick={() => {
                   setShowTutorial(true)
                   setShowDropdown(false)
                 }}
-                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors"
+                className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors mt-1"
               >
                 <span>Game Help</span>
                 <HelpCircle className="w-4 h-4 text-green-400" />

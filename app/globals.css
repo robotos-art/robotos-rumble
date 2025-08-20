@@ -16,8 +16,8 @@
     --primary: 120 100% 50%;
     --primary-foreground: 0 0% 0%;
     
-    --secondary: 39 100% 50%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 120 20% 15%;
+    --secondary-foreground: 120 100% 50%;
     
     --muted: 120 20% 15%;
     --muted-foreground: 120 60% 70%;
@@ -106,6 +106,14 @@
     0 0 6px currentColor;
 }
 
+.glow-lg {
+  text-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 30px currentColor,
+    0 0 40px currentColor;
+}
+
 /* Terminal Cursor */
 .terminal-cursor::after {
   content: "█";
@@ -129,6 +137,59 @@
   40% { transform: translate(1px, -1px); }
   60% { transform: translate(-1px, 0); }
   80% { transform: translate(1px, 0); }
+}
+
+/* Cyber Glitch Animations */
+.animate-glitch-1 {
+  animation: glitch-1 3s infinite;
+}
+
+.animate-glitch-2 {
+  animation: glitch-2 2.5s infinite;
+}
+
+@keyframes glitch-1 {
+  0%, 100% { 
+    transform: translate(0);
+    opacity: 0;
+  }
+  20% { 
+    transform: translate(-2px, 0);
+    opacity: 0.3;
+  }
+  21% {
+    transform: translate(2px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes glitch-2 {
+  0%, 100% { 
+    transform: translate(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(1px, 0);
+    opacity: 0.2;
+  }
+  51% {
+    transform: translate(-1px, 0);
+    opacity: 0;
+  }
+}
+
+/* Scanline Animation */
+.animate-scan {
+  animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 /* Terminal Button */
@@ -180,4 +241,37 @@
 
 .slide-in-from-top-1 {
   animation-name: slide-in-from-top-1;
+}
+
+/* Custom Checkbox Styling */
+.companion-checkbox {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  background: black;
+  border: 2px solid rgba(234, 179, 8, 0.5);
+  border-radius: 0.125rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.companion-checkbox:checked {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: rgb(234, 179, 8);
+}
+
+.companion-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 1px;
+  color: rgb(234, 179, 8);
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.companion-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

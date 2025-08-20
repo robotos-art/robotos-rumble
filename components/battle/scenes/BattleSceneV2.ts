@@ -575,13 +575,71 @@ export class BattleSceneV2 extends Phaser.Scene {
   private startEnemyTurn(unit: BattleUnitV3) {
     // AI turn - execute after a short delay
     this.time.delayedCall(1000, () => {
+      // Get the last battle log entries before and after AI turn
+      const logBefore = this.battleEngine.getState().battleLog.length
+      
       this.battleEngine.executeAITurn()
+      
+      // Check for new battle events and display attack name
+      const logAfter = this.battleEngine.getState().battleLog
+      if (logAfter.length > logBefore) {
+        const newEvents = logAfter.slice(logBefore)
+        // Find the attack/ability event
+        const attackEvent = newEvents.find(e => 
+          e.type === 'ability' && e.description.includes('uses')
+        )
+        
+        if (attackEvent) {
+          // Display the attack name as floating text
+          this.showAttackName(attackEvent.description)
+        }
+      }
+      
       // The AI turn should handle everything including advancing turns
       // Just check if battle ended
       if (!this.checkBattleEnd()) {
         // Wait a bit then check for next turn
         this.time.delayedCall(500, () => this.startNextTurn())
       }
+    })
+  }
+  
+  private showAttackName(message: string) {
+    // Create floating text in the center of the screen
+    const centerX = this.cameras.main.centerX
+    const centerY = this.cameras.main.centerY - 100
+    
+    const attackText = this.add.text(centerX, centerY, message, {
+      fontSize: '28px',
+      fontFamily: 'monospace',
+      color: '#00ff00',
+      stroke: '#000000',
+      strokeThickness: 4,
+      align: 'center'
+    }).setOrigin(0.5)
+    
+    // Add glow effect
+    attackText.setShadow(0, 0, '#00ff00', 10, true, true)
+    
+    // Animate the text
+    this.tweens.add({
+      targets: attackText,
+      y: centerY - 30,
+      alpha: { from: 1, to: 0 },
+      duration: 2000,
+      ease: 'Power2',
+      onComplete: () => {
+        attackText.destroy()
+      }
+    })
+    
+    // Also add a scale effect
+    this.tweens.add({
+      targets: attackText,
+      scaleX: { from: 0.8, to: 1.1 },
+      scaleY: { from: 0.8, to: 1.1 },
+      duration: 300,
+      ease: 'Back.out'
     })
   }
   

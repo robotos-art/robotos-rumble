@@ -18,8 +18,12 @@ export default function TrainingBattle() {
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    // Load saved team
-    const savedTeam = localStorage.getItem('roboto_rumble_team')
+    // Load saved team based on battle settings
+    const savedSettings = localStorage.getItem('battle_settings')
+    const teamSize = savedSettings ? JSON.parse(savedSettings).teamSize : 5
+    const teamKey = `roboto_rumble_team_${teamSize}`
+    const savedTeam = localStorage.getItem(teamKey)
+    
     if (savedTeam) {
       setPlayerTeam(JSON.parse(savedTeam))
     }
@@ -60,7 +64,6 @@ export default function TrainingBattle() {
       <GameHeader 
         showBackButton
         backHref="/battle"
-        showBackgroundSelector
         className="absolute top-0 left-0 right-0 z-50"
       />
       

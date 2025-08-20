@@ -75,10 +75,8 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
     
     try {
       // Fetch balances first
-      const [robotoContract, robopetContract] = await Promise.all([
-        getRobotoContract(),
-        getRobopetContract()
-      ])
+      const robotoContract = getRobotoContract()
+      const robopetContract = getRobopetContract()
       
       const [robotoBalance, robopetBalance] = await Promise.all([
         robotoContract.methods.balanceOf(address).call(),
@@ -212,6 +210,7 @@ export function RobotoTokensProvider({ children }: { children: React.ReactNode }
       setCachedTokens(address, robotoTokens, robopetTokens)
       
     } catch (err) {
+      console.error('Error fetching tokens:', err)
       setError('Failed to load your Robotos and Robopets')
     } finally {
       setLoading(false)

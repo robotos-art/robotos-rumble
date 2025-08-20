@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Button } from '../ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Zap, Swords } from 'lucide-react'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { SoundToggle } from './SoundToggle'
 import { WalletConnect } from './WalletConnect'
@@ -32,29 +33,52 @@ export function GameHeader({
   leftContent,
   rightContent
 }: GameHeaderProps) {
+  const pathname = usePathname()
+  const isHomePage = pathname === '/'
+  const isBattlePage = pathname?.startsWith('/battle')
+  const isTeamBuilderPage = pathname === '/team-builder'
+  
   return (
     <header className={cn(
       "flex items-center justify-between",
-      "px-4 md:px-8",
-      "py-4 md:py-6",
+      "px-2 sm:px-4 md:px-8",
+      "py-2 sm:py-4 md:py-6",
       className
     )}>
       {/* Left section */}
-      <div className="flex items-center gap-3">
-        {showBackButton && backHref && (
-          <Link href={backHref}>
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Home Logo - always visible except on home page */}
+        {!isHomePage && (
+          <Link href="/">
             <Button 
               variant="terminal" 
               size="icon"
               onClick={() => gameSounds.playClick()}
-              title="Back"
+              title="Home"
+              className="group h-9 w-9 md:h-10 md:w-10"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <Zap className="w-5 h-5 text-green-500/60 group-hover:text-green-400 transition-colors" />
             </Button>
           </Link>
         )}
+        
+        {/* Back button - only show if not going back to home */}
+        {showBackButton && backHref && backHref !== '/' && (
+          <Link href={backHref}>
+            <Button
+              variant="terminal"
+              size="icon"
+              onClick={() => gameSounds.playClick()}
+              title="Back"
+              className="group h-9 w-9 md:h-10 md:w-10"
+            >
+              <ArrowLeft className="w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors" />
+            </Button>
+          </Link>
+        )}
+        
         {title && (
-          <h1 className="text-2xl md:text-3xl font-bold text-green-400 glow">
+          <h1 className="text-lg sm:text-xl md:text-2xl leading-none font-bold text-green-400 glow">
             {title}
           </h1>
         )}
@@ -64,6 +88,20 @@ export function GameHeader({
       {/* Right section */}
       <div className="flex items-center gap-2">
         {rightContent}
+        {/* Battle button - show when not on battle/team-builder pages */}
+        {!isBattlePage && !isTeamBuilderPage && !isHomePage && (
+          <Link href="/battle">
+            <Button 
+              variant="terminal" 
+              size="icon"
+              onClick={() => gameSounds.playClick()}
+              title="Start Battle"
+              className="group"
+            >
+              <Swords className="w-5 h-5 text-green-500/60 group-hover:text-green-400 transition-colors" />
+            </Button>
+          </Link>
+        )}
         {showBackgroundSelector && <BackgroundSelector />}
         {showSoundToggle && <SoundToggle />}
         {showWallet && <WalletConnect />}

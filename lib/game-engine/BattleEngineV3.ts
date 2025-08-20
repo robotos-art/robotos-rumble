@@ -82,15 +82,27 @@ export class BattleEngineV3 {
   }
   
   initializeBattle(playerTeam: BattleUnitV3[], enemyTeam: BattleUnitV3[]) {
-    this.state.playerTeam = playerTeam
-    this.state.enemyTeam = enemyTeam
+    // Validate teams
+    if (!playerTeam?.length || !enemyTeam?.length) {
+      console.error('Invalid teams provided to battle', { playerTeam, enemyTeam })
+      this.state.status = 'defeat'
+      return
+    }
+    
+    // Apply companion bonuses before battle starts
+    this.state.playerTeam = this.applyCompanionBonuses(playerTeam)
+    this.state.enemyTeam = this.applyCompanionBonuses(enemyTeam)
     
     // Initialize unit statuses
-    const allUnits = [...playerTeam, ...enemyTeam]
+    const allUnits = [...this.state.playerTeam, ...this.state.enemyTeam]
     allUnits.forEach((unit, index) => {
+      if (!unit || !unit.id) {
+        console.error('Invalid unit at index', index, unit)
+        return
+      }
       this.state.unitStatuses.set(unit.id, {
-        currentHp: unit.stats.hp,
-        currentEnergy: unit.stats.energy,
+        currentHp: unit.stats?.hp || 100,
+        currentEnergy: unit.stats?.energy || 50,
         statusEffects: [],
         cooldowns: new Map(),
         isAlive: true,
@@ -683,6 +695,55 @@ export class BattleEngineV3 {
     })
   }
   
+  private applyCompanionBonuses(team: BattleUnitV3[]): BattleUnitV3[] {
+    // Find companion pairs (Roboto and Robopet with matching IDs)
+    const companionPairs: Map<string, string> = new Map() // tokenId -> battleId
+    
+    // First, check for matching token IDs between Robotos and Robopets
+    const matchingIds: Set<string> = new Set()
+    team.forEach(unit1 => {
+      team.forEach(unit2 => {
+        // Extract the base token ID (without type prefix)
+        const id1 = unit1.id.replace(/^(roboto|robopet)-/, '')
+        const id2 = unit2.id.replace(/^(roboto|robopet)-/, '')
+        if (id1 === id2 && unit1.type !== unit2.type) {
+          matchingIds.add(id1)
+          companionPairs.set(unit1.id, unit1.id) // Track which units get bonus
+          companionPairs.set(unit2.id, unit2.id)
+        }
+      })
+    })
+    
+    // Apply 2% bonus to units with companions
+    return team.map(unit => {
+      if (companionPairs.has(unit.id)) {
+        // Create a new unit with boosted stats
+        const battleUnit = { ...unit }
+        battleUnit.stats = { ...unit.stats }
+        battleUnit.hasCompanionBonus = true
+        
+        // Apply 2% boost to all stats
+        battleUnit.stats.hp = Math.round(unit.stats.hp * 1.02)
+        battleUnit.stats.attack = Math.round(unit.stats.attack * 1.02)
+        battleUnit.stats.defense = Math.round(unit.stats.defense * 1.02)
+        battleUnit.stats.speed = Math.round(unit.stats.speed * 1.02)
+        battleUnit.stats.energy = Math.round(unit.stats.energy * 1.02)
+        battleUnit.stats.crit = Math.round(unit.stats.crit * 1.02)
+        
+        // Log the companion bonus
+        this.addBattleEvent({
+          type: 'buff',
+          description: `${unit.name} gains COMPANION BONUS (+2% all stats)!`,
+          timestamp: Date.now()
+        })
+        
+        return battleUnit
+      }
+      
+      return unit
+    })
+  }
+
   private checkBattleEnd() {
     const alivePlayerUnits = this.state.playerTeam.filter(
       unit => this.state.unitStatuses.get(unit.id)?.isAlive
@@ -711,7 +772,10 @@ export class BattleEngineV3 {
   
   private findUnit(unitId: string): BattleUnitV3 | undefined {
     return [...this.state.playerTeam, ...this.state.enemyTeam]
-      .find(u => u.id === unitId)
+      .find(u => {
+        const battleId = (u as any).battleId || u.id
+        return battleId === unitId || u.id === unitId
+      })
   }
   
   private addBattleEvent(event: BattleEvent) {
@@ -736,7 +800,10 @@ export class BattleEngineV3 {
     const availableAbilities = this.getAvailableAbilities(currentUnit.id)
       .filter(a => this.canUseAbility(currentUnit.id, a.id))
     
-    if (availableAbilities.length > 0) {
+    // 35% chance to use ability if available
+    const useAbility = availableAbilities.length > 0 && Math.random() < 0.35
+    
+    if (useAbility && availableAbilities.length > 0) {
       // Prioritize abilities by element advantage
       const scoredAbilities = availableAbilities.map(ability => {
         let score = 0
@@ -790,11 +857,69 @@ export class BattleEngineV3 {
         target = alivePlayerUnits[0].id // Default target
       }
       
+      // Log ability use with name
+      this.addBattleEvent({
+        type: 'ability',
+        source: currentUnit.id,
+        description: `${currentUnit.name} uses ${chosenAbility.ability.name}!`,
+        timestamp: Date.now()
+      })
+      
       this.executeAbility(currentUnit.id, target, chosenAbility.id)
     } else {
-      // Skip turn if no abilities available
+      // Use basic attack
+      // Smart target selection for basic attacks
+      const targetOptions = alivePlayerUnits.map(player => {
+        const status = this.state.unitStatuses.get(player.id)!
+        const multiplier = this.getElementMultiplier(currentUnit.element, player.element)
+        
+        return {
+          unit: player,
+          score: (100 - status.currentHp) + (multiplier > 1 ? 50 : 0)
+        }
+      })
+      
+      targetOptions.sort((a, b) => b.score - a.score)
+      const target = targetOptions[0].unit
+      
+      // Generate attack name based on element
+      const attackName = this.getElementAttackName(currentUnit.element)
+      
+      // Log the attack with name
+      this.addBattleEvent({
+        type: 'ability',
+        source: currentUnit.id,
+        description: `${currentUnit.name} uses ${attackName}!`,
+        timestamp: Date.now()
+      })
+      
+      // Execute basic attack with timing variation
+      const timingBonus = 0.8 + Math.random() * 0.5 // 0.8x to 1.3x
+      const result = this.executeAction({
+        type: 'attack',
+        sourceId: currentUnit.id,
+        targetId: target.id,
+        timingBonus: timingBonus
+      })
+      
+      // Process next turn
       this.nextTurn()
     }
+  }
+
+  private getElementAttackName(element: string): string {
+    const attackNames: Record<string, string[]> = {
+      'SURGE': ['Lightning Strike', 'Thunder Bolt', 'Electric Surge', 'Volt Tackle'],
+      'CODE': ['Data Breach', 'System Crash', 'Binary Blast', 'Firewall Break'],
+      'METAL': ['Iron Bash', 'Steel Strike', 'Metal Claw', 'Titanium Punch'],
+      'GLITCH': ['Chaos Strike', 'Corruption Wave', 'Error Cascade', 'System Glitch'],
+      'BOND': ['Unity Strike', 'Harmony Blast', 'Friendship Power', 'Loyalty Attack'],
+      'WILD': ['Primal Strike', 'Feral Claw', 'Nature\'s Wrath', 'Savage Bite'],
+      'NEUTRAL': ['Basic Strike', 'Quick Attack', 'Standard Blow', 'Normal Hit']
+    }
+    
+    const names = attackNames[element.toUpperCase()] || attackNames['NEUTRAL']
+    return names[Math.floor(Math.random() * names.length)]
   }
 
   // Add methods for Phaser integration
