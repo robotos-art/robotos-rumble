@@ -1,9 +1,13 @@
 import { Server } from "@colyseus/core"
 import { WebSocketTransport } from "@colyseus/ws-transport"
+import { Encoder } from "@colyseus/schema"
 import express from "express"
 import cors from "cors"
 import { PvPBattleRoom } from "./rooms/PvPBattleRoom"
 import { LobbyRoom } from "./rooms/LobbyRoom"
+
+// Increase buffer size to handle larger battle states
+Encoder.BUFFER_SIZE = 16 * 1024 // 16 KB instead of default
 
 const port = Number(process.env.PORT) || 2567
 

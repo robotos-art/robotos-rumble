@@ -11,6 +11,7 @@ import { PageLayout } from '../../../components/shared/PageLayout'
 import { Users, Swords, Clock, Search, Shield, Bell } from 'lucide-react'
 import { gameSounds } from '../../../lib/sounds/gameSounds'
 import { BattleNotifications } from '../../../lib/notifications/battleNotifications'
+import BattleArena from '../../../components/battle/BattleArena'
 
 export default function PvPLobby() {
   const router = useRouter()
@@ -18,11 +19,14 @@ export default function PvPLobby() {
   const [client, setClient] = useState<Client | null>(null)
   const [room, setRoom] = useState<Room | null>(null)
   const [lobbyRoom, setLobbyRoom] = useState<Room | null>(null)
-  const [status, setStatus] = useState<'idle' | 'searching' | 'joining' | 'connected'>('idle')
+  const [status, setStatus] = useState<'idle' | 'searching' | 'joining' | 'connected' | 'battle'>('idle')
   const [onlineCount, setOnlineCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [battleStarted, setBattleStarted] = useState(false)
+  const [playerTeam, setPlayerTeam] = useState<any[]>([])
+  const [enemyTeam, setEnemyTeam] = useState<any[]>([])
   
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: 'speedy' })
@@ -186,15 +190,30 @@ export default function PvPLobby() {
           BattleNotifications.showMatchFound()
         }
         
-        // Navigate to battle arena with room ID
-        // Use joinedRoom.roomId (not .id)
-        setTimeout(() => {
-          if (joinedRoom?.roomId) {
-            router.push(`/battle/pvp/${joinedRoom.roomId}`)
-          } else {
-            console.error('Room ID is undefined!', { room: joinedRoom, roomId: joinedRoom?.roomId })
+        // Set up battle state listener
+        joinedRoom.onStateChange((state) => {
+          if (state.status === 'battle' && !battleStarted) {
+            console.log('Battle is starting!')
+            // Parse teams from state
+            const myPlayerId = joinedRoom.sessionId
+            const players = Array.from(state.players.values())
+            const myPlayer = players.find(p => p.id === myPlayerId)
+            const enemyPlayer = players.find(p => p.id !== myPlayerId)
+            
+            if (myPlayer && enemyPlayer) {
+              try {
+                const myTeam = JSON.parse(myPlayer.team || '[]')
+                const oppTeam = JSON.parse(enemyPlayer.team || '[]')
+                setPlayerTeam(myTeam)
+                setEnemyTeam(oppTeam)
+                setBattleStarted(true)
+                setStatus('battle')
+              } catch (e) {
+                console.error('Error parsing teams:', e)
+              }
+            }
           }
-        }, 1000)
+        })
       })
       
       joinedRoom.onMessage("error", (message) => {
@@ -258,6 +277,44 @@ export default function PvPLobby() {
             </div>
           </div>
         </div>
+      </PageLayout>
+    )
+  }
+
+  // Show battle arena when battle starts
+  if (battleStarted && playerTeam.length > 0 && enemyTeam.length > 0) {
+    return (
+      <PageLayout>
+        <GameHeader
+          title="PVP BATTLE"
+          showBackButton
+          backHref="/battle"
+        />
+        <BattleArena
+          playerTeam={playerTeam}
+          enemyTeam={enemyTeam}
+          onBattleEnd={(won) => {
+            console.log('Battle ended, won:', won)
+            // Reset state
+            setBattleStarted(false)
+            setStatus('idle')
+            setPlayerTeam([])
+            setEnemyTeam([])
+            if (room) {
+              room.leave()
+              setRoom(null)
+            }
+          }}
+          isPvP={true}
+          serverTimer={10} // Will be updated from server
+          isPlayerTurn={true} // Will be updated from server
+          onAction={(action) => {
+            // Send action to server
+            if (room) {
+              room.send('action', action)
+            }
+          }}
+        />
       </PageLayout>
     )
   }
