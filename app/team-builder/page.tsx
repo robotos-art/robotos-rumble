@@ -56,7 +56,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-2809",
     name: "Robopet #2809",
-    image: "https://storage.googleapis.com/robotos-robopets/images/2809.png",
+    image: "https://robopets.s3.amazonaws.com/images/2809.png",
     traits: {
       Background: "Sunset",
       Body: "Gunmetal",
@@ -70,7 +70,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-4012",
     name: "Robopet #4012",
-    image: "https://storage.googleapis.com/robotos-robopets/images/4012.png",
+    image: "https://robopets.s3.amazonaws.com/images/4012.png",
     traits: {
       Background: "Night Sky",
       Body: "Chrome",
@@ -84,7 +84,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-6211",
     name: "Robopet #6211",
-    image: "https://storage.googleapis.com/robotos-robopets/images/6211.png",
+    image: "https://robopets.s3.amazonaws.com/images/6211.png",
     traits: {
       Background: "Digital Rain",
       Body: "Rust",
@@ -98,7 +98,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-7386",
     name: "Robopet #7386",
-    image: "https://storage.googleapis.com/robotos-robopets/images/7386.png",
+    image: "https://robopets.s3.amazonaws.com/images/7386.png",
     traits: {
       Background: "Neon City",
       Body: "Gold",
@@ -112,7 +112,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-9997",
     name: "Robopet #9997",
-    image: "https://storage.googleapis.com/robotos-robopets/images/9997.png",
+    image: "https://robopets.s3.amazonaws.com/images/9997.png",
     traits: {
       Background: "Void",
       Body: "Obsidian",
