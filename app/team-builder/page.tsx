@@ -152,7 +152,6 @@ export default function TeamBuilder() {
     teamSize: 5,
     speed: "speedy",
   });
-  const [showStockRobopets, setShowStockRobopets] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -238,8 +237,6 @@ export default function TeamBuilder() {
   
   // Process stock Robopets separately
   const stockUnits = useMemo(() => {
-    if (!showStockRobopets) return [];
-    
     const units: BattleUnitV3[] = [];
     STOCK_ROBOPETS.forEach((stockPet) => {
       try {
@@ -258,7 +255,7 @@ export default function TeamBuilder() {
       }
     });
     return units;
-  }, [showStockRobopets]);
+  }, []);
 
   // Load saved team after units are processed
   useEffect(() => {
@@ -1163,7 +1160,7 @@ export default function TeamBuilder() {
               </div>
 
               {/* Empty State */}
-              {!loading && processedUnits.length === 0 && !showStockRobopets && (
+              {!loading && processedUnits.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-green-400/60 text-lg">
                     NO COMBAT UNITS DETECTED
@@ -1179,48 +1176,22 @@ export default function TeamBuilder() {
                   <h3 className="text-xl font-bold text-green-400 mb-2">
                     STOCK ROBOPETS
                   </h3>
-                  <p className="text-green-400/70 text-sm mb-4">
-                    Don't have enough Robotos to play? Use some of Pablo Stanley's stash.
+                  <p className="text-green-400/70 text-sm">
+                    Don't have enough Robotos to play? Use some of Pablo Stanley's stash. Or{" "}
+                    <a 
+                      href="https://opensea.io/collection/robopets" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                      onClick={() => gameSounds.play("confirm")}
+                    >
+                      get some from OpenSea
+                    </a>
                   </p>
-                  <div className="flex items-center justify-center gap-4">
-                    <Button
-                      variant={showStockRobopets ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setShowStockRobopets(!showStockRobopets);
-                        gameSounds.play("menuNavigate");
-                      }}
-                      className={showStockRobopets ? "bg-green-600 hover:bg-green-700" : ""}
-                    >
-                      {showStockRobopets ? "Hide Stock Robopets" : "Show Stock Robopets"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        window.open("https://opensea.io/collection/robopets", "_blank");
-                        gameSounds.play("confirm");
-                      }}
-                      className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
-                    >
-                      Get Your Own on OpenSea →
-                    </Button>
-                  </div>
-                  {showStockRobopets && (
-                    <p className="text-xs text-yellow-400/70 mt-3">
-                      ⚡ These Robopets can be used by multiple players simultaneously
-                    </p>
-                  )}
                 </div>
                 
                 {/* Stock Units Grid */}
-                {showStockRobopets && (
-                  <div>
-                    <div className="mb-4 text-center">
-                      <span className="text-sm text-purple-400 font-bold">
-                        PABLO'S COLLECTION ({filteredStockUnits.length} AVAILABLE)
-                      </span>
-                    </div>
+                <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                       {filteredStockUnits.map((unit, index) => {
                         const isSelected = selectedTeam.find(
@@ -1336,7 +1307,6 @@ export default function TeamBuilder() {
                       </div>
                     )}
                   </div>
-                )}
               </div>
             )}
           </>
