@@ -28,6 +28,7 @@ export interface BattleUnitV3 {
   };
   hasCompanionBonus?: boolean; // Added for companion tracking
   battleId?: string; // Unique identifier for battle instance
+  isStock?: boolean; // Indicates if this is a stock unit from Pablo's collection
 }
 
 export interface AbilityInstance {

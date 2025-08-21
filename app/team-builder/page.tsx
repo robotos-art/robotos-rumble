@@ -51,6 +51,80 @@ import { GameHeader } from "../../components/shared/GameHeader";
 import { PageLayout } from "../../components/shared/PageLayout";
 import type { BattleSettings } from "../battle/page";
 
+// Stock Robopets provided by Pablo Stanley for players without NFTs
+const STOCK_ROBOPETS = [
+  {
+    id: "robopet-2809",
+    name: "Robopet #2809",
+    image: "https://storage.googleapis.com/robotos-robopets/images/2809.png",
+    traits: {
+      Background: "Sunset",
+      Body: "Gunmetal",
+      Eyes: "Visor",
+      Head: "Spikes",
+      Arms: "Standard",
+      Chest: "Shield",
+      Feet: "Wheels"
+    }
+  },
+  {
+    id: "robopet-4012",
+    name: "Robopet #4012",
+    image: "https://storage.googleapis.com/robotos-robopets/images/4012.png",
+    traits: {
+      Background: "Night Sky",
+      Body: "Chrome",
+      Eyes: "Laser",
+      Head: "Antenna",
+      Arms: "Claw",
+      Chest: "Core",
+      Feet: "Hover"
+    }
+  },
+  {
+    id: "robopet-6211",
+    name: "Robopet #6211",
+    image: "https://storage.googleapis.com/robotos-robopets/images/6211.png",
+    traits: {
+      Background: "Digital Rain",
+      Body: "Rust",
+      Eyes: "Scanner",
+      Head: "Dome",
+      Arms: "Heavy",
+      Chest: "Vents",
+      Feet: "Treads"
+    }
+  },
+  {
+    id: "robopet-7386",
+    name: "Robopet #7386",
+    image: "https://storage.googleapis.com/robotos-robopets/images/7386.png",
+    traits: {
+      Background: "Neon City",
+      Body: "Gold",
+      Eyes: "Glow",
+      Head: "Mohawk",
+      Arms: "Blaster",
+      Chest: "Reactor",
+      Feet: "Magnetic"
+    }
+  },
+  {
+    id: "robopet-9997",
+    name: "Robopet #9997",
+    image: "https://storage.googleapis.com/robotos-robopets/images/9997.png",
+    traits: {
+      Background: "Void",
+      Body: "Obsidian",
+      Eyes: "Cyclops",
+      Head: "Crown",
+      Arms: "Energy",
+      Chest: "Armor",
+      Feet: "Rockets"
+    }
+  }
+];
+
 export default function TeamBuilder() {
   const router = useRouter();
   const { isConnected } = useAccount();
@@ -64,6 +138,7 @@ export default function TeamBuilder() {
     teamSize: 5,
     speed: "speedy",
   });
+  const [showStockRobopets, setShowStockRobopets] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -143,9 +218,32 @@ export default function TeamBuilder() {
         console.warn("Failed to process Robopet:", e);
       }
     });
+    
+    // Add stock Robopets if enabled
+    if (showStockRobopets) {
+      STOCK_ROBOPETS.forEach((stockPet) => {
+        try {
+          const metadata = {
+            ...stockPet,
+            attributes: Object.entries(stockPet.traits).map(([trait_type, value]) => ({
+              trait_type,
+              value
+            }))
+          };
+          const unit = TraitProcessorV3.processRobopetTraits(metadata);
+          unit.isStock = true; // Mark as stock unit
+          if (!processedIds.has(unit.id)) {
+            processedIds.add(unit.id);
+            units.push(unit);
+          }
+        } catch (e) {
+          console.warn("Failed to process stock Robopet:", e);
+        }
+      });
+    }
 
     return units;
-  }, [robotos, robopets]);
+  }, [robotos, robopets, showStockRobopets]);
 
   // Load saved team after units are processed
   useEffect(() => {
@@ -621,11 +719,11 @@ export default function TeamBuilder() {
                   const unit = selectedTeam[index];
                   const companion = unit
                     ? selectedTeam.find((u) => {
-                        // Extract base IDs by removing prefixes
-                        const id1 = unit.id.replace(/^(roboto|robopet)-/, "");
-                        const id2 = u.id.replace(/^(roboto|robopet)-/, "");
-                        return id1 === id2 && u.type !== unit.type;
-                      })
+                      // Extract base IDs by removing prefixes
+                      const id1 = unit.id.replace(/^(roboto|robopet)-/, "");
+                      const id2 = u.id.replace(/^(roboto|robopet)-/, "");
+                      return id1 === id2 && u.type !== unit.type;
+                    })
                     : null;
                   const key = unit
                     ? `selected-${unit.type}-${unit.id}-${index}`
@@ -787,13 +885,12 @@ export default function TeamBuilder() {
                   return (
                     <Card
                       key={`${unit.type}-${unit.id}`}
-                      className={`bg-black/60 border-2 rounded-lg transition-all overflow-hidden relative cursor-pointer ${
-                        isSelected
-                          ? "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
-                          : companionInTeam
-                            ? "border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]"
-                            : "border-green-500/30 hover:border-green-500/60"
-                      }`}
+                      className={`bg-black/60 border-2 rounded-[0.7em] transition-all overflow-hidden relative cursor-pointer ${isSelected
+                        ? "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
+                        : companionInTeam
+                          ? "border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]"
+                          : "border-green-500/30 hover:border-green-500/60"
+                        }`}
                       onClick={() => toggleUnitSelection(unit)}
                       onMouseEnter={() => gameSounds.playHover()}
                     >
@@ -801,7 +898,7 @@ export default function TeamBuilder() {
                       <Button
                         variant="terminal"
                         size="icon"
-                        className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 opacity-60 hover:opacity-100 w-6 h-6 sm:w-8 sm:h-8"
+                        className="absolute top-1.5 right-1.5 z-10 opacity-60 hover:opacity-100 w-6 h-6"
                         onClick={(e) => {
                           e.stopPropagation();
                           setLightboxIndex(index);
@@ -813,7 +910,12 @@ export default function TeamBuilder() {
 
                       <div className="flex">
                         {/* Left side - Image */}
-                        <div className="w-32 h-32 sm:w-48 sm:h-48 flex-shrink-0 bg-black/50 border-r border-green-500/20 relative">
+                        <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
+                          {unit.isStock && (
+                            <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+                              STOCK
+                            </div>
+                          )}
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -980,16 +1082,14 @@ export default function TeamBuilder() {
                               }}
                               className={`
                                 flex mt-2 sm:mt-3 items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded border transition-all w-full
-                                ${
-                                  companionInTeam
-                                    ? "bg-yellow-500 border-yellow-400 hover:bg-yellow-400"
-                                    : "bg-black/50 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/10"
+                                ${companionInTeam
+                                  ? "bg-yellow-500 border-yellow-400 hover:bg-yellow-400"
+                                  : "bg-black/50 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/10"
                                 }
-                                ${
-                                  !companionInTeam &&
+                                ${!companionInTeam &&
                                   selectedTeam.length >= settings.teamSize
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : "cursor-pointer"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "cursor-pointer"
                                 }
                               `}
                             >
@@ -1024,7 +1124,7 @@ export default function TeamBuilder() {
               </div>
 
               {/* Empty State */}
-              {!loading && processedUnits.length === 0 && (
+              {!loading && processedUnits.length === 0 && !showStockRobopets && (
                 <div className="text-center py-12">
                   <p className="text-green-400/60 text-lg">
                     NO COMBAT UNITS DETECTED
@@ -1032,6 +1132,49 @@ export default function TeamBuilder() {
                 </div>
               )}
             </div>
+            
+            {/* Stock Robopets Section */}
+            {isConnected && (
+              <div className="mt-12 border-t border-green-500/30 pt-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-green-400 mb-2">
+                    STOCK ROBOPETS
+                  </h3>
+                  <p className="text-green-400/70 text-sm mb-4">
+                    Don't have enough Robotos to play? Use some of Pablo Stanley's stash.
+                  </p>
+                  <div className="flex items-center justify-center gap-4">
+                    <Button
+                      variant={showStockRobopets ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setShowStockRobopets(!showStockRobopets);
+                        gameSounds.play("menuNavigate");
+                      }}
+                      className={showStockRobopets ? "bg-green-600 hover:bg-green-700" : ""}
+                    >
+                      {showStockRobopets ? "Hide Stock Robopets" : "Show Stock Robopets"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        window.open("https://opensea.io/collection/robopets", "_blank");
+                        gameSounds.play("confirm");
+                      }}
+                      className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    >
+                      Get Your Own on OpenSea →
+                    </Button>
+                  </div>
+                  {showStockRobopets && (
+                    <p className="text-xs text-yellow-400/70 mt-3">
+                      ⚡ These Robopets can be used by multiple players simultaneously
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
