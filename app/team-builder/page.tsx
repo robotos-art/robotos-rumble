@@ -1274,9 +1274,6 @@ export default function TeamBuilder() {
                                     <span className="text-sm sm:text-base font-bold text-green-400">
                                       {unit.name}
                                     </span>
-                                    <span className="text-xs sm:text-sm text-purple-400">
-                                      (Stock)
-                                    </span>
                                   </div>
                                   <div className="flex flex-wrap gap-1 text-[10px] sm:text-xs">
                                     <span className="bg-green-500/20 text-green-400 px-1 sm:px-2 py-0.5 rounded">
