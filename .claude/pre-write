@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Get the file path from the environment variable
+FILE_PATH="${CLAUDE_WRITE_FILE_PATH}"
+
+# Check for common mistakes in new files
+
+# 1. Check if trying to create database/filesystem storage files
+if [[ "$FILE_PATH" =~ (database|db|sqlite|postgres|mysql|filesystem|local-storage) ]]; then
+    echo "❌ BLOCKED: Use Vercel Blob storage instead of database/filesystem"
+    echo "📝 Reminder: Battle saves should use @vercel/blob via API routes"
+    echo "📁 Reference: /app/api/battles/save/route.ts"
+    exit 1
+fi
+
+# 2. Check if trying to create Socket.io files
+if [[ "$FILE_PATH" =~ (socket\.io|socketio|websocket) ]]; then
+    echo "❌ BLOCKED: Use Colyseus for multiplayer, not Socket.io"
+    echo "📝 Reminder: Multiplayer is handled by Colyseus"
+    echo "📁 Reference: /robotos-rumble-server/ and /app/battle/pvp/"
+    exit 1
+fi
+
+# 3. Check if creating pages router files
+if [[ "$FILE_PATH" =~ ^pages/ ]]; then
+    echo "⚠️ WARNING: Use App Router (/app) instead of Pages Router (/pages)"
+    echo "📝 This project uses Next.js App Router exclusively"
+    exit 1
+fi
+
+# 4. Check if creating duplicate state management
+if [[ "$FILE_PATH" =~ (redux|mobx|recoil|jotai) ]]; then
+    echo "⚠️ WARNING: Use existing Zustand store or React Context"
+    echo "📝 State management: Zustand + RobotoTokensContext"
+    echo "📁 Reference: /contexts/ directory"
+    exit 1
+fi
+
+# Allow the write to proceed
+exit 0

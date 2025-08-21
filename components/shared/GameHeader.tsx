@@ -1,57 +1,59 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Button } from '../ui/button'
-import { ArrowLeft, Zap, Swords } from 'lucide-react'
-import { gameSounds } from '../../lib/sounds/gameSounds'
-import { SoundToggle } from './SoundToggle'
-import { WalletConnect } from './WalletConnect'
-import { BackgroundSelector } from './BackgroundSelector'
-import { cn } from '../../lib/utils'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "../ui/button";
+import { ArrowLeft, Zap, Swords } from "lucide-react";
+import { gameSounds } from "../../lib/sounds/gameSounds";
+import { SoundToggle } from "./SoundToggle";
+import { WalletConnect } from "./WalletConnect";
+import { BackgroundSelector } from "./BackgroundSelector";
+import { cn } from "../../lib/utils";
 
 interface GameHeaderProps {
-  title?: string
-  backHref?: string
-  showBackButton?: boolean
-  showSoundToggle?: boolean
-  showWallet?: boolean
-  showBackgroundSelector?: boolean
-  className?: string
-  leftContent?: React.ReactNode
-  rightContent?: React.ReactNode
+  title?: string;
+  backHref?: string;
+  showBackButton?: boolean;
+  showSoundToggle?: boolean;
+  showWallet?: boolean;
+  showBackgroundSelector?: boolean;
+  className?: string;
+  leftContent?: React.ReactNode;
+  rightContent?: React.ReactNode;
 }
 
 export function GameHeader({
   title,
-  backHref = '/',
+  backHref = "/",
   showBackButton = false,
   showSoundToggle = true,
   showWallet = true,
   showBackgroundSelector = false,
   className,
   leftContent,
-  rightContent
+  rightContent,
 }: GameHeaderProps) {
-  const pathname = usePathname()
-  const isHomePage = pathname === '/'
-  const isBattlePage = pathname?.startsWith('/battle')
-  const isTeamBuilderPage = pathname === '/team-builder'
-  
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isBattlePage = pathname?.startsWith("/battle");
+  const isTeamBuilderPage = pathname === "/team-builder";
+
   return (
-    <header className={cn(
-      "flex items-center justify-between",
-      "px-2 sm:px-4 md:px-8",
-      "py-2 sm:py-4 md:py-6",
-      className
-    )}>
+    <header
+      className={cn(
+        "flex items-center justify-between",
+        "px-2 sm:px-4 md:px-8",
+        "py-2 sm:py-4 md:py-6",
+        className,
+      )}
+    >
       {/* Left section */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Home Logo - always visible except on home page */}
         {!isHomePage && (
           <Link href="/">
-            <Button 
-              variant="terminal" 
+            <Button
+              variant="terminal"
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Home"
@@ -61,9 +63,9 @@ export function GameHeader({
             </Button>
           </Link>
         )}
-        
+
         {/* Back button - only show if not going back to home */}
-        {showBackButton && backHref && backHref !== '/' && (
+        {showBackButton && backHref && backHref !== "/" && (
           <Link href={backHref}>
             <Button
               variant="terminal"
@@ -76,7 +78,7 @@ export function GameHeader({
             </Button>
           </Link>
         )}
-        
+
         {title && (
           <h1 className="text-lg sm:text-xl md:text-2xl leading-none font-bold text-green-400 glow">
             {title}
@@ -91,8 +93,8 @@ export function GameHeader({
         {/* Battle button - show when not on battle/team-builder pages */}
         {!isBattlePage && !isTeamBuilderPage && !isHomePage && (
           <Link href="/battle">
-            <Button 
-              variant="terminal" 
+            <Button
+              variant="terminal"
               size="icon"
               onClick={() => gameSounds.playClick()}
               title="Start Battle"
@@ -107,5 +109,5 @@ export function GameHeader({
         {showWallet && <WalletConnect />}
       </div>
     </header>
-  )
+  );
 }

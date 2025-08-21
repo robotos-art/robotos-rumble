@@ -1,63 +1,89 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Palette, X, Grid3x3, Sparkles, Circle, Sun, Star, Waves } from 'lucide-react'
-import { Button } from '../ui/button'
-import { cn } from '../../lib/utils'
+import { useState, useEffect } from "react";
+import {
+  Palette,
+  X,
+  Grid3x3,
+  Sparkles,
+  Circle,
+  Sun,
+  Star,
+  Waves,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { cn } from "../../lib/utils";
 
-export type BackgroundType = 'none' | 'grid-lines' | 'particles' | 'dot-grid' | 'light-rays' | 'galaxy' | 'aurora'
+export type BackgroundType =
+  | "none"
+  | "grid-lines"
+  | "particles"
+  | "dot-grid"
+  | "light-rays"
+  | "galaxy"
+  | "aurora";
 
-const BACKGROUND_OPTIONS: { value: BackgroundType; label: string; Icon: any }[] = [
-  { value: 'none', label: 'None', Icon: X },
-  { value: 'grid-lines', label: 'Grid Lines', Icon: Grid3x3 },
-  { value: 'particles', label: 'Particles', Icon: Sparkles },
-  { value: 'dot-grid', label: 'Dot Grid', Icon: Circle },
-  { value: 'light-rays', label: 'Light Rays', Icon: Sun },
-  { value: 'galaxy', label: 'Galaxy', Icon: Star },
-  { value: 'aurora', label: 'Aurora', Icon: Waves }
-]
+const BACKGROUND_OPTIONS: {
+  value: BackgroundType;
+  label: string;
+  Icon: any;
+}[] = [
+  { value: "none", label: "None", Icon: X },
+  { value: "grid-lines", label: "Grid Lines", Icon: Grid3x3 },
+  { value: "particles", label: "Particles", Icon: Sparkles },
+  { value: "dot-grid", label: "Dot Grid", Icon: Circle },
+  { value: "light-rays", label: "Light Rays", Icon: Sun },
+  { value: "galaxy", label: "Galaxy", Icon: Star },
+  { value: "aurora", label: "Aurora", Icon: Waves },
+];
 
 interface BackgroundSelectorProps {
-  onBackgroundChange?: (background: BackgroundType) => void
+  onBackgroundChange?: (background: BackgroundType) => void;
 }
 
-export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedBackground, setSelectedBackground] = useState<BackgroundType>(() => {
-    // Load from localStorage or default to random
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        return saved as BackgroundType
+export function BackgroundSelector({
+  onBackgroundChange,
+}: BackgroundSelectorProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedBackground, setSelectedBackground] = useState<BackgroundType>(
+    () => {
+      // Load from localStorage or default to random
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("roboto_rumble_background");
+        if (saved && BACKGROUND_OPTIONS.some((opt) => opt.value === saved)) {
+          return saved as BackgroundType;
+        }
       }
-    }
-    // Random selection excluding 'none'
-    const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
-    return options[Math.floor(Math.random() * options.length)].value
-  })
+      // Random selection excluding 'none'
+      const options = BACKGROUND_OPTIONS.filter((opt) => opt.value !== "none");
+      return options[Math.floor(Math.random() * options.length)].value;
+    },
+  );
 
   useEffect(() => {
     // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('roboto_rumble_background', selectedBackground)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("roboto_rumble_background", selectedBackground);
       // Dispatch custom event for other components
-      window.dispatchEvent(new CustomEvent('backgroundChange', { detail: selectedBackground }))
+      window.dispatchEvent(
+        new CustomEvent("backgroundChange", { detail: selectedBackground }),
+      );
     }
     // Notify parent component
-    onBackgroundChange?.(selectedBackground)
-  }, [selectedBackground, onBackgroundChange])
+    onBackgroundChange?.(selectedBackground);
+  }, [selectedBackground, onBackgroundChange]);
 
   const handleSelect = (value: BackgroundType) => {
-    setSelectedBackground(value)
-    setIsOpen(false)
-  }
+    setSelectedBackground(value);
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative">
       <Button
         variant="terminal"
         size="icon"
-        className='group h-9 w-9 md:h-10 md:w-10'
+        className="group h-9 w-9 md:h-10 md:w-10"
         onClick={() => setIsOpen(!isOpen)}
         title="Background Settings"
       >
@@ -75,7 +101,9 @@ export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorPro
               onClick={() => handleSelect(option.value)}
               className={cn(
                 "flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-green-900/30 transition-colors",
-                selectedBackground === option.value ? 'text-green-300 bg-green-900/20' : 'text-green-400'
+                selectedBackground === option.value
+                  ? "text-green-300 bg-green-900/20"
+                  : "text-green-400",
               )}
             >
               <option.Icon className="w-3 h-3" />
@@ -85,37 +113,44 @@ export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorPro
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export function useBackground() {
   const [background, setBackground] = useState<BackgroundType>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        return saved as BackgroundType
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("roboto_rumble_background");
+      if (saved && BACKGROUND_OPTIONS.some((opt) => opt.value === saved)) {
+        return saved as BackgroundType;
       }
     }
-    const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
-    return options[Math.floor(Math.random() * options.length)].value
-  })
+    const options = BACKGROUND_OPTIONS.filter((opt) => opt.value !== "none");
+    return options[Math.floor(Math.random() * options.length)].value;
+  });
 
   useEffect(() => {
     // Check localStorage on mount in case it was set before this component mounted
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        setBackground(saved as BackgroundType)
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("roboto_rumble_background");
+      if (saved && BACKGROUND_OPTIONS.some((opt) => opt.value === saved)) {
+        setBackground(saved as BackgroundType);
       }
     }
 
     const handleBackgroundChange = (event: CustomEvent) => {
-      setBackground(event.detail as BackgroundType)
-    }
+      setBackground(event.detail as BackgroundType);
+    };
 
-    window.addEventListener('backgroundChange', handleBackgroundChange as EventListener)
-    return () => window.removeEventListener('backgroundChange', handleBackgroundChange as EventListener)
-  }, [])
+    window.addEventListener(
+      "backgroundChange",
+      handleBackgroundChange as EventListener,
+    );
+    return () =>
+      window.removeEventListener(
+        "backgroundChange",
+        handleBackgroundChange as EventListener,
+      );
+  }, []);
 
-  return background
+  return background;
 }

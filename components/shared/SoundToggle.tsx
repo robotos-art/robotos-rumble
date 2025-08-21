@@ -1,62 +1,63 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Volume2, VolumeX, Volume1, Volume } from 'lucide-react'
-import { Button } from '../ui/button'
-import { Slider } from '../ui/slider'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { gameSounds } from '../../lib/sounds/gameSounds'
+import { useState, useEffect } from "react";
+import { Volume2, VolumeX, Volume1, Volume } from "lucide-react";
+import { Button } from "../ui/button";
+import { Slider } from "../ui/slider";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { gameSounds } from "../../lib/sounds/gameSounds";
 
 export function SoundToggle() {
-  const [isEnabled, setIsEnabled] = useState(true)
-  const [volume, setVolume] = useState(50)
-  const [isOpen, setIsOpen] = useState(false)
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [volume, setVolume] = useState(50);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     // Get initial state from sound system
-    setIsEnabled(gameSounds.getEnabled())
-    setVolume(Math.round(gameSounds.getVolume() * 100))
-  }, [])
+    setIsEnabled(gameSounds.getEnabled());
+    setVolume(Math.round(gameSounds.getVolume() * 100));
+  }, []);
 
   const toggleSound = () => {
-    const newState = !isEnabled
-    setIsEnabled(newState)
-    gameSounds.setEnabled(newState)
+    const newState = !isEnabled;
+    setIsEnabled(newState);
+    gameSounds.setEnabled(newState);
 
     // Play a click sound on enable
     if (newState) {
-      setTimeout(() => gameSounds.playClick(), 100)
+      setTimeout(() => gameSounds.playClick(), 100);
     }
-  }
+  };
 
   const handleVolumeChange = (value: number[]) => {
-    const newVolume = value[0]
-    setVolume(newVolume)
-    gameSounds.setVolume(newVolume / 100)
+    const newVolume = value[0];
+    setVolume(newVolume);
+    gameSounds.setVolume(newVolume / 100);
 
     // If volume is 0, disable sound
     if (newVolume === 0) {
-      setIsEnabled(false)
-      gameSounds.setEnabled(false)
+      setIsEnabled(false);
+      gameSounds.setEnabled(false);
     } else if (!isEnabled) {
       // If sound was disabled and volume > 0, enable it
-      setIsEnabled(true)
-      gameSounds.setEnabled(true)
+      setIsEnabled(true);
+      gameSounds.setEnabled(true);
     }
 
     // Play a test sound when adjusting volume (not at 0)
     if (newVolume > 0) {
-      gameSounds.playClick()
+      gameSounds.playClick();
     }
-  }
+  };
 
   const getVolumeIcon = () => {
-    const iconClass = "w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors"
-    if (!isEnabled || volume === 0) return <VolumeX className={iconClass} />
-    if (volume < 30) return <Volume className={iconClass} />
-    if (volume < 70) return <Volume1 className={iconClass} />
-    return <Volume2 className={iconClass} />
-  }
+    const iconClass =
+      "w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors";
+    if (!isEnabled || volume === 0) return <VolumeX className={iconClass} />;
+    if (volume < 30) return <Volume className={iconClass} />;
+    if (volume < 70) return <Volume1 className={iconClass} />;
+    return <Volume2 className={iconClass} />;
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -68,13 +69,13 @@ export function SoundToggle() {
           onClick={(e) => {
             // If clicking when popover is closed, just toggle mute
             if (!isOpen) {
-              e.preventDefault()
-              toggleSound()
+              e.preventDefault();
+              toggleSound();
             }
           }}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
-          title={isEnabled ? 'Mute sounds' : 'Enable sounds'}
+          title={isEnabled ? "Mute sounds" : "Enable sounds"}
         >
           {getVolumeIcon()}
         </Button>
@@ -100,5 +101,5 @@ export function SoundToggle() {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
