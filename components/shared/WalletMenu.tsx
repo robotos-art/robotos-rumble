@@ -1,76 +1,88 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
-import { useAccount, useDisconnect, useEnsName } from 'wagmi'
-import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext'
-import { ChevronDown, ExternalLink, LogOut, Wallet, X, HelpCircle, Trophy, User } from 'lucide-react'
-import { Button } from '../ui/button'
-import { TutorialDialog } from './TutorialDialog'
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { useAccount, useDisconnect, useEnsName } from "wagmi";
+import { useRobotoTokensContext } from "../../contexts/RobotoTokensContext";
+import {
+  ChevronDown,
+  ExternalLink,
+  LogOut,
+  Wallet,
+  X,
+  HelpCircle,
+  Trophy,
+  User,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { TutorialDialog } from "./TutorialDialog";
 
 export function WalletMenu() {
-  const { address } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { robotos, robopets } = useRobotoTokensContext()
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [showTutorial, setShowTutorial] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  
+  const { address } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { robotos, robopets } = useRobotoTokensContext();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   // Get ENS name
   const { data: ensName } = useEnsName({
     address: address as `0x${string}`,
     enabled: !!address,
-  })
-  
+  });
+
   // Check if mobile - after mount to avoid hydration issues
   useEffect(() => {
-    setMounted(true)
-    const checkMobile = () => setIsMobile(window.innerWidth < 640)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-  
+    setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Handle click outside to close dropdown (desktop only)
   useEffect(() => {
-    if (!showDropdown || isMobile) return
-    
+    if (!showDropdown || isMobile) return;
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
       }
-    }
-    
+    };
+
     // Small timeout to prevent immediate closing
     const timeoutId = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside, true)
-    }, 0)
-    
+      document.addEventListener("click", handleClickOutside, true);
+    }, 0);
+
     return () => {
-      clearTimeout(timeoutId)
-      document.removeEventListener('click', handleClickOutside, true)
-    }
-  }, [showDropdown, isMobile])
-  
+      clearTimeout(timeoutId);
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, [showDropdown, isMobile]);
+
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobile && showDropdown) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isMobile, showDropdown])
-  
-  if (!address || !mounted) return null
-  
-  const addressShortened = address.slice(0, 6) + '...' + address.slice(-4)
-  const displayName = ensName || addressShortened
-  
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, showDropdown]);
+
+  if (!address || !mounted) return null;
+
+  const addressShortened = address.slice(0, 6) + "..." + address.slice(-4);
+  const displayName = ensName || addressShortened;
+
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
@@ -84,11 +96,13 @@ export function WalletMenu() {
           <span className="sm:hidden">{addressShortened}</span>
           <span className="hidden sm:inline">{displayName}</span>
         </span>
-        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-green-500/60 group-hover:text-green-400 transition-all ${showDropdown ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-3 h-3 sm:w-4 sm:h-4 text-green-500/60 group-hover:text-green-400 transition-all ${showDropdown ? "rotate-180" : ""}`}
+        />
       </Button>
-      
-      {showDropdown && (
-        isMobile ? (
+
+      {showDropdown &&
+        (isMobile ? (
           /* Mobile Full Screen Menu */
           <div className="fixed inset-0 bg-black z-50 flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-green-500/30">
@@ -100,12 +114,12 @@ export function WalletMenu() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto">
               {/* Wallet Address */}
               <div className="p-6 border-b border-green-500/30">
                 <p className="text-sm text-green-400 mb-2">CONNECTED WALLET</p>
-                <Link 
+                <Link
                   href={`/profile/${address}`}
                   onClick={() => setShowDropdown(false)}
                   className="block font-mono text-green-500 break-all mb-4 hover:text-green-400 transition-colors"
@@ -114,7 +128,9 @@ export function WalletMenu() {
                     <>
                       <span className="text-green-300 text-lg">{ensName}</span>
                       <br />
-                      <span className="text-sm text-green-500/70">{addressShortened}</span>
+                      <span className="text-sm text-green-500/70">
+                        {addressShortened}
+                      </span>
                     </>
                   ) : (
                     address
@@ -129,7 +145,7 @@ export function WalletMenu() {
                   <span>View Profile</span>
                 </Link>
               </div>
-              
+
               {/* Collection */}
               <div className="p-6 border-b border-green-500/30">
                 <p className="text-sm text-green-400 mb-4">YOUR COLLECTION</p>
@@ -141,7 +157,9 @@ export function WalletMenu() {
                     className="flex items-center justify-between hover:bg-green-500/10 -mx-3 px-3 py-2 rounded transition-colors"
                   >
                     <span className="text-base">Robotos</span>
-                    <span className="text-base font-mono text-green-400">{robotos.length}</span>
+                    <span className="text-base font-mono text-green-400">
+                      {robotos.length}
+                    </span>
                   </a>
                   <a
                     href="https://opensea.io/collection/robopets"
@@ -150,11 +168,13 @@ export function WalletMenu() {
                     className="flex items-center justify-between hover:bg-green-500/10 -mx-3 px-3 py-2 rounded transition-colors"
                   >
                     <span className="text-base">Robopets</span>
-                    <span className="text-base font-mono text-green-400">{robopets.length}</span>
+                    <span className="text-base font-mono text-green-400">
+                      {robopets.length}
+                    </span>
                   </a>
                 </div>
               </div>
-              
+
               {/* Actions */}
               <div className="p-6">
                 <Link
@@ -165,18 +185,18 @@ export function WalletMenu() {
                   <span>Leaderboard</span>
                   <Trophy className="w-5 h-5 text-green-400" />
                 </Link>
-                
+
                 <button
                   onClick={() => {
-                    setShowTutorial(true)
-                    setShowDropdown(false)
+                    setShowTutorial(true);
+                    setShowDropdown(false);
                   }}
                   className="flex items-center justify-between w-full px-4 py-3 text-base hover:bg-green-500/10 rounded transition-colors mb-3"
                 >
                   <span>Game Help</span>
                   <HelpCircle className="w-5 h-5 text-green-400" />
                 </button>
-                
+
                 <a
                   href={`https://opensea.io/${address}`}
                   target="_blank"
@@ -186,11 +206,11 @@ export function WalletMenu() {
                   <span>View on OpenSea</span>
                   <ExternalLink className="w-5 h-5 text-green-400" />
                 </a>
-                
+
                 <button
                   onClick={() => {
-                    disconnect()
-                    setShowDropdown(false)
+                    disconnect();
+                    setShowDropdown(false);
                   }}
                   className="flex items-center justify-between w-full px-4 py-3 text-base text-red-400 hover:bg-red-500/10 rounded transition-colors"
                 >
@@ -206,7 +226,7 @@ export function WalletMenu() {
             {/* Wallet Address */}
             <div className="p-4 border-b border-green-500/30">
               <p className="text-xs text-green-400 mb-1">Connected Wallet</p>
-              <Link 
+              <Link
                 href={`/profile/${address}`}
                 onClick={() => setShowDropdown(false)}
                 className="block font-mono text-sm text-green-500 break-all mb-3 hover:text-green-400 transition-colors"
@@ -215,7 +235,9 @@ export function WalletMenu() {
                   <>
                     <span className="text-green-300">{ensName}</span>
                     <br />
-                    <span className="text-xs text-green-500/70">{addressShortened}</span>
+                    <span className="text-xs text-green-500/70">
+                      {addressShortened}
+                    </span>
                   </>
                 ) : (
                   address
@@ -230,7 +252,7 @@ export function WalletMenu() {
                 <span>View Profile</span>
               </Link>
             </div>
-            
+
             {/* Collection */}
             <div className="p-4 border-b border-green-500/30">
               <p className="text-xs text-green-400 mb-2">YOUR COLLECTION</p>
@@ -242,7 +264,9 @@ export function WalletMenu() {
                   className="flex items-center justify-between hover:bg-green-500/10 -mx-2 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-sm">Robotos</span>
-                  <span className="text-sm font-mono text-green-400">{robotos.length}</span>
+                  <span className="text-sm font-mono text-green-400">
+                    {robotos.length}
+                  </span>
                 </a>
                 <a
                   href="https://opensea.io/collection/robopets"
@@ -251,11 +275,13 @@ export function WalletMenu() {
                   className="flex items-center justify-between hover:bg-green-500/10 -mx-2 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-sm">Robopets</span>
-                  <span className="text-sm font-mono text-green-400">{robopets.length}</span>
+                  <span className="text-sm font-mono text-green-400">
+                    {robopets.length}
+                  </span>
                 </a>
               </div>
             </div>
-            
+
             {/* Actions */}
             <div className="p-2">
               <Link
@@ -266,18 +292,18 @@ export function WalletMenu() {
                 <span>Leaderboard</span>
                 <Trophy className="w-4 h-4 text-green-400" />
               </Link>
-              
+
               <button
                 onClick={() => {
-                  setShowTutorial(true)
-                  setShowDropdown(false)
+                  setShowTutorial(true);
+                  setShowDropdown(false);
                 }}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm hover:bg-green-500/10 rounded transition-colors mt-1"
               >
                 <span>Game Help</span>
                 <HelpCircle className="w-4 h-4 text-green-400" />
               </button>
-              
+
               <a
                 href={`https://opensea.io/${address}`}
                 target="_blank"
@@ -287,11 +313,11 @@ export function WalletMenu() {
                 <span>View on OpenSea</span>
                 <ExternalLink className="w-4 h-4 text-green-400" />
               </a>
-              
+
               <button
                 onClick={() => {
-                  disconnect()
-                  setShowDropdown(false)
+                  disconnect();
+                  setShowDropdown(false);
                 }}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded transition-colors mt-1"
               >
@@ -300,14 +326,10 @@ export function WalletMenu() {
               </button>
             </div>
           </div>
-        )
-      )}
-      
+        ))}
+
       {/* Tutorial Dialog - controlled by state */}
-      <TutorialDialog 
-        open={showTutorial} 
-        onOpenChange={setShowTutorial}
-      />
+      <TutorialDialog open={showTutorial} onOpenChange={setShowTutorial} />
     </div>
-  )
+  );
 }

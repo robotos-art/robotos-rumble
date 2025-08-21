@@ -21,7 +21,9 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
   baseIntensity = 0.18,
   hoverIntensity = 0.5,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement & { cleanupFuzzyText?: () => void}>(null);
+  const canvasRef = useRef<
+    HTMLCanvasElement & { cleanupFuzzyText?: () => void }
+  >(null);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -108,7 +110,7 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
           -fuzzRange,
           -fuzzRange,
           offscreenWidth + 2 * fuzzRange,
-          tightHeight + 2 * fuzzRange
+          tightHeight + 2 * fuzzRange,
         );
         const intensity = isHovering ? hoverIntensity : baseIntensity;
         for (let j = 0; j < tightHeight; j++) {
@@ -122,7 +124,7 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
             dx,
             j,
             offscreenWidth,
-            1
+            1,
           );
         }
         animationFrameId = window.requestAnimationFrame(run);
