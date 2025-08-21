@@ -218,32 +218,33 @@ export default function TeamBuilder() {
         console.warn("Failed to process Robopet:", e);
       }
     });
-    
-    // Add stock Robopets if enabled
-    if (showStockRobopets) {
-      STOCK_ROBOPETS.forEach((stockPet) => {
-        try {
-          const metadata = {
-            ...stockPet,
-            attributes: Object.entries(stockPet.traits).map(([trait_type, value]) => ({
-              trait_type,
-              value
-            }))
-          };
-          const unit = TraitProcessorV3.processRobopetTraits(metadata);
-          unit.isStock = true; // Mark as stock unit
-          if (!processedIds.has(unit.id)) {
-            processedIds.add(unit.id);
-            units.push(unit);
-          }
-        } catch (e) {
-          console.warn("Failed to process stock Robopet:", e);
-        }
-      });
-    }
 
     return units;
-  }, [robotos, robopets, showStockRobopets]);
+  }, [robotos, robopets]);
+  
+  // Process stock Robopets separately
+  const stockUnits = useMemo(() => {
+    if (!showStockRobopets) return [];
+    
+    const units: BattleUnitV3[] = [];
+    STOCK_ROBOPETS.forEach((stockPet) => {
+      try {
+        const metadata = {
+          ...stockPet,
+          attributes: Object.entries(stockPet.traits).map(([trait_type, value]) => ({
+            trait_type,
+            value
+          }))
+        };
+        const unit = TraitProcessorV3.processRobopetTraits(metadata);
+        unit.isStock = true; // Mark as stock unit
+        units.push(unit);
+      } catch (e) {
+        console.warn("Failed to process stock Robopet:", e);
+      }
+    });
+    return units;
+  }, [showStockRobopets]);
 
   // Load saved team after units are processed
   useEffect(() => {
@@ -440,6 +441,35 @@ export default function TeamBuilder() {
 
     return filtered;
   }, [processedUnits, currentFilters]);
+  
+  // Apply same filters to stock units
+  const filteredStockUnits = useMemo(() => {
+    let filtered = [...stockUnits];
+    
+    // Search filter
+    if (currentFilters.search && currentFilters.search.trim() !== "") {
+      const search = currentFilters.search.toLowerCase();
+      filtered = filtered.filter(
+        (unit) =>
+          unit.name.toLowerCase().includes(search) ||
+          unit.id.toLowerCase().includes(search),
+      );
+    }
+    
+    // Element filter
+    if (currentFilters.elements && currentFilters.elements.length > 0) {
+      filtered = filtered.filter((unit) =>
+        currentFilters.elements.includes(unit.element),
+      );
+    }
+    
+    // Stock units are all Robopets, so filter by robopet type
+    if (currentFilters.robotType && currentFilters.robotType !== "all" && currentFilters.robotType !== "robopet") {
+      filtered = [];
+    }
+    
+    return filtered;
+  }, [stockUnits, currentFilters]);
 
   const toggleUnitSelection = useCallback(
     (unit: BattleUnitV3) => {
@@ -911,11 +941,6 @@ export default function TeamBuilder() {
                       <div className="flex">
                         {/* Left side - Image */}
                         <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
-                          {unit.isStock && (
-                            <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
-                              STOCK
-                            </div>
-                          )}
                           <img
                             src={unit.imageUrl}
                             alt={unit.name}
@@ -1173,6 +1198,134 @@ export default function TeamBuilder() {
                     </p>
                   )}
                 </div>
+                
+                {/* Stock Units Grid */}
+                {showStockRobopets && (
+                  <div>
+                    <div className="mb-4 text-center">
+                      <span className="text-sm text-purple-400 font-bold">
+                        PABLO'S COLLECTION ({filteredStockUnits.length} AVAILABLE)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {filteredStockUnits.map((unit, index) => {
+                        const isSelected = selectedTeam.find(
+                          (u) => u.id === unit.id && u.type === unit.type,
+                        );
+                        
+                        return (
+                          <Card
+                            key={`stock-${unit.id}`}
+                            className={`bg-black/60 border-2 rounded-[0.7em] transition-all overflow-hidden relative cursor-pointer ${
+                              isSelected
+                                ? "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
+                                : "border-purple-500/30 hover:border-purple-500/60"
+                            }`}
+                            onClick={() => toggleUnitSelection(unit)}
+                            onMouseEnter={() => gameSounds.playHover()}
+                          >
+                            {/* Expand button */}
+                            <Button
+                              variant="terminal"
+                              size="icon"
+                              className="absolute top-1.5 right-1.5 z-10 opacity-60 hover:opacity-100 w-6 h-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Adjust index for lightbox
+                                setLightboxIndex(processedUnits.length + index);
+                                gameSounds.playClick();
+                              }}
+                            >
+                              <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </Button>
+
+                            <div className="flex">
+                              {/* Left side - Image */}
+                              <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
+                                <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+                                  STOCK
+                                </div>
+                                <img
+                                  src={unit.imageUrl}
+                                  alt={unit.name}
+                                  className="w-full h-full object-cover pixelated"
+                                />
+                              </div>
+
+                              {/* Right side - Metadata */}
+                              <div className="flex-1 p-3 sm:p-4 min-h-[128px] sm:min-h-[192px] flex flex-col">
+                                {/* Header */}
+                                <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
+                                  <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
+                                    <span className="text-sm sm:text-base font-bold text-green-400">
+                                      {unit.name}
+                                    </span>
+                                    <span className="text-xs sm:text-sm text-purple-400">
+                                      (Stock)
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1 text-[10px] sm:text-xs">
+                                    <span className="bg-green-500/20 text-green-400 px-1 sm:px-2 py-0.5 rounded">
+                                      {unit.element}
+                                    </span>
+                                    <span className="bg-blue-500/20 text-blue-400 px-1 sm:px-2 py-0.5 rounded">
+                                      {unit.type.toUpperCase()}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-[10px] sm:text-xs mt-auto">
+                                  <div className="flex items-center gap-1">
+                                    <Heart className="w-3 h-3 text-red-500" />
+                                    <span>{unit.stats.hp}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Swords className="w-3 h-3 text-yellow-500" />
+                                    <span>{unit.stats.attack}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Shield className="w-3 h-3 text-blue-500" />
+                                    <span>{unit.stats.defense}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Zap className="w-3 h-3 text-purple-500" />
+                                    <span>{unit.stats.speed}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Gauge className="w-3 h-3 text-green-500" />
+                                    <span>{unit.stats.energy}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-orange-500" />
+                                    <span>{unit.stats.crit}%</span>
+                                  </div>
+                                </div>
+
+                                {/* Selection Status */}
+                                {isSelected && (
+                                  <div className="mt-2 sm:mt-3 text-center bg-green-500/20 rounded p-1">
+                                    <span className="text-[10px] sm:text-xs text-green-400 font-bold">
+                                      SELECTED
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                    
+                    {filteredStockUnits.length === 0 && (
+                      <div className="text-center py-8">
+                        <p className="text-purple-400/60">
+                          No stock units match your current filters
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -1182,7 +1335,7 @@ export default function TeamBuilder() {
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <UnitLightbox
-          units={filteredUnits}
+          units={[...filteredUnits, ...filteredStockUnits]}
           initialIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onSelect={(unit) => {
@@ -1195,7 +1348,7 @@ export default function TeamBuilder() {
       )}
 
       {/* Fixed Team Footer - Only show when connected and have units */}
-      {isConnected && processedUnits.length > 0 && (
+      {isConnected && (processedUnits.length > 0 || stockUnits.length > 0) && (
         <TeamFooter
           selectedTeam={selectedTeam}
           settings={settings}
@@ -1206,7 +1359,7 @@ export default function TeamBuilder() {
       )}
 
       {/* Add bottom padding when footer is visible */}
-      {isConnected && processedUnits.length > 0 && <div className="h-20" />}
+      {isConnected && (processedUnits.length > 0 || stockUnits.length > 0) && <div className="h-20" />}
     </PageLayout>
   );
 }
