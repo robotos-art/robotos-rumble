@@ -21,39 +21,31 @@ export default config({
   },
 
   initializeExpress: (app) => {
-    // CORS configuration
-    const corsOptions = {
-      origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-        const allowedOrigins = [
-          "http://localhost:3000",
-          "http://localhost:3004", 
-          "https://rumble.robotos.art",
-          "https://rumble-preview.vercel.app",
-          "https://robotos-rumble.vercel.app"
-        ];
-        
-        // Allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
-        
-        // Check exact matches
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        
-        // Check for Vercel preview deployments
-        if (origin.match(/https:\/\/robotos-rumble.*\.vercel\.app$/)) {
-          return callback(null, true);
-        }
-        
-        // Block everything else
-        callback(new Error('Not allowed by CORS'));
-      },
+    // Enable CORS for all origins
+    // Colyseus Cloud handles CORS at the NGINX level, so we need to be permissive here
+    app.use(cors({
+      origin: true, // Allow all origins
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"]
-    };
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+      exposedHeaders: ["X-Colyseus-Messages"]
+    }));
     
-    app.use(cors(corsOptions));
+    // Additional headers for Colyseus Cloud
+    app.use((req, res, next) => {
+      // Ensure headers are set for all responses
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+      
+      // Handle preflight
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+      }
+      
+      next();
+    });
     
     // Health check endpoint
     app.get("/health", (req, res) => {
