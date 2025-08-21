@@ -63,16 +63,6 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={onClose}>
       <div className="relative max-w-4xl w-full mx-2 sm:mx-4" onClick={(e) => e.stopPropagation()}>
-        {/* Close button */}
-        <Button
-          variant="terminal"
-          size="icon"
-          className="absolute -top-10 sm:-top-12 right-0 z-10"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5" />
-        </Button>
-
         {/* Navigation buttons */}
         <Button
           variant="terminal"
@@ -95,7 +85,16 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         </Button>
 
         {/* Main content */}
-        <div className="bg-black/95 border-2 border-green-500 rounded-lg overflow-hidden">
+        <div className="bg-black/95 border-2 border-green-500 rounded-lg overflow-hidden relative">
+          {/* Close button - inside the dialog */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 z-10 hover:bg-green-500/20 text-green-400"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </Button>
           <div className="grid md:grid-cols-2 gap-0">
             {/* Left side - Image */}
             <div className="bg-black/50 md:border-r border-b md:border-b-0 border-green-500/20 p-4 sm:p-8 flex items-center justify-center">

@@ -8,12 +8,12 @@ import { Button } from '../../../components/ui/button'
 import { Card } from '../../../components/ui/card'
 import { GameHeader } from '../../../components/shared/GameHeader'
 import { PageLayout } from '../../../components/shared/PageLayout'
-import { Users, Swords, Clock, Search, Shield, Bell } from 'lucide-react'
+import { Users, Swords, Clock, Search, Shield, Bell, Edit } from 'lucide-react'
 import { gameSounds } from '../../../lib/sounds/gameSounds'
 import { BattleNotifications } from '../../../lib/notifications/battleNotifications'
 import BattleArena from '../../../components/battle/BattleArena'
-import TeamFooter from '../../../components/team-builder/TeamFooter'
 import { TraitProcessorV3 } from '../../../lib/game-engine/TraitProcessorV3'
+import { UnitLightbox } from '../../../components/team-builder/UnitLightbox'
 
 export default function PvPLobby() {
   const router = useRouter()
@@ -30,36 +30,52 @@ export default function PvPLobby() {
   const [playerTeam, setPlayerTeam] = useState<any[]>([])
   const [enemyTeam, setEnemyTeam] = useState<any[]>([])
   const [loadedTeam, setLoadedTeam] = useState<any[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: 'speedy' })
   
+  // Load team when component mounts or when returning from team-builder
   useEffect(() => {
-    setMounted(true)
-    const savedSettings = localStorage.getItem('battle_settings')
-    if (savedSettings) {
-      const parsedSettings = JSON.parse(savedSettings)
-      setSettings(parsedSettings)
-      
-      // Load the team for the current settings
-      const teamKey = `roboto_rumble_team_${parsedSettings.teamSize}`
-      const savedTeam = localStorage.getItem(teamKey)
-      if (savedTeam) {
-        try {
-          const team = JSON.parse(savedTeam)
-          // Process team to get battle units
-          const processedTeam = team.map((unit: any) => TraitProcessorV3.processBattleUnit(unit))
-          setLoadedTeam(processedTeam)
-        } catch (e) {
-          console.error('Error loading team:', e)
+    const loadTeam = () => {
+      const savedSettings = localStorage.getItem('battle_settings')
+      if (savedSettings) {
+        const parsedSettings = JSON.parse(savedSettings)
+        setSettings(parsedSettings)
+        
+        // Load the team for the current settings
+        const teamKey = `roboto_rumble_team_${parsedSettings.teamSize}`
+        const savedTeam = localStorage.getItem(teamKey)
+        if (savedTeam && savedTeam !== '[]') {
+          try {
+            const team = JSON.parse(savedTeam)
+            // Team is already processed from team-builder, no need to process again
+            setLoadedTeam(team)
+          } catch (e) {
+            console.error('Error loading team:', e)
+          }
         }
       }
     }
     
+    setMounted(true)
+    loadTeam()
+    
+    // Also reload when page becomes visible (returning from team-builder)
+    const handleFocus = () => {
+      loadTeam()
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
+  
+  useEffect(() => {
+    
     // Initialize Colyseus client
-    // Use localhost for development, will need to update for production
     const wsUrl = process.env.NEXT_PUBLIC_COLYSEUS_URL || 'ws://localhost:2567'
-    console.log('Connecting to Colyseus server at:', wsUrl)
     const colyseusClient = new Client(wsUrl)
     setClient(colyseusClient)
     
@@ -153,12 +169,6 @@ export default function PvPLobby() {
       setError(null)
       gameSounds.play('menuNavigate')
       
-      console.log('Attempting to join/create room with settings:', {
-        teamSize: settings.teamSize,
-        speed: settings.speed,
-        address: address
-      })
-      
       // Try to join or create a room
       let joinedRoom: Room | null = null
       
@@ -188,8 +198,6 @@ export default function PvPLobby() {
         throw joinError
       }
       
-      console.log('Successfully joined room:', joinedRoom.roomId)
-      
       setRoom(joinedRoom)
       setStatus('connected')
       
@@ -201,7 +209,6 @@ export default function PvPLobby() {
       // Set up room event listeners
       joinedRoom.onMessage("match-ready", (message) => {
         gameSounds.play('menuAccept')
-        console.log("Match ready!", message)
         
         // Show notification if tab is not visible
         if (document.visibilityState !== 'visible') {
@@ -211,7 +218,6 @@ export default function PvPLobby() {
         // Set up battle state listener
         joinedRoom.onStateChange((state) => {
           if (state.status === 'battle' && !battleStarted) {
-            console.log('Battle is starting!')
             // Parse teams from state
             const myPlayerId = joinedRoom.sessionId
             const players = Array.from(state.players.values())
@@ -312,7 +318,6 @@ export default function PvPLobby() {
           playerTeam={playerTeam}
           enemyTeam={enemyTeam}
           onBattleEnd={(won) => {
-            console.log('Battle ended, won:', won)
             // Reset state
             setBattleStarted(false)
             setStatus('idle')
@@ -393,8 +398,65 @@ export default function PvPLobby() {
                 <>
                   <h2 className="text-2xl text-green-400 mb-4">READY FOR COMBAT?</h2>
                   
+                  {/* Show team lineup */}
+                  {loadedTeam.length > 0 ? (
+                    <div className="mb-4">
+                      <div className="flex justify-center gap-3 mb-4">
+                        {loadedTeam.slice(0, settings.teamSize).map((unit, index) => {
+                          // Extract ID number from unit.id (e.g., "roboto-1234" -> "1234")
+                          const idNumber = unit.id?.replace(/^(roboto|robopet)-/, '') || '???'
+                          return (
+                            <div 
+                              key={index}
+                              className="flex flex-col items-center cursor-pointer"
+                              onClick={() => {
+                                setLightboxIndex(index)
+                                gameSounds.playClick()
+                              }}
+                            >
+                              <div className="relative group">
+                                <img 
+                                  src={unit.imageUrl || unit.image || '/placeholder-robot.png'} 
+                                  alt={unit.name || `Unit ${index + 1}`}
+                                  className="w-20 h-20 rounded-lg border-2 border-green-500/50 hover:border-green-400 transition-colors object-cover pixelated"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder-robot.png'
+                                  }}
+                                />
+                              </div>
+                              <div className="mt-1 bg-black rounded px-2 py-0.5 text-[10px] font-bold text-green-400 border border-green-500/50 whitespace-nowrap">
+                                {idNumber}-{unit.element || 'None'}
+                              </div>
+                            </div>
+                          )
+                        })}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push('/team-builder')}
+                          className="text-green-400 hover:text-green-300 p-1 self-center ml-2"
+                          title="Edit Team"
+                        >
+                          <Edit className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-4">
+                      <p className="text-yellow-400 text-sm">No team selected!</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push('/team-builder')}
+                        className="mt-2"
+                      >
+                        Build Your Team
+                      </Button>
+                    </div>
+                  )}
+                  
                   {mounted && (
-                    <div className="flex justify-center gap-4 mb-6">
+                    <div className="flex justify-center gap-4 mb-3">
                       <div className="text-sm">
                         <span className="text-gray-400">Team Size: </span>
                         <span className="text-green-400">{settings.teamSize}v{settings.teamSize}</span>
@@ -411,7 +473,7 @@ export default function PvPLobby() {
                     size="lg"
                     onClick={findMatch}
                     className="text-xl py-6 px-12"
-                    disabled={!isConnected}
+                    disabled={!isConnected || loadedTeam.length !== settings.teamSize}
                   >
                     <Search className="w-6 h-6 mr-3" />
                     FIND MATCH
@@ -444,6 +506,57 @@ export default function PvPLobby() {
                       Looking for another Roboto holder to battle...
                     </p>
                   </div>
+                  
+                  {/* Show team lineup while waiting */}
+                  {loadedTeam.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <span className="text-sm text-gray-400">Your Team:</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            cancelSearch()
+                            router.push('/team-builder')
+                          }}
+                          className="text-green-400 hover:text-green-300 p-1"
+                          title="Edit Team"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="flex justify-center gap-2">
+                        {loadedTeam.slice(0, settings.teamSize).map((unit, index) => {
+                          // Extract ID number from unit.id (e.g., "roboto-1234" -> "1234")
+                          const idNumber = unit.id?.replace(/^(roboto|robopet)-/, '') || '???'
+                          return (
+                            <div 
+                              key={index}
+                              className="flex flex-col items-center cursor-pointer"
+                              onClick={() => {
+                                setLightboxIndex(index)
+                                gameSounds.playClick()
+                              }}
+                            >
+                              <div className="relative">
+                                <img 
+                                  src={unit.imageUrl || unit.image || '/placeholder-robot.png'} 
+                                  alt={unit.name || `Unit ${index + 1}`}
+                                  className="w-16 h-16 rounded-lg border-2 border-green-500/50 hover:border-green-400 transition-colors object-cover pixelated"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder-robot.png'
+                                  }}
+                                />
+                              </div>
+                              <div className="mt-1 bg-black rounded px-1.5 py-0.5 text-[9px] font-bold text-green-400 border border-green-500/50 whitespace-nowrap">
+                                {idNumber}-{unit.element || 'None'}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                   
                   <Button
                     variant="outline"
@@ -507,13 +620,14 @@ export default function PvPLobby() {
         </div>
       </div>
       
-      {/* Show team footer when not in battle */}
-      {loadedTeam.length > 0 && !battleStarted && (
-        <TeamFooter 
+      {/* Unit Lightbox Dialog */}
+      {lightboxIndex !== null && loadedTeam.length > 0 && (
+        <UnitLightbox
+          units={loadedTeam}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
           selectedTeam={loadedTeam}
-          teamSize={settings.teamSize}
-          onRemoveUnit={() => {}} // Read-only in lobby
-          isReadOnly={true}
+          maxTeamSize={settings.teamSize}
         />
       )}
     </PageLayout>
