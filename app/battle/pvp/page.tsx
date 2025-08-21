@@ -14,6 +14,7 @@ import { BattleNotifications } from "../../../lib/notifications/battleNotificati
 import BattleArena from "../../../components/battle/BattleArena";
 import { TraitProcessorV3 } from "../../../lib/game-engine/TraitProcessorV3";
 import { UnitLightbox } from "../../../components/team-builder/UnitLightbox";
+import { MatchProposalModal } from "../../../components/battle/MatchProposalModal";
 
 export default function PvPLobby() {
   const router = useRouter();
@@ -33,6 +34,11 @@ export default function PvPLobby() {
   const [enemyTeam, setEnemyTeam] = useState<any[]>([]);
   const [loadedTeam, setLoadedTeam] = useState<any[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  
+  // Settings mismatch handling
+  const [showProposalModal, setShowProposalModal] = useState(false);
+  const [opponentSettings, setOpponentSettings] = useState<{ teamSize: number; speed: string } | null>(null);
+  const [waitingPlayers, setWaitingPlayers] = useState<any[]>([]);
 
   // Load battle settings
   const [settings, setSettings] = useState({ teamSize: 5, speed: "speedy" });
@@ -110,28 +116,53 @@ export default function PvPLobby() {
 
         // Listen for players looking for matches
         lobby.onMessage("player-looking", (data) => {
-          // Show notification if we're not searching and settings match
-          if (
-            status === "idle" &&
-            data.teamSize === settings.teamSize &&
-            data.speed === settings.speed
-          ) {
-            BattleNotifications.showPlayerWaiting(data);
+          // Store all waiting players
+          setWaitingPlayers(prev => {
+            const filtered = prev.filter(p => p.id !== data.id);
+            return [...filtered, data];
+          });
+          
+          // Show notification based on settings match
+          if (status === "idle") {
+            const isExactMatch = data.teamSize === settings.teamSize && 
+                                data.speed === settings.speed;
+            const isMismatch = data.teamSize !== settings.teamSize || 
+                              data.speed !== settings.speed;
+            
+            if (isExactMatch) {
+              // Perfect match - show strong notification
+              BattleNotifications.showPlayerWaiting(data);
+            } else if (isMismatch) {
+              // Mismatch - show softer notification with details
+              gameSounds.play("menuNavigate");
+              const message = `Player waiting: ${data.teamSize}v${data.teamSize} ${data.speed}`;
+              new Notification("Mismatched Player Available", {
+                body: message,
+                icon: "/icon-192.png"
+              });
+            }
           }
         });
 
         // Listen for existing waiting players
         lobby.onMessage("players-waiting", (players) => {
-          // Check if any match our settings
-          const matching = players.find(
-            (p: any) =>
-              p.teamSize === settings.teamSize && p.speed === settings.speed,
-          );
-          if (matching && status === "idle") {
-            BattleNotifications.showPlayerWaiting({
-              teamSize: matching.teamSize,
-              speed: matching.speed,
-            });
+          setWaitingPlayers(players);
+          
+          // Check for any players (exact or mismatched)
+          if (players.length > 0 && status === "idle") {
+            const exactMatch = players.find(
+              (p: any) =>
+                p.teamSize === settings.teamSize && p.speed === settings.speed,
+            );
+            if (exactMatch) {
+              BattleNotifications.showPlayerWaiting({
+                teamSize: exactMatch.teamSize,
+                speed: exactMatch.speed,
+              });
+            } else {
+              // There are mismatched players waiting
+              gameSounds.play("menuNavigate");
+            }
           }
         });
       } catch (err) {
@@ -215,6 +246,27 @@ export default function PvPLobby() {
         lobbyRoom.send("stop-waiting");
       }
 
+      // Handle settings mismatch
+      joinedRoom.onMessage("settings-mismatch", (data) => {
+        setOpponentSettings(data.opponentSettings);
+        setShowProposalModal(true);
+        gameSounds.play("notification");
+      });
+
+      // Handle settings accepted
+      joinedRoom.onMessage("settings-accepted", (data) => {
+        gameSounds.play("confirm");
+        setShowProposalModal(false);
+        // Settings were accepted, wait for match to start
+      });
+
+      // Handle settings proposal
+      joinedRoom.onMessage("settings-proposal", (data) => {
+        setOpponentSettings(data.settings);
+        setShowProposalModal(true);
+        gameSounds.play("notification");
+      });
+
       // Set up room event listeners
       joinedRoom.onMessage("match-ready", (message) => {
         gameSounds.play("confirm");
@@ -290,6 +342,19 @@ export default function PvPLobby() {
 
     if (granted) {
       gameSounds.play("confirm");
+    }
+  };
+
+  const handleAcceptSettings = (acceptedSettings: { teamSize: number; speed: string }) => {
+    if (room) {
+      room.send("accept-settings", acceptedSettings);
+      setShowProposalModal(false);
+    }
+  };
+
+  const handleProposeSettings = (proposedSettings: { teamSize: number; speed: string }) => {
+    if (room) {
+      room.send("propose-settings", proposedSettings);
     }
   };
 
@@ -485,6 +550,56 @@ export default function PvPLobby() {
                     </div>
                   )}
 
+                  {/* Show waiting players */}
+                  {waitingPlayers.length > 0 && (
+                    <div className="mb-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <h3 className="text-sm font-bold text-green-400 mb-3">
+                        PLAYERS WAITING ({waitingPlayers.length})
+                      </h3>
+                      <div className="space-y-2">
+                        {waitingPlayers.map((player, index) => {
+                          const isExactMatch = player.teamSize === settings.teamSize && 
+                                              player.speed === settings.speed;
+                          const teamMismatch = player.teamSize !== settings.teamSize;
+                          const speedMismatch = player.speed !== settings.speed;
+                          
+                          return (
+                            <div 
+                              key={player.id || index}
+                              className={`flex items-center justify-between p-2 rounded border ${
+                                isExactMatch 
+                                  ? "bg-green-900/30 border-green-500/50" 
+                                  : "bg-yellow-900/20 border-yellow-500/30"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                                  isExactMatch ? "bg-green-400" : "bg-yellow-400"
+                                }`} />
+                                <span className="text-xs text-white">
+                                  {player.name || "Anonymous"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-xs">
+                                <span className={teamMismatch ? "text-yellow-400" : "text-green-400"}>
+                                  {player.teamSize}v{player.teamSize}
+                                </span>
+                                <span className={speedMismatch ? "text-yellow-400" : "text-green-400"}>
+                                  {player.speed}
+                                </span>
+                                {!isExactMatch && (
+                                  <span className="text-yellow-400 text-[10px]">
+                                    MISMATCH
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <Button
                     variant="terminal"
                     size="lg"
@@ -668,6 +783,26 @@ export default function PvPLobby() {
           onClose={() => setLightboxIndex(null)}
           selectedTeam={loadedTeam}
           maxTeamSize={settings.teamSize}
+        />
+      )}
+
+      {/* Match Proposal Modal */}
+      {showProposalModal && opponentSettings && (
+        <MatchProposalModal
+          isOpen={showProposalModal}
+          onClose={() => {
+            setShowProposalModal(false);
+            if (room) {
+              room.leave();
+              setRoom(null);
+              setStatus("idle");
+            }
+          }}
+          yourSettings={settings}
+          opponentSettings={opponentSettings}
+          onAccept={handleAcceptSettings}
+          onPropose={handleProposeSettings}
+          currentTeamSize={loadedTeam.length}
         />
       )}
     </PageLayout>

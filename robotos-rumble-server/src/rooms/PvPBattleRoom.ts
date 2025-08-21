@@ -6,20 +6,25 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   maxClients = 2
   private battleEngine: BattleEngineServer = new BattleEngineServer()
   private actionTimers: Map<string, NodeJS.Timeout> = new Map()
+  private playerPreferences: Map<string, { teamSize: number, speed: string }> = new Map()
+  private settingsAgreed: Map<string, boolean> = new Map()
   
   onCreate(options: any) {
     this.setState(new BattleRoomState())
     
-    // Set battle settings from options
-    this.state.teamSize = options.teamSize || 5
-    this.state.speed = options.speed || "speedy"
-    this.state.timerDuration = this.state.speed === "speedy" ? 5 : 10
+    // Don't set final settings yet - wait for both players to negotiate
+    // These are just defaults that may change
+    this.state.teamSize = 5
+    this.state.speed = "speedy"
+    this.state.timerDuration = 5
     
     // Set up message handlers
     this.onMessage("ready", this.handleReady.bind(this))
     this.onMessage("action", this.handleAction.bind(this))
     this.onMessage("forfeit", this.handleForfeit.bind(this))
     this.onMessage("team", this.handleTeamUpdate.bind(this))
+    this.onMessage("accept-settings", (client, settings) => this.handleAcceptSettings(client, settings))
+    this.onMessage("propose-settings", (client, settings) => this.handleProposeSettings(client, settings))
     
     console.log("PvP Battle Room created with settings:", {
       teamSize: this.state.teamSize,
@@ -30,6 +35,12 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   onJoin(client: Client, options: any) {
     console.log(`${client.sessionId} joined PvP battle room`)
+    
+    // Store player preferences
+    this.playerPreferences.set(client.sessionId, {
+      teamSize: options.teamSize || 5,
+      speed: options.speed || "speedy"
+    })
     
     // Create player
     const player = new Player()
@@ -44,8 +55,35 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     // Check if we have 2 players
     if (this.state.players.size === 2) {
-      this.state.status = "ready"
-      this.broadcast("match-ready", { message: "Both players connected! Send your teams." })
+      // Check if settings match
+      const prefs = Array.from(this.playerPreferences.values())
+      const settingsMatch = prefs[0].teamSize === prefs[1].teamSize && 
+                           prefs[0].speed === prefs[1].speed
+      
+      if (settingsMatch) {
+        // Settings match - proceed normally
+        this.state.teamSize = prefs[0].teamSize
+        this.state.speed = prefs[0].speed
+        this.state.timerDuration = this.state.speed === "speedy" ? 5 : 10
+        this.state.status = "ready"
+        this.broadcast("match-ready", { message: "Both players connected! Send your teams." })
+      } else {
+        // Settings don't match - need negotiation
+        const players = Array.from(this.state.players.entries())
+        
+        // Notify each player about the mismatch
+        players.forEach(([id, player]) => {
+          const myPrefs = this.playerPreferences.get(id)!
+          const otherPrefs = Array.from(this.playerPreferences.entries())
+            .find(([otherId]) => otherId !== id)?.[1]!
+          
+          this.clients.find(c => c.sessionId === id)?.send("settings-mismatch", {
+            yourSettings: myPrefs,
+            opponentSettings: otherPrefs,
+            message: `Opponent wants ${otherPrefs.teamSize}v${otherPrefs.teamSize} ${otherPrefs.speed} mode`
+          })
+        })
+      }
     }
   }
   
@@ -346,6 +384,47 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       this.state.players.delete(playerId)
       this.state.status = "waiting"
     }
+  }
+  
+  handleAcceptSettings(client: Client, settings: { teamSize: number, speed: string }) {
+    console.log(`${client.sessionId} accepted settings:`, settings)
+    
+    // Mark this player as agreed
+    this.settingsAgreed.set(client.sessionId, true)
+    
+    // Update the agreed settings
+    this.state.teamSize = settings.teamSize
+    this.state.speed = settings.speed
+    this.state.timerDuration = settings.speed === "speedy" ? 5 : 10
+    
+    // Notify the other player
+    this.broadcast("settings-accepted", {
+      playerId: client.sessionId,
+      settings: settings
+    }, { except: client })
+    
+    // Check if both players have agreed
+    if (this.settingsAgreed.size === 2) {
+      this.state.status = "ready"
+      this.broadcast("match-ready", { 
+        message: "Settings agreed! Send your teams.",
+        finalSettings: {
+          teamSize: this.state.teamSize,
+          speed: this.state.speed
+        }
+      })
+    }
+  }
+  
+  handleProposeSettings(client: Client, settings: { teamSize: number, speed: string }) {
+    console.log(`${client.sessionId} proposed settings:`, settings)
+    
+    // Broadcast the proposal to the other player
+    this.broadcast("settings-proposal", {
+      playerId: client.sessionId,
+      settings: settings,
+      message: `Opponent proposes ${settings.teamSize}v${settings.teamSize} ${settings.speed} mode`
+    }, { except: client })
   }
   
   private handleForfeit(client: Client) {

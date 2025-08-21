@@ -49,12 +49,15 @@ export class LobbyRoom extends Room<LobbyState> {
       this.state.waitingPlayers.set(client.sessionId, player)
       
       // Notify all other clients that someone is waiting
+      // Send to everyone so they can see mismatched players too
       this.broadcast("player-looking", {
+        id: player.id,
         teamSize: player.teamSize,
-        speed: player.speed
+        speed: player.speed,
+        name: player.name
       }, { except: client })
       
-      console.log(`${client.sessionId} is now waiting for a match`)
+      console.log(`${client.sessionId} is now waiting for a match (${player.teamSize}v${player.teamSize}, ${player.speed})`)
     })
     
     this.onMessage("stop-waiting", (client) => {
