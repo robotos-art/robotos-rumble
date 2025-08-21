@@ -32,7 +32,7 @@ export class BattleNotifications {
     if (!this.isEnabled()) return;
 
     const title = "⚔️ Match Found!";
-    const options: NotificationOptions = {
+    const options: NotificationOptions & { vibrate?: number[] } = {
       body: opponentName
         ? `${opponentName} is ready to battle!`
         : "An opponent has been found! Join the battle now.",
@@ -66,7 +66,7 @@ export class BattleNotifications {
     if (!this.isEnabled()) return;
 
     const title = "🎮 Player Looking for Match";
-    const options: NotificationOptions = {
+    const options: NotificationOptions & { vibrate?: number[] } = {
       body: settings
         ? `Someone wants to play ${settings.teamSize}v${settings.teamSize} ${settings.speed} mode!`
         : "A player is looking for an opponent. Join now!",
@@ -97,7 +97,7 @@ export class BattleNotifications {
     if (!this.isEnabled()) return;
 
     const title = "🚀 Battle Starting!";
-    const options: NotificationOptions = {
+    const options: NotificationOptions & { vibrate?: number[] } = {
       body: `Your battle begins in ${secondsLeft} seconds...`,
       icon: "/robotos-icon.png",
       badge: "/robotos-badge.png",
@@ -128,7 +128,7 @@ export class BattleNotifications {
     if (document.visibilityState === "visible") return;
 
     const title = "⏰ Your Turn!";
-    const options: NotificationOptions = {
+    const options: NotificationOptions & { vibrate?: number[] } = {
       body: unitName
         ? `It's ${unitName}'s turn to attack!`
         : "It's your turn to make a move!",

@@ -110,7 +110,6 @@ export default function BattleArena({
       isPlayerTurn={isPlayerTurn}
       serverTimer={serverTimer}
       onAction={onAction}
-      roomState={roomState}
     />
   );
 }

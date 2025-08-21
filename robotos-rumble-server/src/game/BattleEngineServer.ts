@@ -202,7 +202,7 @@ export class BattleEngineServer {
   private checkBattleEnd(): { winner: string } | null {
     const aliveByOwner: Record<string, number> = {}
     
-    for (const unit of this.units.values()) {
+    for (const unit of Array.from(this.units.values())) {
       if (unit.isAlive) {
         aliveByOwner[unit.ownerId] = (aliveByOwner[unit.ownerId] || 0) + 1
       }

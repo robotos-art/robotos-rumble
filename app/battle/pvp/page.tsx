@@ -104,7 +104,7 @@ export default function PvPLobby() {
         setLobbyRoom(lobby);
 
         // Listen for lobby updates
-        lobby.onStateChange((state) => {
+        lobby.onStateChange((state: any) => {
           setOnlineCount(state.totalOnline || 0);
         });
 
@@ -217,7 +217,7 @@ export default function PvPLobby() {
 
       // Set up room event listeners
       joinedRoom.onMessage("match-ready", (message) => {
-        gameSounds.play("menuAccept");
+        gameSounds.play("confirm");
 
         // Show notification if tab is not visible
         if (document.visibilityState !== "visible") {
@@ -230,13 +230,13 @@ export default function PvPLobby() {
             // Parse teams from state
             const myPlayerId = joinedRoom.sessionId;
             const players = Array.from(state.players.values());
-            const myPlayer = players.find((p) => p.id === myPlayerId);
-            const enemyPlayer = players.find((p) => p.id !== myPlayerId);
+            const myPlayer = players.find((p: any) => p.id === myPlayerId);
+            const enemyPlayer = players.find((p: any) => p.id !== myPlayerId);
 
             if (myPlayer && enemyPlayer) {
               try {
-                const myTeam = JSON.parse(myPlayer.team || "[]");
-                const oppTeam = JSON.parse(enemyPlayer.team || "[]");
+                const myTeam = JSON.parse((myPlayer as any).team || "[]");
+                const oppTeam = JSON.parse((enemyPlayer as any).team || "[]");
                 setPlayerTeam(myTeam);
                 setEnemyTeam(oppTeam);
                 setBattleStarted(true);
@@ -289,7 +289,7 @@ export default function PvPLobby() {
     localStorage.setItem("pvp_notifications_asked", "true");
 
     if (granted) {
-      gameSounds.play("menuAccept");
+      gameSounds.play("confirm");
     }
   };
 

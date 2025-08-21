@@ -91,7 +91,7 @@ export default function PvPBattlePage() {
       });
 
       joinedRoom.onMessage("battle-start", (message) => {
-        gameSounds.play("menuAccept");
+        gameSounds.play("confirm");
       });
 
       joinedRoom.onMessage("turn-start", (data) => {
@@ -151,7 +151,7 @@ export default function PvPBattlePage() {
           crit: 10,
         },
         abilities: [],
-        traits: [],
+        traits: {},
         imageUrl: "",
         elementModifiers: {
           strongAgainst: [],
@@ -252,7 +252,7 @@ export default function PvPBattlePage() {
   }
 
   return (
-    <PageLayout noPadding>
+    <PageLayout>
       {/* Exit button overlay */}
       <div className="absolute top-4 left-4 z-50">
         <Button
