@@ -56,7 +56,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-2809",
     name: "Robopet #2809",
-    image: "https://robopets.s3.amazonaws.com/images/2809.png",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/2809/body-transparent.png",
     traits: {
       Background: "Sunset",
       Body: "Gunmetal",
@@ -68,9 +68,23 @@ const STOCK_ROBOPETS = [
     }
   },
   {
+    id: "robopet-3619",
+    name: "Robopet #3619",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/3619/body-transparent.png",
+    traits: {
+      Background: "Galaxy",
+      Body: "Silver",
+      Eyes: "Beam",
+      Head: "Fins",
+      Arms: "Cannon",
+      Chest: "Battery",
+      Feet: "Boosters"
+    }
+  },
+  {
     id: "robopet-4012",
     name: "Robopet #4012",
-    image: "https://robopets.s3.amazonaws.com/images/4012.png",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/4012/body-transparent.png",
     traits: {
       Background: "Night Sky",
       Body: "Chrome",
@@ -84,7 +98,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-6211",
     name: "Robopet #6211",
-    image: "https://robopets.s3.amazonaws.com/images/6211.png",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/6211/body-transparent.png",
     traits: {
       Background: "Digital Rain",
       Body: "Rust",
@@ -98,7 +112,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-7386",
     name: "Robopet #7386",
-    image: "https://robopets.s3.amazonaws.com/images/7386.png",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/7386/body-transparent.png",
     traits: {
       Background: "Neon City",
       Body: "Gold",
@@ -112,7 +126,7 @@ const STOCK_ROBOPETS = [
   {
     id: "robopet-9997",
     name: "Robopet #9997",
-    image: "https://robopets.s3.amazonaws.com/images/9997.png",
+    image: "https://d2w8sp0plvpr8a.cloudfront.net/9997/body-transparent.png",
     traits: {
       Background: "Void",
       Body: "Obsidian",
