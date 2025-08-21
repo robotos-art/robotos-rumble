@@ -139,6 +139,277 @@ const STOCK_ROBOPETS = [
   }
 ];
 
+// Shared component for rendering unit cards
+const UnitCard = ({ 
+  unit, 
+  index, 
+  isSelected, 
+  companion, 
+  companionInTeam, 
+  settings, 
+  selectedTeam,
+  onToggleUnit, 
+  onToggleCompanion, 
+  onLightboxOpen, 
+  baseIndex = 0 
+}: {
+  unit: BattleUnitV3;
+  index: number;
+  isSelected: boolean;
+  companion?: BattleUnitV3;
+  companionInTeam?: BattleUnitV3;
+  settings: BattleSettings;
+  selectedTeam: BattleUnitV3[];
+  onToggleUnit: (unit: BattleUnitV3) => void;
+  onToggleCompanion?: (unit: BattleUnitV3) => void;
+  onLightboxOpen: (index: number) => void;
+  baseIndex?: number;
+}) => {
+  const isStock = unit.isStock || false;
+  
+  return (
+    <Card
+      key={`${unit.type}-${unit.id}`}
+      className={`bg-black/60 border-2 rounded-[0.7em] transition-all overflow-hidden relative cursor-pointer ${
+        isSelected
+          ? isStock 
+            ? "border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.6)]" 
+            : "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
+          : companionInTeam
+            ? "border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]"
+            : isStock
+              ? "border-purple-500/30 hover:border-purple-500/60"
+              : "border-green-500/30 hover:border-green-500/60"
+        }`}
+      onClick={() => onToggleUnit(unit)}
+      onMouseEnter={() => gameSounds.playHover()}
+    >
+      {/* Expand button */}
+      <Button
+        variant="terminal"
+        size="icon"
+        className="absolute top-1.5 right-1.5 z-10 opacity-60 hover:opacity-100 w-6 h-6"
+        onClick={(e) => {
+          e.stopPropagation();
+          onLightboxOpen(baseIndex + index);
+          gameSounds.playClick();
+        }}
+      >
+        <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
+      </Button>
+
+      <div className="flex">
+        {/* Left side - Image */}
+        <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
+          {isStock && (
+            <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+              STOCK
+            </div>
+          )}
+          <img
+            src={unit.imageUrl}
+            alt={unit.name}
+            className="w-full h-full object-cover pixelated"
+          />
+        </div>
+
+        {/* Right side - Metadata */}
+        <div className="flex-1 p-3 sm:p-4 min-h-[128px] sm:min-h-[192px] flex flex-col">
+          {/* Header */}
+          <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
+              <h3 className="text-sm sm:text-lg font-bold truncate">
+                {unit.name}
+              </h3>
+            </div>
+            <div
+              className="text-xs sm:text-sm"
+              style={{
+                color: TraitProcessorV3.getElementColor(
+                  unit.element,
+                ),
+              }}
+            >
+              {TraitProcessorV3.getElementSymbol(unit.element)}{" "}
+              {unit.element}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <TooltipProvider>
+            <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-2 sm:mb-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.hp}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Health Points - Total damage unit can take
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Swords className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.attack}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Attack - Increases damage dealt</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.defense}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Defense - Reduces damage taken</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.speed}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Speed - Determines turn order</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.energy}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Energy - Resource for using abilities</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-500" />
+                    <span className="text-xs sm:text-sm font-mono">
+                      {unit.stats.crit}%
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Critical - Chance for 50% bonus damage</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+
+          {/* Content area that grows */}
+          <div className="flex-grow">
+            {/* Abilities */}
+            <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
+              {unit.abilities.map((abilityId) => {
+                const ability =
+                  TraitProcessorV3.getAbilityData(abilityId);
+                return ability ? (
+                  <div
+                    key={abilityId}
+                    className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 bg-black/50 border border-green-500/30 rounded"
+                    style={{
+                      borderColor:
+                        TraitProcessorV3.getElementColor(
+                          ability.element,
+                        ) + "40",
+                      backgroundColor:
+                        TraitProcessorV3.getElementColor(
+                          ability.element,
+                        ) + "0A",
+                    }}
+                  >
+                    {ability.name}
+                  </div>
+                ) : null;
+              })}
+            </div>
+          </div>
+
+          {/* Companion Toggle - only for non-stock units */}
+          {companion && !isStock && onToggleCompanion && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  companionInTeam ||
+                  selectedTeam.length < settings.teamSize
+                ) {
+                  onToggleCompanion(companion);
+                  gameSounds.playClick();
+                }
+              }}
+              className={`
+                flex mt-2 sm:mt-3 items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded border transition-all w-full
+                ${companionInTeam
+                  ? "bg-yellow-500 border-yellow-400 hover:bg-yellow-400"
+                  : "bg-black/50 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/10"
+                }
+                ${!companionInTeam &&
+                  settings.teamSize <= 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
+                }
+              `}
+            >
+              <img
+                src={companion.imageUrl}
+                alt={companion.name}
+                className="w-6 h-6 sm:w-8 sm:h-8 object-cover pixelated rounded flex-shrink-0"
+              />
+              <div className="text-[10px] sm:text-xs min-w-0 text-left flex-1">
+                <div
+                  className={`truncate font-semibold ${companionInTeam ? "text-black" : "text-yellow-400"}`}
+                >
+                  {companion.name}
+                </div>
+                <div
+                  className={`font-bold ${companionInTeam ? "text-black/80" : "text-green-400/60"}`}
+                >
+                  {companionInTeam && isSelected
+                    ? "2% BOOST ✓"
+                    : companionInTeam
+                      ? "Companion ✓"
+                      : "Add Companion"}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 export default function TeamBuilder() {
   const router = useRouter();
   const { isConnected } = useAccount();
@@ -906,10 +1177,10 @@ export default function TeamBuilder() {
                 </div>
               )}
 
-              {/* Units Grid */}
+              {/* Units Grid - Only wallet units */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredUnits.map((unit, index) => {
-                  const isSelected = selectedTeam.find(
+                  const isSelected = !!selectedTeam.find(
                     (u) => u.id === unit.id && u.type === unit.type,
                   );
                   const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, "");
@@ -917,244 +1188,25 @@ export default function TeamBuilder() {
                     const uBaseId = u.id.replace(/^(roboto|robopet)-/, "");
                     return uBaseId === unitBaseId && u.type !== unit.type;
                   });
-                  const companionInTeam =
-                    companion &&
-                    selectedTeam.find(
-                      (u) => u.id === companion.id && u.type === companion.type,
-                    );
+                  const companionInTeam = companion ? selectedTeam.find(
+                    (u) => u.id === companion.id && u.type === companion.type,
+                  ) : undefined;
 
                   return (
-                    <Card
+                    <UnitCard
                       key={`${unit.type}-${unit.id}`}
-                      className={`bg-black/60 border-2 rounded-[0.7em] transition-all overflow-hidden relative cursor-pointer ${isSelected
-                        ? "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
-                        : companionInTeam
-                          ? "border-yellow-500/50 shadow-[0_0_10px_rgba(255,255,0,0.3)]"
-                          : "border-green-500/30 hover:border-green-500/60"
-                        }`}
-                      onClick={() => toggleUnitSelection(unit)}
-                      onMouseEnter={() => gameSounds.playHover()}
-                    >
-                      {/* Expand button */}
-                      <Button
-                        variant="terminal"
-                        size="icon"
-                        className="absolute top-1.5 right-1.5 z-10 opacity-60 hover:opacity-100 w-6 h-6"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLightboxIndex(index);
-                          gameSounds.playClick();
-                        }}
-                      >
-                        <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-
-                      <div className="flex">
-                        {/* Left side - Image */}
-                        <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
-                          <img
-                            src={unit.imageUrl}
-                            alt={unit.name}
-                            className="w-full h-full object-cover pixelated"
-                          />
-                        </div>
-
-                        {/* Right side - Metadata */}
-                        <div className="flex-1 p-3 sm:p-4 min-h-[128px] sm:min-h-[192px] flex flex-col">
-                          {/* Header */}
-                          <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
-                            <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
-                              <h3 className="text-sm sm:text-lg font-bold truncate">
-                                {unit.name}
-                              </h3>
-                            </div>
-                            <div
-                              className="text-xs sm:text-sm"
-                              style={{
-                                color: TraitProcessorV3.getElementColor(
-                                  unit.element,
-                                ),
-                              }}
-                            >
-                              {TraitProcessorV3.getElementSymbol(unit.element)}{" "}
-                              {unit.element}
-                            </div>
-                          </div>
-
-                          {/* Stats */}
-                          <TooltipProvider>
-                            <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-2 sm:mb-4">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.hp}
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    Health Points - Total damage unit can take
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Swords className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.attack}
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Attack - Increases damage dealt</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.defense}
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Defense - Reduces damage taken</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.speed}
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Speed - Determines turn order</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.energy}
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Energy - Resource for using abilities</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-0.5 sm:gap-1 cursor-help">
-                                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-500" />
-                                    <span className="text-xs sm:text-sm font-mono">
-                                      {unit.stats.crit}%
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Critical - Chance for 50% bonus damage</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TooltipProvider>
-
-                          {/* Content area that grows */}
-                          <div className="flex-grow">
-                            {/* Abilities */}
-                            <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
-                              {unit.abilities.map((abilityId) => {
-                                const ability =
-                                  TraitProcessorV3.getAbilityData(abilityId);
-                                return ability ? (
-                                  <div
-                                    key={abilityId}
-                                    className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 bg-black/50 border border-green-500/30 rounded"
-                                    style={{
-                                      borderColor:
-                                        TraitProcessorV3.getElementColor(
-                                          ability.element,
-                                        ) + "40",
-                                      backgroundColor:
-                                        TraitProcessorV3.getElementColor(
-                                          ability.element,
-                                        ) + "0A",
-                                    }}
-                                  >
-                                    {ability.name}
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Companion Toggle */}
-                          {companion && (
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (
-                                  !(
-                                    !companionInTeam &&
-                                    selectedTeam.length >= settings.teamSize
-                                  )
-                                ) {
-                                  toggleUnitSelection(companion);
-                                  gameSounds.playClick();
-                                }
-                              }}
-                              className={`
-                                flex mt-2 sm:mt-3 items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded border transition-all w-full
-                                ${companionInTeam
-                                  ? "bg-yellow-500 border-yellow-400 hover:bg-yellow-400"
-                                  : "bg-black/50 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/10"
-                                }
-                                ${!companionInTeam &&
-                                  selectedTeam.length >= settings.teamSize
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : "cursor-pointer"
-                                }
-                              `}
-                            >
-                              <img
-                                src={companion.imageUrl}
-                                alt={companion.name}
-                                className="w-6 h-6 sm:w-8 sm:h-8 object-cover pixelated rounded flex-shrink-0"
-                              />
-                              <div className="text-[10px] sm:text-xs min-w-0 text-left flex-1">
-                                <div
-                                  className={`truncate font-semibold ${companionInTeam ? "text-black" : "text-yellow-400"}`}
-                                >
-                                  {companion.name}
-                                </div>
-                                <div
-                                  className={`font-bold ${companionInTeam ? "text-black/80" : "text-green-400/60"}`}
-                                >
-                                  {companionInTeam && isSelected
-                                    ? "2% BOOST ✓"
-                                    : companionInTeam
-                                      ? "Companion ✓"
-                                      : "Add Companion"}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
+                      unit={unit}
+                      index={index}
+                      isSelected={isSelected}
+                      companion={companion}
+                      companionInTeam={companionInTeam}
+                      settings={settings}
+                      selectedTeam={selectedTeam}
+                      onToggleUnit={toggleUnitSelection}
+                      onToggleCompanion={toggleUnitSelection}
+                      onLightboxOpen={setLightboxIndex}
+                      baseIndex={0}
+                    />
                   );
                 })}
               </div>
@@ -1170,10 +1222,10 @@ export default function TeamBuilder() {
             </div>
             
             {/* Stock Robopets Section */}
-            {isConnected && (
+            {isConnected && filteredStockUnits.length > 0 && (
               <div className="mt-12 border-t border-green-500/30 pt-8">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-green-400 mb-2">
+                  <h3 className="text-xl font-bold text-purple-400 mb-2">
                     STOCK ROBOPETS
                   </h3>
                   <p className="text-green-400/70 text-sm">
@@ -1190,123 +1242,30 @@ export default function TeamBuilder() {
                   </p>
                 </div>
                 
-                {/* Stock Units Grid */}
-                <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                      {filteredStockUnits.map((unit, index) => {
-                        const isSelected = selectedTeam.find(
-                          (u) => u.id === unit.id && u.type === unit.type,
-                        );
-                        
-                        return (
-                          <Card
-                            key={`stock-${unit.id}`}
-                            className={`bg-black/60 border-2 rounded-[0.7em] transition-all overflow-hidden relative cursor-pointer ${
-                              isSelected
-                                ? "border-green-500 shadow-[0_0_20px_rgba(0,255,0,0.6)]"
-                                : "border-purple-500/30 hover:border-purple-500/60"
-                            }`}
-                            onClick={() => toggleUnitSelection(unit)}
-                            onMouseEnter={() => gameSounds.playHover()}
-                          >
-                            {/* Expand button */}
-                            <Button
-                              variant="terminal"
-                              size="icon"
-                              className="absolute top-1.5 right-1.5 z-10 opacity-60 hover:opacity-100 w-6 h-6"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Adjust index for lightbox
-                                setLightboxIndex(processedUnits.length + index);
-                                gameSounds.playClick();
-                              }}
-                            >
-                              <Expand className="w-3 h-3 sm:w-4 sm:h-4" />
-                            </Button>
+                {/* Stock Units Grid - Uses exact same card component as regular units */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {filteredStockUnits.map((unit, index) => {
+                    const isSelected = !!selectedTeam.find(
+                      (u) => u.id === unit.id && u.type === unit.type,
+                    );
 
-                            <div className="flex">
-                              {/* Left side - Image */}
-                              <div className="w-32 h-32 sm:w-36 sm:h-36 p-1 flex-shrink-0 relative">
-                                <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
-                                  STOCK
-                                </div>
-                                <img
-                                  src={unit.imageUrl}
-                                  alt={unit.name}
-                                  className="w-full h-full object-cover pixelated"
-                                />
-                              </div>
-
-                              {/* Right side - Metadata */}
-                              <div className="flex-1 p-3 sm:p-4 min-h-[128px] sm:min-h-[192px] flex flex-col">
-                                {/* Header */}
-                                <div className="mb-2 sm:mb-3 pr-8 sm:pr-12">
-                                  <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
-                                    <span className="text-sm sm:text-base font-bold text-green-400">
-                                      {unit.name}
-                                    </span>
-                                  </div>
-                                  <div className="flex flex-wrap gap-1 text-[10px] sm:text-xs">
-                                    <span className="bg-green-500/20 text-green-400 px-1 sm:px-2 py-0.5 rounded">
-                                      {unit.element}
-                                    </span>
-                                    <span className="bg-blue-500/20 text-blue-400 px-1 sm:px-2 py-0.5 rounded">
-                                      {unit.type.toUpperCase()}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* Stats Grid */}
-                                <div className="grid grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-[10px] sm:text-xs mt-auto">
-                                  <div className="flex items-center gap-1">
-                                    <Heart className="w-3 h-3 text-red-500" />
-                                    <span>{unit.stats.hp}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Swords className="w-3 h-3 text-yellow-500" />
-                                    <span>{unit.stats.attack}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Shield className="w-3 h-3 text-blue-500" />
-                                    <span>{unit.stats.defense}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Zap className="w-3 h-3 text-purple-500" />
-                                    <span>{unit.stats.speed}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Gauge className="w-3 h-3 text-green-500" />
-                                    <span>{unit.stats.energy}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-orange-500" />
-                                    <span>{unit.stats.crit}%</span>
-                                  </div>
-                                </div>
-
-                                {/* Selection Status */}
-                                {isSelected && (
-                                  <div className="mt-2 sm:mt-3 text-center bg-green-500/20 rounded p-1">
-                                    <span className="text-[10px] sm:text-xs text-green-400 font-bold">
-                                      SELECTED
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                    
-                    {filteredStockUnits.length === 0 && (
-                      <div className="text-center py-8">
-                        <p className="text-purple-400/60">
-                          No stock units match your current filters
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                    return (
+                      <UnitCard
+                        key={`${unit.type}-${unit.id}`}
+                        unit={unit}
+                        index={index}
+                        isSelected={isSelected}
+                        companion={undefined}
+                        companionInTeam={undefined}
+                        settings={settings}
+                        selectedTeam={selectedTeam}
+                        onToggleUnit={toggleUnitSelection}
+                        onLightboxOpen={setLightboxIndex}
+                        baseIndex={filteredUnits.length}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
           </>
