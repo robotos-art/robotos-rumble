@@ -271,7 +271,7 @@ export default function BattleArenaV3({
     };
   }, []);
 
-  const showMessage = (msg: string, duration = BATTLE_CONSTANTS.TIMERS.MESSAGE_DURATION) => {
+  const showMessage = (msg: string, duration: number = BATTLE_CONSTANTS.TIMERS.MESSAGE_DURATION) => {
     setMessage(msg);
     if (duration > 0) {
       setTimeout(() => setMessage(""), duration);
