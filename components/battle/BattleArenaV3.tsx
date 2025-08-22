@@ -206,7 +206,7 @@ export default function BattleArenaV3({
     // Update turn order from server
     if (result.turnOrder) {
       newState.turnOrder = result.turnOrder;
-      newState.currentTurnIndex = result.turnIndex || 0;
+      newState.turnIndex = result.turnIndex || 0;
     }
     
     setBattleState(newState);
@@ -244,20 +244,16 @@ export default function BattleArenaV3({
       const damageType = result.critical ? "critical" : 
                         result.damage === 0 ? "miss" : "normal";
       setDamageNumbers(prev => [...prev, {
-        id: Date.now(),
-        amount: result.damage,
-        type: damageType,
         unitId: result.targetId,
+        damage: result.damage,
+        type: damageType,
+        timestamp: Date.now(),
       }]);
     }
     
     // Check for battle end
     if (result.battleEnded) {
       handleBattleEnd(result.won);
-    } else if (!result.isPlayerTurn) {
-      // If it's not our turn anymore, reset to waiting state
-      setIsDefending(false);
-      setIsAttacking(false);
     }
   }, [isPvP, battleEngine, playerTeam]);
 
