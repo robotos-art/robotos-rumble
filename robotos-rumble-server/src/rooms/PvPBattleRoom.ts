@@ -103,14 +103,18 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   handleReady(client: Client) {
     const player = this.state.players.get(client.sessionId)
     if (!player) {
+      console.error(`[PvP] Player ${client.sessionId} not found in handleReady`)
       return
     }
     
     player.ready = true
+    console.log(`[PvP] Player ${client.sessionId} is ready. Players: ${this.state.players.size}, All ready: ${Array.from(this.state.players.values()).every(p => p.ready)}`)
+    
     // Check if both players are ready
     const allReady = Array.from(this.state.players.values()).every(p => p.ready)
     
     if (allReady && this.state.players.size === 2) {
+      console.log("[PvP] Starting battle - both players ready!")
       this.startBattle()
     }
   }
@@ -227,6 +231,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   private startBattle() {
+    console.log("[PvP] startBattle() called")
     
     // Parse teams
     const players = Array.from(this.state.players.values())
@@ -273,12 +278,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Start first turn
     this.nextTurn()
     
+    console.log("[PvP] Battle started, first turn initiated")
     this.broadcast("battle-start", { message: "Battle has begun!" })
   }
   
   private nextTurn(): void {
     // Get current unit from engine
     const currentUnit = this.battleEngine.getCurrentUnit()
+    console.log(`[PvP] nextTurn() - current unit: ${currentUnit?.id}, owner: ${currentUnit?.ownerId}`)
     if (!currentUnit) {
       // Recalculate turn order
       const engineState = this.battleEngine.getState()
@@ -297,6 +304,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.startActionTimer(currentUnit.ownerId)
     
     // Notify players
+    console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}`)
     this.broadcast("turn-start", {
       unitId: currentUnit.id,
       playerId: currentUnit.ownerId,
