@@ -731,7 +731,6 @@ export class BattleEngineV3 {
             description: `${unit.name} is paralyzed and skips turn!`,
             timestamp: Date.now(),
           });
-          // TODO: Implement turn skipping
         }
 
         // Reduce duration

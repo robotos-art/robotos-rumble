@@ -26,15 +26,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.onMessage("accept-settings", (client, settings) => this.handleAcceptSettings(client, settings))
     this.onMessage("propose-settings", (client, settings) => this.handleProposeSettings(client, settings))
     
-    console.log("PvP Battle Room created with settings:", {
-      teamSize: this.state.teamSize,
-      speed: this.state.speed,
-      timerDuration: this.state.timerDuration
-    })
   }
   
   onJoin(client: Client, options: any) {
-    console.log(`${client.sessionId} joined PvP battle room`)
     
     // Store player preferences
     this.playerPreferences.set(client.sessionId, {
@@ -88,7 +82,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   onLeave(client: Client, consented: boolean) {
-    console.log(`${client.sessionId} left PvP battle room (consented: ${consented})`)
     
     if (this.state.status === "battle" && !consented) {
       // Player disconnected during battle - give them 30 seconds to reconnect
@@ -100,7 +93,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   async onReconnect(client: Client) {
-    console.log(`${client.sessionId} reconnected to PvP battle`)
     
     // Resume their timer if it was their turn
     if (this.state.currentTurn === client.sessionId) {
@@ -111,24 +103,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   handleReady(client: Client) {
     const player = this.state.players.get(client.sessionId)
     if (!player) {
-      console.log(`handleReady: Player ${client.sessionId} not found`)
       return
     }
     
     player.ready = true
-    console.log(`Player ${client.sessionId} is ready. Total players: ${this.state.players.size}`)
-    
-    // Log all players and their ready status
-    this.state.players.forEach((p, id) => {
-      console.log(`  - ${id}: ready=${p.ready}, hasTeam=${p.team !== "[]"}`)
-    })
-    
     // Check if both players are ready
     const allReady = Array.from(this.state.players.values()).every(p => p.ready)
-    console.log(`All ready: ${allReady}, Player count: ${this.state.players.size}`)
     
     if (allReady && this.state.players.size === 2) {
-      console.log("Starting battle!")
       this.startBattle()
     }
   }
@@ -138,7 +120,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     if (!player) return
     
     player.team = JSON.stringify(team)
-    console.log(`${client.sessionId} updated their team`)
     
     // If both players have teams and are ready, start battle
     const players = Array.from(this.state.players.values())
@@ -246,7 +227,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   private startBattle() {
-    console.log("Starting PvP battle!")
     
     // Parse teams
     const players = Array.from(this.state.players.values())
@@ -400,7 +380,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       loser: this.state.loser
     })
     
-    console.log(`Battle ended! Winner: ${winnerId}`)
     
     // Disconnect after 10 seconds
     setTimeout(() => {
@@ -424,7 +403,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   handleAcceptSettings(client: Client, settings: { teamSize: number, speed: string }) {
-    console.log(`${client.sessionId} accepted settings:`, settings)
     
     // Mark this player as agreed
     this.settingsAgreed.set(client.sessionId, true)
@@ -454,7 +432,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   handleProposeSettings(client: Client, settings: { teamSize: number, speed: string }) {
-    console.log(`${client.sessionId} proposed settings:`, settings)
     
     // Broadcast the proposal to the other player
     this.broadcast("settings-proposal", {
@@ -479,7 +456,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       playerName: this.state.players.get(client.sessionId)?.name || "Player"
     })
     
-    console.log(`${client.sessionId} forfeited the match`)
     
     // End the battle with the other player as winner
     if (winnerId) {

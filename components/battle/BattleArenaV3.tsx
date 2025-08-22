@@ -8,6 +8,11 @@ import {
   BattleUnitV3,
   TraitProcessorV3,
 } from "../../lib/game-engine/TraitProcessorV3";
+import { BATTLE_CONSTANTS } from "../../lib/game-engine/battleConstants";
+import { 
+  playDamageSound, 
+  determineDamageType 
+} from "../../lib/game-engine/battleUtils";
 import { BattleEngineV3 } from "../../lib/game-engine/BattleEngineV3";
 import { gameSounds } from "../../lib/sounds/gameSounds";
 import RobotoUnit from "./RobotoUnit";
@@ -224,21 +229,7 @@ export default function BattleArenaV3({
       }
       
       // Play appropriate sound
-      if (result.damage === 0) {
-        gameSounds.play("miss");
-      } else if (result.damage < 30) {
-        gameSounds.play("attackWeak");
-      } else if (result.damage < 60) {
-        gameSounds.play("attackNormal");
-      } else if (result.damage < 100) {
-        gameSounds.play("attackStrong");
-      } else {
-        gameSounds.play("attackDevastating");
-      }
-      
-      if (result.critical) {
-        gameSounds.play("critical");
-      }
+      playDamageSound(result.damage, result.critical);
       
       // Show damage number
       const damageType = result.critical ? "critical" : 
@@ -270,7 +261,7 @@ export default function BattleArenaV3({
     setBattleState(battleEngine.getState());
     gameSounds.play("roundStart");
     showMessage("Battle Start! Get ready!");
-    setTimeout(() => startNextTurn(), 2000);
+    setTimeout(() => startNextTurn(), BATTLE_CONSTANTS.TIMERS.BATTLE_START_DELAY);
 
     // Cleanup intervals on unmount
     return () => {
@@ -280,7 +271,7 @@ export default function BattleArenaV3({
     };
   }, []);
 
-  const showMessage = (msg: string, duration = 2000) => {
+  const showMessage = (msg: string, duration = BATTLE_CONSTANTS.TIMERS.MESSAGE_DURATION) => {
     setMessage(msg);
     if (duration > 0) {
       setTimeout(() => setMessage(""), duration);
@@ -370,7 +361,7 @@ export default function BattleArenaV3({
       setDefenseActive(true);
       setDefenseCommitted(false);
       setDefenseScore(1.0);
-      setTimeout(() => executeAITurn(unit), 1500);
+      setTimeout(() => executeAITurn(unit), BATTLE_CONSTANTS.TIMERS.ACTION_INTERVAL);
     }
   };
 
@@ -594,12 +585,10 @@ export default function BattleArenaV3({
 
           // Show achievements if any
           if (result.newAchievements?.length > 0) {
-            // TODO: Show achievement notifications
             console.log("New achievements unlocked:", result.newAchievements);
           }
 
           if (result.newBadges?.length > 0) {
-            // TODO: Show badge notifications
             console.log("New badges earned:", result.newBadges);
           }
         }
@@ -803,13 +792,13 @@ export default function BattleArenaV3({
 
     // Calculate defense bonus from score
     const defenseBonus =
-      defScore >= 1.5
-        ? 0.5
-        : defScore >= 1.25
-          ? 0.75
-          : defScore >= 1.0
-            ? 1.0
-            : 1.2;
+      defScore >= BATTLE_CONSTANTS.DEFENSE_BONUS.PERFECT.threshold
+        ? BATTLE_CONSTANTS.DEFENSE_BONUS.PERFECT.multiplier
+        : defScore >= BATTLE_CONSTANTS.DEFENSE_BONUS.GOOD.threshold
+          ? BATTLE_CONSTANTS.DEFENSE_BONUS.GOOD.multiplier
+          : defScore >= BATTLE_CONSTANTS.DEFENSE_BONUS.NORMAL.threshold
+            ? BATTLE_CONSTANTS.DEFENSE_BONUS.NORMAL.multiplier
+            : BATTLE_CONSTANTS.DEFENSE_BONUS.WEAK.multiplier;
 
     // Get defender's HP BEFORE the attack
     const prevHp =
@@ -861,56 +850,24 @@ export default function BattleArenaV3({
       }
     }
 
-    // Play attack sound based on damage amount
-    if (actualDamage === 0) {
-      gameSounds.play("miss");
-    } else if (actualDamage < 30) {
-      gameSounds.play("attackWeak");
-    } else if (actualDamage < 60) {
-      gameSounds.play("attackNormal");
-    } else if (actualDamage < 100) {
-      gameSounds.play("attackStrong");
-    } else {
-      gameSounds.play("attackDevastating");
-    }
+    // Determine damage type and play sound
+    let damageType = determineDamageType(actualDamage, result.events);
+    const isCritical = damageType === "critical";
+    playDamageSound(actualDamage, isCritical, atkScore);
 
-    // Determine damage type based on actual results and timing
-    let damageType: "normal" | "critical" | "effective" | "weak" | "miss" =
-      "normal";
-
-    if (actualDamage === 0) {
-      damageType = "miss";
-    } else {
-      // First check for critical hit
-      const critEvent = result.events?.find((e) =>
-        e.description?.includes("Critical"),
+    // Additional element effectiveness handling
+    if (damageType !== "critical" && result.events) {
+      const elementEvent = result.events.find((e) =>
+        e.description?.includes("SUPER EFFECTIVE"),
       );
-      if (critEvent) {
-        damageType = "critical";
-        // Play special critical sound for high damage criticals
-        if (actualDamage >= 100) {
-          gameSounds.play("criticalSuper");
-        } else if (atkScore >= 1.5) {
-          gameSounds.play("criticalCombo"); // Perfect timing + critical
-        } else {
-          gameSounds.play("critical");
-        }
+      const weakEvent = result.events.find((e) =>
+        e.description?.includes("NOT VERY EFFECTIVE"),
+      );
+      if (elementEvent) {
+        damageType = "effective";
+      } else if (weakEvent) {
+        damageType = "weak";
       }
-      // Then check element effectiveness
-      else if (result.events) {
-        const elementEvent = result.events.find((e) =>
-          e.description?.includes("SUPER EFFECTIVE"),
-        );
-        const weakEvent = result.events.find((e) =>
-          e.description?.includes("NOT VERY EFFECTIVE"),
-        );
-        if (elementEvent) {
-          damageType = "effective";
-        } else if (weakEvent) {
-          damageType = "weak";
-        }
-      }
-      // Default to normal for regular hits
     }
 
     // Add timing quality to the display
@@ -942,7 +899,7 @@ export default function BattleArenaV3({
       setTimeout(() => {
         setExplosionActive(false);
         setDefendingUnitId(null); // Clear shake animation
-      }, 1500);
+      }, BATTLE_CONSTANTS.TIMERS.ACTION_INTERVAL);
     }, 500); // 500ms projectile travel time
 
     // Show what attack was used (especially for enemy attacks)

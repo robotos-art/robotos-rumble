@@ -289,7 +289,6 @@ export default function PvPBattlePage() {
         roomState={serverBattleResult}
         onBattleEnd={(won) => {
           // Battle end is handled by server
-          console.log("Battle ended, won:", won);
         }}
       />
 
