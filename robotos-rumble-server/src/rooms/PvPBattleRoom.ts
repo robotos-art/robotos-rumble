@@ -287,6 +287,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       battleUnit.ownerId = unit.ownerId
       battleUnit.name = unit.name
       battleUnit.element = unit.element
+      battleUnit.imageUrl = unit.imageUrl || ""
       battleUnit.currentHp = unit.stats.hp
       battleUnit.maxHp = unit.stats.hp
       battleUnit.currentEnergy = unit.stats.energy
@@ -363,11 +364,11 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       nextUnitId = nextUnit.id
     }
     
-    // Build and broadcast result
+    // Build and broadcast result (BattleEngineServer returns simplified result)
     const actionResult = {
-      damage: result.damage,
-      critical: result.critical,
-      events: result.events,
+      damage: result.damage || 0,
+      critical: false, // Server doesn't track critical separately
+      events: [], // Server doesn't return events array
       attackerId: unit.id,
       targetId: target.id,
       units: Array.from(this.state.units).map(u => ({

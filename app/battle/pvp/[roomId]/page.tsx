@@ -167,7 +167,7 @@ export default function PvPBattlePage() {
         },
         abilities: [],
         traits: {},
-        imageUrl: "",
+        imageUrl: unit.imageUrl || "",
         elementModifiers: {
           strongAgainst: [],
           weakAgainst: [],

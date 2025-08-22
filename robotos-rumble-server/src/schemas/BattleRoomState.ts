@@ -15,6 +15,7 @@ export class BattleUnit extends Schema {
   @type("string") ownerId: string = ""
   @type("string") name: string = ""
   @type("string") element: string = ""
+  @type("string") imageUrl: string = ""
   @type("number") currentHp: number = 100
   @type("number") maxHp: number = 100
   @type("number") currentEnergy: number = 100

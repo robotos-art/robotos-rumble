@@ -309,7 +309,7 @@ export default function BattleArenaV3({
       if (targetIntervalRef.current) clearInterval(targetIntervalRef.current);
       if (attackIntervalRef.current) clearInterval(attackIntervalRef.current);
     };
-  }, []);
+  }, [playerTeam, enemyTeam, isPvP]);
 
   const showMessage = (msg: string, duration: number = BATTLE_CONSTANTS.TIMERS.MESSAGE_DURATION) => {
     setMessage(msg);

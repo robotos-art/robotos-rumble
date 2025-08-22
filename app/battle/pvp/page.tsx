@@ -12,9 +12,9 @@ import { Users, Swords, Clock, Search, Shield, Bell, Edit } from "lucide-react";
 import { gameSounds } from "../../../lib/sounds/gameSounds";
 import { BattleNotifications } from "../../../lib/notifications/battleNotifications";
 import BattleArena from "../../../components/battle/BattleArena";
-import { 
+import {
   TraitProcessorV3,
-  BattleUnitV3 
+  BattleUnitV3
 } from "../../../lib/game-engine/TraitProcessorV3";
 import { UnitLightbox } from "../../../components/team-builder/UnitLightbox";
 import { MatchProposalModal } from "../../../components/battle/MatchProposalModal";
@@ -307,7 +307,7 @@ export default function PvPLobby() {
                 },
                 abilities: [],
                 traits: {},
-                imageUrl: "",
+                imageUrl: unit.imageUrl || "",
                 elementModifiers: {
                   strongAgainst: [],
                   weakAgainst: [],
@@ -694,10 +694,7 @@ export default function PvPLobby() {
                   <div className="space-y-6">
                     <div className="flex justify-center">
                       <div className="relative">
-                        <Swords className="w-12 h-12 text-green-400 animate-pulse" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-32 h-32 border-4 border-green-400/30 rounded-full animate-spin" />
-                        </div>
+                        <Swords className="w-12 h-12 text-green-300 animate-pulse" />
                       </div>
                     </div>
 
