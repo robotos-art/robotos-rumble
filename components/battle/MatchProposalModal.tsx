@@ -148,7 +148,7 @@ export function MatchProposalModal({
                   onAccept(opponentSettings);
                 }}
               >
-                ACCEPT OPPONENT'S SETTINGS
+                ACCEPT OPPONENT&apos;S SETTINGS
                 <span className="ml-2 text-xs opacity-80">
                   ({opponentSettings.teamSize}v{opponentSettings.teamSize} {opponentSettings.speed})
                 </span>
