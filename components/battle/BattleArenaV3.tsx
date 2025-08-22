@@ -272,9 +272,9 @@ export default function BattleArenaV3({
       
       setCurrentUnit(unit);
       
-      // Determine if it's our turn
-      const isOurTurn = playerId === address;
-      const isOurUnit = playerTeam.some(u => u.id === unitId);
+      // Determine if it's our turn by checking if the active unit belongs to our team
+      // Unit IDs are namespaced with sessionId, so check if unit is in playerTeam
+      const isOurTurn = playerTeam.some(u => u.id === unitId);
       
       if (isOurTurn) {
         // Our turn - show action selection
@@ -289,7 +289,7 @@ export default function BattleArenaV3({
         showMessage(`Opponent's ${unit.name} is preparing to attack!`);
       }
     }
-  }, [serverTurnEvent, isPvP, address, playerTeam, enemyTeam]);
+  }, [serverTurnEvent, isPvP, playerTeam, enemyTeam]);
 
   // Initialize battle
   useEffect(() => {

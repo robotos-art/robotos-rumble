@@ -119,10 +119,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   async onReconnect(client: Client) {
     
-    // Resume their timer if it was their turn
-    if (this.state.currentTurn === client.sessionId) {
-      this.startActionTimer(client.sessionId)
-    }
+    // Timer is handled by clock interval, no need to restart
+    // The clock interval will continue counting down turnTimer
   }
   
   handleReady(client: Client) {
@@ -277,6 +275,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     // Initialize battle engine
     this.battleEngine.initializeBattle(team1, team2)
+    
+    // Sync initial turn order from engine
+    this.syncUnitsWithEngine()
     
     // Initialize state units
     const allUnits = [...team1, ...team2]
