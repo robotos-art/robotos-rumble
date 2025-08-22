@@ -27,6 +27,7 @@ export default function PvPBattlePage() {
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [battleStarted, setBattleStarted] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [serverResultCallback, setServerResultCallback] = useState<((result: any) => void) | null>(null);
 
   useEffect(() => {
     if (!roomId || !address) {
@@ -105,6 +106,23 @@ export default function PvPBattlePage() {
         } else {
           setIsPlayerTurn(false);
         }
+      });
+
+      // Handle action results from server
+      joinedRoom.onMessage("action-executed", (result) => {
+        // Our action was executed on server
+        if (serverResultCallback) {
+          serverResultCallback(result);
+        }
+        setIsPlayerTurn(result.isPlayerTurn);
+      });
+
+      joinedRoom.onMessage("opponent-action", (result) => {
+        // Opponent's action was executed on server
+        if (serverResultCallback) {
+          serverResultCallback(result);
+        }
+        setIsPlayerTurn(result.isPlayerTurn);
       });
 
       joinedRoom.onMessage("battle-end", (data) => {
@@ -272,7 +290,7 @@ export default function PvPBattlePage() {
         isPlayerTurn={isPlayerTurn}
         serverTimer={room?.state?.turnTimer}
         onAction={handleAction}
-        roomState={room?.state}
+        roomState={{ onServerResult: (callback: (result: any) => void) => setServerResultCallback(() => callback) }}
         onBattleEnd={(won) => {
           // Battle end is handled by server
           console.log("Battle ended, won:", won);

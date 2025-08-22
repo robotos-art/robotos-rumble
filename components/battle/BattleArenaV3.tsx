@@ -35,6 +35,7 @@ interface BattleArenaV3Props {
   isPlayerTurn?: boolean;
   serverTimer?: number;
   onAction?: (action: any) => void;
+  onServerResult?: (callback: (result: any) => void) => void;
 }
 
 type BattlePhase =
@@ -76,6 +77,7 @@ export default function BattleArenaV3({
   isPlayerTurn: serverIsPlayerTurn,
   serverTimer,
   onAction: onPvPAction,
+  onServerResult,
 }: BattleArenaV3Props) {
   const { address } = useAccount();
 
@@ -181,6 +183,13 @@ export default function BattleArenaV3({
   const actionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const targetIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const attackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Register server result callback for PvP
+  useEffect(() => {
+    if (isPvP && onServerResult) {
+      onServerResult(applyServerBattleResult);
+    }
+  }, [isPvP, onServerResult, applyServerBattleResult]);
 
   // Initialize battle
   useEffect(() => {
@@ -695,6 +704,83 @@ export default function BattleArenaV3({
     return elementMap[element.toUpperCase()] || "energy";
   };
 
+  // Apply battle results from server (PvP mode)
+  const applyServerBattleResult = React.useCallback((result: any) => {
+    if (!isPvP) return;
+    
+    // Update battle state from server
+    const newState = battleEngine.getState();
+    
+    // Update unit HP and energy from server
+    if (result.units) {
+      result.units.forEach((unit: any) => {
+        const unitStatus = newState.unitStatuses.get(unit.id);
+        if (unitStatus) {
+          unitStatus.currentHp = unit.currentHp;
+          unitStatus.currentEnergy = unit.currentEnergy;
+          unitStatus.isAlive = unit.isAlive;
+        }
+      });
+    }
+    
+    // Update turn order from server
+    if (result.turnOrder) {
+      newState.turnOrder = result.turnOrder;
+      newState.currentTurnIndex = result.turnIndex || 0;
+    }
+    
+    setBattleState(newState);
+    
+    // Handle animations and sounds
+    if (result.damage !== undefined && result.targetId) {
+      // Track damage for stats
+      const isPlayerAttacking = result.attackerId && playerTeam.some((u: any) => u.id === result.attackerId);
+      if (result.damage > 0) {
+        if (isPlayerAttacking) {
+          totalDamageDealt.current += result.damage;
+        } else {
+          totalDamageReceived.current += result.damage;
+        }
+      }
+      
+      // Play appropriate sound
+      if (result.damage === 0) {
+        gameSounds.play("miss");
+      } else if (result.damage < 30) {
+        gameSounds.play("attackWeak");
+      } else if (result.damage < 60) {
+        gameSounds.play("attackNormal");
+      } else if (result.damage < 100) {
+        gameSounds.play("attackStrong");
+      } else {
+        gameSounds.play("attackDevastating");
+      }
+      
+      if (result.critical) {
+        gameSounds.play("critical");
+      }
+      
+      // Show damage number
+      const damageType = result.critical ? "critical" : 
+                        result.damage === 0 ? "miss" : "normal";
+      setDamageNumbers(prev => [...prev, {
+        id: Date.now(),
+        amount: result.damage,
+        type: damageType,
+        unitId: result.targetId,
+      }]);
+    }
+    
+    // Check for battle end
+    if (result.battleEnded) {
+      handleBattleEnd(result.won);
+    } else if (!result.isPlayerTurn) {
+      // If it's not our turn anymore, reset to waiting state
+      setIsDefending(false);
+      setIsAttacking(false);
+    }
+  }, [isPvP, battleEngine, playerTeam]);
+
   const executeAttack = (
     attacker: BattleUnitV3,
     defender: BattleUnitV3,
@@ -734,7 +820,24 @@ export default function BattleArenaV3({
       battleEngine.getState().unitStatuses.get(defender.id)?.currentHp ||
       defender.stats.hp;
 
-    // Update battle state through the engine with timing bonuses
+    // In PvP mode, send action to server instead of executing locally
+    if (isPvP && onPvPAction) {
+      // Send action to server and let it handle execution
+      onPvPAction({
+        type: pendingAction?.type || "attack",
+        sourceId: attacker.id,
+        targetId: defender.id,
+        abilityId: pendingAction?.abilityId,
+        timingBonus: atkScore,
+        defenseBonus: defenseBonus,
+      });
+      
+      // Server will send back results which will be handled by applyServerBattleResult
+      // For now, just show the attack animation
+      return;
+    }
+    
+    // PvE mode: Execute locally as before
     const result = battleEngine.executeAction({
       type: pendingAction?.type || "attack",
       sourceId: attacker.id,

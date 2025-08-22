@@ -199,6 +199,43 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       )
     }
     
+    // Prepare action result data for clients
+    const actionResult = {
+      damage: result.damage,
+      critical: false, // Server doesn't track critical hits separately yet
+      attackerId: action.sourceId,
+      targetId: action.targetId,
+      units: Array.from(this.state.units).map(unit => ({
+        id: unit.id,
+        currentHp: unit.currentHp,
+        currentEnergy: unit.currentEnergy,
+        isAlive: unit.isAlive
+      })),
+      turnOrder: Array.from(this.state.turnOrder),
+      turnIndex: this.state.turnIndex,
+      battleEnded: result.battleEnded,
+      winner: result.winner
+    }
+    
+    // Broadcast action result to both players
+    this.clients.forEach(otherClient => {
+      if (otherClient.sessionId === client.sessionId) {
+        // Send to acting player
+        otherClient.send("action-executed", {
+          ...actionResult,
+          isPlayerTurn: false, // Their turn just ended
+          won: result.battleEnded ? result.winner === client.sessionId : undefined
+        })
+      } else {
+        // Send to opponent
+        otherClient.send("opponent-action", {
+          ...actionResult,
+          isPlayerTurn: this.state.currentTurn === otherClient.sessionId,
+          won: result.battleEnded ? result.winner === otherClient.sessionId : undefined
+        })
+      }
+    })
+    
     // Check for battle end
     if (result.battleEnded) {
       this.endBattle(result.winner!)
