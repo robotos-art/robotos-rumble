@@ -43,16 +43,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
             if (enemies.length > 0) {
               const target = enemies[Math.floor(Math.random() * enemies.length)]
               
-              // Simulate the action as if the player sent it
-              const timeoutClient = this.clients.find(c => c.sessionId === currentUnit.ownerId)
-              if (timeoutClient) {
-                this.handleAction(timeoutClient, {
-                  type: "attack",
-                  sourceId: currentUnit.id,
-                  targetId: target.id,
-                  timingBonus: 0.5 // Weak timing for timeout
-                })
-              }
+              // Execute auto-action directly without fake client
+              this.executeAutoAction(currentUnit, target)
             }
           }
         }
@@ -201,7 +193,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       targetId: action.targetId,
       abilityId: action.abilityId,
       timingBonus: action.timingBonus,
-      defenseBonus: action.defenseBonus
+      defenseBonus: 0.8 // Server-controlled defense for now, ignore client value
     })
     
     // Update state
@@ -229,17 +221,10 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     let nextUnitId = null
     
     if (nextUnit) {
-      // Move to next unit in current turn order
-      const engineState = this.battleEngine.getState()
-      const currentIndex = engineState.turnIndex
-      const nextIndex = (currentIndex + 1) % engineState.turnOrder.length
-      const upcomingUnitId = engineState.turnOrder[nextIndex]
-      const upcomingUnit = engineState.units.find(u => u.id === upcomingUnitId)
-      
-      if (upcomingUnit) {
-        nextPlayerId = upcomingUnit.ownerId
-        nextUnitId = upcomingUnit.id
-      }
+      // Get the current unit AFTER the action (engine already advanced)
+      // No need to add 1 since executeAction already advanced the turn
+      nextPlayerId = nextUnit.ownerId
+      nextUnitId = nextUnit.id
     }
     
     // Prepare action result data for clients
@@ -340,8 +325,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.state.currentTurn = currentUnit.ownerId
     this.state.turnTimer = this.state.timerDuration
     
-    // Start action timer
-    this.startActionTimer(currentUnit.ownerId)
+    // No need for startActionTimer - clock interval handles timeout
     
     // Notify players
     console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}`)
@@ -352,40 +336,60 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     })
   }
   
-  private startActionTimer(playerId: string) {
-    // Clear any existing timer
-    const existingTimer = this.actionTimers.get(playerId)
-    if (existingTimer) {
-      clearTimeout(existingTimer)
+  // Removed startActionTimer - using clock interval for timeouts instead
+  
+  private executeAutoAction(unit: any, target: any): void {
+    // Execute action directly when timer expires
+    const result = this.battleEngine.executeAction({
+      playerId: unit.ownerId,
+      type: "attack",
+      sourceId: unit.id,
+      targetId: target.id,
+      timingBonus: 0.5, // Weak timing for timeout
+      defenseBonus: 0.8 // Default defense
+    })
+    
+    // Sync state
+    this.syncUnitsWithEngine()
+    
+    // Get next unit info AFTER the action
+    const nextUnit = this.battleEngine.getCurrentUnit()
+    let nextPlayerId = ""
+    let nextUnitId = ""
+    
+    if (nextUnit) {
+      nextPlayerId = nextUnit.ownerId
+      nextUnitId = nextUnit.id
     }
     
-    // Set new timer
-    const timer = setTimeout(() => {
-      // Auto-execute basic attack on timeout
-      const currentUnit = this.battleEngine.getCurrentUnit()
-      if (currentUnit && currentUnit.ownerId === playerId) {
-        // Find a random alive enemy
-        const enemies = Array.from(this.state.units).filter(u => 
-          u.ownerId !== playerId && u.isAlive
-        )
-        
-        if (enemies.length > 0) {
-          const target = enemies[Math.floor(Math.random() * enemies.length)]
-          
-          this.handleAction(
-            { sessionId: playerId } as Client,
-            {
-              type: "attack",
-              sourceId: currentUnit.id,
-              targetId: target.id,
-              timingBonus: 0.5 // Weak timing for timeout
-            }
-          )
-        }
-      }
-    }, this.state.timerDuration * 1000)
+    // Build and broadcast result
+    const actionResult = {
+      damage: result.damage,
+      critical: result.critical,
+      events: result.events,
+      attackerId: unit.id,
+      targetId: target.id,
+      units: Array.from(this.state.units).map(u => ({
+        id: u.id,
+        currentHp: u.currentHp,
+        currentEnergy: u.currentEnergy,
+        isAlive: u.isAlive
+      })),
+      turnOrder: Array.from(this.state.turnOrder),
+      turnIndex: this.state.turnIndex,
+      battleEnded: false,
+      nextPlayerId: nextPlayerId,
+      nextUnitId: nextUnitId
+    }
     
-    this.actionTimers.set(playerId, timer)
+    this.broadcast("action-result", actionResult)
+    
+    // Check for battle end
+    if (result.battleEnded) {
+      this.endBattle(result.winner!)
+    } else {
+      this.nextTurn()
+    }
   }
   
   private syncUnitsWithEngine() {

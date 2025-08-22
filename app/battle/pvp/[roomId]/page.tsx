@@ -28,6 +28,7 @@ export default function PvPBattlePage() {
   const [battleStarted, setBattleStarted] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
+  const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
 
   useEffect(() => {
     if (!roomId || !address) {
@@ -96,6 +97,13 @@ export default function PvPBattlePage() {
       });
 
       joinedRoom.onMessage("turn-start", (data) => {
+        // Pass turn event to BattleArena for server-driven phase transitions
+        setServerTurnEvent({
+          unitId: data.unitId,
+          playerId: data.playerId,
+          timer: data.timer
+        });
+        
         if (data.playerId === joinedRoom.sessionId) {
           setIsPlayerTurn(true);
           gameSounds.play("turnStart");
@@ -108,17 +116,10 @@ export default function PvPBattlePage() {
         }
       });
 
-      // Handle action results from server
-      joinedRoom.onMessage("action-executed", (result) => {
-        // Our action was executed on server
+      // Handle action results from server (unified message for both players)
+      joinedRoom.onMessage("action-result", (result) => {
         setServerBattleResult(result);
-        setIsPlayerTurn(result.isPlayerTurn);
-      });
-
-      joinedRoom.onMessage("opponent-action", (result) => {
-        // Opponent's action was executed on server
-        setServerBattleResult(result);
-        setIsPlayerTurn(result.isPlayerTurn);
+        // Don't set turn here - wait for turn-start message
       });
 
       joinedRoom.onMessage("battle-end", (data) => {
@@ -287,6 +288,7 @@ export default function PvPBattlePage() {
         serverTimer={room?.state?.turnTimer}
         onAction={handleAction}
         roomState={serverBattleResult}
+        serverTurnEvent={serverTurnEvent}
         onBattleEnd={(won) => {
           // Battle end is handled by server
         }}

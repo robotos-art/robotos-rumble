@@ -274,6 +274,7 @@ export default function BattleArenaV3({
       
       // Determine if it's our turn
       const isOurTurn = playerId === address;
+      const isOurUnit = playerTeam.some(u => u.id === unitId);
       
       if (isOurTurn) {
         // Our turn - show action selection
@@ -282,10 +283,10 @@ export default function BattleArenaV3({
         gameSounds.play("playerTurn");
         showMessage(`${unit.name} steps forward!`);
       } else {
-        // Opponent's turn - show waiting/defending
+        // Opponent's turn - show waiting (could add defense later)
         setPhase("waiting");
         gameSounds.play("enemyTurn");
-        showMessage(`Opponent's ${unit.name} is attacking!`);
+        showMessage(`Opponent's ${unit.name} is preparing to attack!`);
       }
     }
   }, [serverTurnEvent, isPvP, address, playerTeam, enemyTeam]);
@@ -399,15 +400,20 @@ export default function BattleArenaV3({
       }
     } else {
       // AI turn - open defense window for player (PvE only)
-      setPhase("defending");
-      setDefenseActive(true);
-      setDefenseCommitted(false);
-      setDefenseScore(1.0);
-      setTimeout(() => executeAITurn(unit), BATTLE_CONSTANTS.TIMERS.ACTION_INTERVAL);
+      if (!isPvP) {
+        setPhase("defending");
+        setDefenseActive(true);
+        setDefenseCommitted(false);
+        setDefenseScore(1.0);
+        setTimeout(() => executeAITurn(unit), BATTLE_CONSTANTS.TIMERS.ACTION_INTERVAL);
+      }
     }
   };
 
   const executeAITurn = (unit: BattleUnitV3) => {
+    // Skip AI execution in PvP mode
+    if (isPvP) return;
+    
     // Get fresh state
     const currentState = battleEngine.getState();
 
@@ -972,7 +978,12 @@ export default function BattleArenaV3({
       setAttackCommitted(false);
       setAttackScore(1.0);
       setDefenseScore(1.0);
-      startNextTurn();
+      
+      // Only continue to next turn in PvE mode
+      // In PvP, wait for server's turn-start event
+      if (!isPvP) {
+        startNextTurn();
+      }
     }, 2000);
   };
 
@@ -1020,7 +1031,8 @@ export default function BattleArenaV3({
 
   // Handle action countdown
   useEffect(() => {
-    if (phase === "selecting-action" && actionCountdown > 0) {
+    if (phase === "selecting-action" && actionCountdown > 0 && !isPvP) {
+      // Only auto-execute in PvE; PvP server handles timeouts
       const timer = setTimeout(() => {
         if (actionCountdown === 1) {
           // Auto-select attack on timeout
@@ -1031,7 +1043,7 @@ export default function BattleArenaV3({
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [phase, actionCountdown, handleAttack]);
+  }, [phase, actionCountdown, handleAttack, isPvP]);
 
   // Handle target countdown
   useEffect(() => {

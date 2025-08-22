@@ -37,7 +37,7 @@ export default function PvPLobby() {
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
   const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  
+
   // Settings mismatch handling
   const [showProposalModal, setShowProposalModal] = useState(false);
   const [opponentSettings, setOpponentSettings] = useState<{ teamSize: number; speed: string } | null>(null);
@@ -124,14 +124,14 @@ export default function PvPLobby() {
             const filtered = prev.filter(p => p.id !== data.id);
             return [...filtered, data];
           });
-          
+
           // Show notification based on settings match
           if (status === "idle") {
-            const isExactMatch = data.teamSize === settings.teamSize && 
-                                data.speed === settings.speed;
-            const isMismatch = data.teamSize !== settings.teamSize || 
-                              data.speed !== settings.speed;
-            
+            const isExactMatch = data.teamSize === settings.teamSize &&
+              data.speed === settings.speed;
+            const isMismatch = data.teamSize !== settings.teamSize ||
+              data.speed !== settings.speed;
+
             if (isExactMatch) {
               // Perfect match - show strong notification
               BattleNotifications.showPlayerWaiting(data);
@@ -150,7 +150,7 @@ export default function PvPLobby() {
         // Listen for existing waiting players
         lobby.onMessage("players-waiting", (players) => {
           setWaitingPlayers(players);
-          
+
           // Check for any players (exact or mismatched)
           if (players.length > 0 && status === "idle") {
             const exactMatch = players.find(
@@ -282,24 +282,46 @@ export default function PvPLobby() {
         // Set up battle state listener
         joinedRoom.onStateChange((state) => {
           if (state.status === "battle" && !battleStarted) {
-            // Parse teams from state
-            const myPlayerId = joinedRoom.sessionId;
-            const players = Array.from(state.players.values());
-            const myPlayer = players.find((p: any) => p.id === myPlayerId);
-            const enemyPlayer = players.find((p: any) => p.id !== myPlayerId);
+            // Build teams from state.units with namespaced IDs
+            const mySessionId = joinedRoom.sessionId;
+            const units = Array.from(state.units);
+            const myUnits: BattleUnitV3[] = [];
+            const opponentUnits: BattleUnitV3[] = [];
 
-            if (myPlayer && enemyPlayer) {
-              try {
-                const myTeam = JSON.parse((myPlayer as any).team || "[]");
-                const oppTeam = JSON.parse((enemyPlayer as any).team || "[]");
-                setPlayerTeam(myTeam);
-                setEnemyTeam(oppTeam);
-                setBattleStarted(true);
-                setStatus("battle");
-              } catch (e) {
-                console.error("Error parsing teams:", e);
+            units.forEach((unit: any) => {
+              const battleUnit: BattleUnitV3 = {
+                id: unit.id, // Already namespaced by server
+                name: unit.name,
+                element: unit.element,
+                type: "roboto",
+                stats: {
+                  hp: unit.maxHp,
+                  attack: 50, // Default values, server handles actual combat
+                  defense: 40,
+                  speed: 45,
+                  energy: unit.maxEnergy,
+                  crit: 10,
+                },
+                abilities: [],
+                traits: {},
+                imageUrl: "",
+                elementModifiers: {
+                  strongAgainst: [],
+                  weakAgainst: [],
+                },
+              };
+
+              if (unit.ownerId === mySessionId) {
+                myUnits.push(battleUnit);
+              } else {
+                opponentUnits.push(battleUnit);
               }
-            }
+            });
+
+            setPlayerTeam(myUnits);
+            setEnemyTeam(opponentUnits);
+            setBattleStarted(true);
+            setStatus("battle");
           }
         });
       });
@@ -312,7 +334,7 @@ export default function PvPLobby() {
           playerId: data.playerId,
           timer: data.timer
         });
-        
+
         if (data.playerId === joinedRoom.sessionId) {
           setIsPlayerTurn(true);
           // Show notification if tab is not visible
@@ -337,7 +359,7 @@ export default function PvPLobby() {
       joinedRoom.onMessage("battle-end", (data) => {
         const won = data.winner === joinedRoom.sessionId;
         gameSounds.play(won ? "victory" : "defeat");
-        
+
         // Redirect after showing result
         setTimeout(() => {
           router.push("/battle");
@@ -602,24 +624,22 @@ export default function PvPLobby() {
                       </h3>
                       <div className="space-y-2">
                         {waitingPlayers.map((player, index) => {
-                          const isExactMatch = player.teamSize === settings.teamSize && 
-                                              player.speed === settings.speed;
+                          const isExactMatch = player.teamSize === settings.teamSize &&
+                            player.speed === settings.speed;
                           const teamMismatch = player.teamSize !== settings.teamSize;
                           const speedMismatch = player.speed !== settings.speed;
-                          
+
                           return (
-                            <div 
+                            <div
                               key={player.id || index}
-                              className={`flex items-center justify-between p-2 rounded border ${
-                                isExactMatch 
-                                  ? "bg-green-900/30 border-green-500/50" 
-                                  : "bg-yellow-900/20 border-yellow-500/30"
-                              }`}
+                              className={`flex items-center justify-between p-2 rounded border ${isExactMatch
+                                ? "bg-green-900/30 border-green-500/50"
+                                : "bg-yellow-900/20 border-yellow-500/30"
+                                }`}
                             >
                               <div className="flex items-center gap-3">
-                                <div className={`w-2 h-2 rounded-full animate-pulse ${
-                                  isExactMatch ? "bg-green-400" : "bg-yellow-400"
-                                }`} />
+                                <div className={`w-2 h-2 rounded-full animate-pulse ${isExactMatch ? "bg-green-400" : "bg-yellow-400"
+                                  }`} />
                                 <span className="text-xs text-white">
                                   {player.name || "Anonymous"}
                                 </span>
@@ -668,98 +688,98 @@ export default function PvPLobby() {
               {(status === "searching" ||
                 status === "joining" ||
                 status === "connected") && (
-                <div className="space-y-6">
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      <Swords className="w-24 h-24 text-green-400 animate-pulse" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-32 h-32 border-4 border-green-400/30 rounded-full animate-spin" />
+                  <div className="space-y-6">
+                    <div className="flex justify-center">
+                      <div className="relative">
+                        <Swords className="w-12 h-12 text-green-400 animate-pulse" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-32 h-32 border-4 border-green-400/30 rounded-full animate-spin" />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <h3 className="text-xl text-green-400 mb-2">
-                      {status === "connected"
-                        ? "WAITING FOR OPPONENT"
-                        : "SEARCHING FOR OPPONENT"}
-                    </h3>
-                    <p className="text-gray-400 text-sm">
-                      Looking for another Roboto holder to battle...
-                    </p>
-                  </div>
-
-                  {/* Show team lineup while waiting */}
-                  {loadedTeam.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <span className="text-sm text-gray-400">
-                          Your Team:
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            cancelSearch();
-                            router.push("/team-builder");
-                          }}
-                          className="text-green-400 hover:text-green-300 p-1"
-                          title="Edit Team"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="flex justify-center gap-2">
-                        {loadedTeam
-                          .slice(0, settings.teamSize)
-                          .map((unit, index) => {
-                            // Extract ID number from unit.id (e.g., "roboto-1234" -> "1234")
-                            const idNumber =
-                              unit.id?.replace(/^(roboto|robopet)-/, "") ||
-                              "???";
-                            return (
-                              <div
-                                key={index}
-                                className="flex flex-col items-center cursor-pointer"
-                                onClick={() => {
-                                  setLightboxIndex(index);
-                                  gameSounds.playClick();
-                                }}
-                              >
-                                <div className="relative">
-                                  <img
-                                    src={
-                                      unit.imageUrl ||
-                                      unit.image ||
-                                      "/placeholder-robot.png"
-                                    }
-                                    alt={unit.name || `Unit ${index + 1}`}
-                                    className="w-16 h-16 rounded-lg border-2 border-green-500/50 hover:border-green-400 transition-colors object-cover pixelated"
-                                    onError={(e) => {
-                                      e.currentTarget.src =
-                                        "/placeholder-robot.png";
-                                    }}
-                                  />
-                                </div>
-                                <div className="mt-1 bg-black rounded px-1.5 py-0.5 text-[9px] font-bold text-green-400 border border-green-500/50 whitespace-nowrap">
-                                  {idNumber}-{unit.element || "None"}
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
+                    <div>
+                      <h3 className="text-xl text-green-400 mb-2">
+                        {status === "connected"
+                          ? "WAITING FOR OPPONENT"
+                          : "SEARCHING FOR OPPONENT"}
+                      </h3>
+                      <p className="text-gray-400 text-sm">
+                        Looking for another Roboto holder to battle...
+                      </p>
                     </div>
-                  )}
 
-                  <Button
-                    variant="outline"
-                    onClick={cancelSearch}
-                    className="text-red-400 border-red-400 hover:bg-red-400/10"
-                  >
-                    CANCEL SEARCH
-                  </Button>
-                </div>
-              )}
+                    {/* Show team lineup while waiting */}
+                    {loadedTeam.length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <span className="text-sm text-gray-400">
+                            Your Team:
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              cancelSearch();
+                              router.push("/team-builder");
+                            }}
+                            className="text-green-400 hover:text-green-300 p-1"
+                            title="Edit Team"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="flex justify-center gap-2">
+                          {loadedTeam
+                            .slice(0, settings.teamSize)
+                            .map((unit, index) => {
+                              // Extract ID number from unit.id (e.g., "roboto-1234" -> "1234")
+                              const idNumber =
+                                unit.id?.replace(/^(roboto|robopet)-/, "") ||
+                                "???";
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex flex-col items-center cursor-pointer"
+                                  onClick={() => {
+                                    setLightboxIndex(index);
+                                    gameSounds.playClick();
+                                  }}
+                                >
+                                  <div className="relative">
+                                    <img
+                                      src={
+                                        unit.imageUrl ||
+                                        unit.image ||
+                                        "/placeholder-robot.png"
+                                      }
+                                      alt={unit.name || `Unit ${index + 1}`}
+                                      className="w-16 h-16 rounded-lg border-2 border-green-500/50 hover:border-green-400 transition-colors object-cover pixelated"
+                                      onError={(e) => {
+                                        e.currentTarget.src =
+                                          "/placeholder-robot.png";
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="mt-1 bg-black rounded px-1.5 py-0.5 text-[9px] font-bold text-green-400 border border-green-500/50 whitespace-nowrap">
+                                    {idNumber}-{unit.element || "None"}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      onClick={cancelSearch}
+                      className="text-red-400 border-red-400 hover:bg-red-400/10"
+                    >
+                      CANCEL SEARCH
+                    </Button>
+                  </div>
+                )}
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500 rounded p-4 mt-4">
