@@ -33,6 +33,8 @@ export default function PvPLobby() {
   const [playerTeam, setPlayerTeam] = useState<any[]>([]);
   const [enemyTeam, setEnemyTeam] = useState<any[]>([]);
   const [loadedTeam, setLoadedTeam] = useState<any[]>([]);
+  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
+  const [serverBattleResult, setServerBattleResult] = useState<any>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   
   // Settings mismatch handling
@@ -301,6 +303,47 @@ export default function PvPLobby() {
         });
       });
 
+      // Handle turn-start messages
+      joinedRoom.onMessage("turn-start", (data) => {
+        if (data.playerId === joinedRoom.sessionId) {
+          setIsPlayerTurn(true);
+          gameSounds.play("turnStart");
+          // Show notification if tab is not visible
+          if (document.visibilityState !== "visible") {
+            BattleNotifications.showYourTurn();
+          }
+        } else {
+          setIsPlayerTurn(false);
+        }
+      });
+
+      // Handle action results from server
+      joinedRoom.onMessage("action-executed", (result) => {
+        // Our action was executed on server
+        setServerBattleResult(result);
+        setIsPlayerTurn(result.isPlayerTurn);
+      });
+
+      joinedRoom.onMessage("opponent-action", (result) => {
+        // Opponent's action was executed on server
+        setServerBattleResult(result);
+        setIsPlayerTurn(result.isPlayerTurn);
+      });
+
+      joinedRoom.onMessage("battle-start", (message) => {
+        gameSounds.play("confirm");
+      });
+
+      joinedRoom.onMessage("battle-end", (data) => {
+        const won = data.winner === joinedRoom.sessionId;
+        gameSounds.play(won ? "victory" : "defeat");
+        
+        // Redirect after showing result
+        setTimeout(() => {
+          router.push("/battle");
+        }, 5000);
+      });
+
       joinedRoom.onMessage("error", (message) => {
         setError(message.message);
         gameSounds.play("cancel");
@@ -394,14 +437,14 @@ export default function PvPLobby() {
             }
           }}
           isPvP={true}
-          serverTimer={10} // Will be updated from server
-          isPlayerTurn={true} // Will be updated from server
+          serverTimer={room?.state?.turnTimer || 10}
+          isPlayerTurn={isPlayerTurn}
           onAction={(action) => {
-            // Send action to server
             if (room) {
               room.send("action", action);
             }
           }}
+          roomState={serverBattleResult}
         />
       </PageLayout>
     );
