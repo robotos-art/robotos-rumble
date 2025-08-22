@@ -1229,7 +1229,7 @@ export default function TeamBuilder() {
                     STOCK ROBOPETS
                   </h3>
                   <p className="text-green-400/70 text-sm">
-                    Don't have enough Robotos to play? Use some of Pablo Stanley's stash. Or{" "}
+                    Don&apos;t have enough Robotos to play? Use some of Pablo Stanley&apos;s stash. Or{" "}
                     <a 
                       href="https://opensea.io/collection/robopets" 
                       target="_blank" 

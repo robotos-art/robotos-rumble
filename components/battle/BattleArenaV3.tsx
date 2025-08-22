@@ -185,7 +185,7 @@ export default function BattleArenaV3({
   const attackIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Apply battle results from server (PvP mode) - defined early to avoid hoisting issues
-  const applyServerBattleResult = React.useCallback((result: any) => {
+  const applyServerBattleResult = useCallback((result: any) => {
     if (!isPvP) return;
     
     // Update battle state from server
