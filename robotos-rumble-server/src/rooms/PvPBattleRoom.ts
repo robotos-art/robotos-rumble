@@ -26,6 +26,39 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.onMessage("accept-settings", (client, settings) => this.handleAcceptSettings(client, settings))
     this.onMessage("propose-settings", (client, settings) => this.handleProposeSettings(client, settings))
     
+    // Set up turn timer countdown
+    this.clock.setInterval(() => {
+      if (this.state.status === "battle" && this.state.turnTimer > 0) {
+        this.state.turnTimer--
+        
+        // Auto-execute on timeout
+        if (this.state.turnTimer === 0) {
+          const currentUnit = this.battleEngine.getCurrentUnit()
+          if (currentUnit) {
+            // Find a random alive enemy
+            const enemies = Array.from(this.state.units).filter(u => 
+              u.ownerId !== currentUnit.ownerId && u.isAlive
+            )
+            
+            if (enemies.length > 0) {
+              const target = enemies[Math.floor(Math.random() * enemies.length)]
+              
+              // Simulate the action as if the player sent it
+              const timeoutClient = this.clients.find(c => c.sessionId === currentUnit.ownerId)
+              if (timeoutClient) {
+                this.handleAction(timeoutClient, {
+                  type: "attack",
+                  sourceId: currentUnit.id,
+                  targetId: target.id,
+                  timingBonus: 0.5 // Weak timing for timeout
+                })
+              }
+            }
+          }
+        }
+      }
+    }, 1000) // Update every second
+    
   }
   
   onJoin(client: Client, options: any) {
@@ -184,6 +217,31 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       )
     }
     
+    // Check for battle end first
+    if (result.battleEnded) {
+      this.endBattle(result.winner!)
+      return
+    }
+    
+    // Determine next turn BEFORE broadcasting
+    const nextUnit = this.battleEngine.getCurrentUnit()
+    let nextPlayerId = null
+    let nextUnitId = null
+    
+    if (nextUnit) {
+      // Move to next unit in current turn order
+      const engineState = this.battleEngine.getState()
+      const currentIndex = engineState.turnIndex
+      const nextIndex = (currentIndex + 1) % engineState.turnOrder.length
+      const upcomingUnitId = engineState.turnOrder[nextIndex]
+      const upcomingUnit = engineState.units.find(u => u.id === upcomingUnitId)
+      
+      if (upcomingUnit) {
+        nextPlayerId = upcomingUnit.ownerId
+        nextUnitId = upcomingUnit.id
+      }
+    }
+    
     // Prepare action result data for clients
     const actionResult = {
       damage: result.damage,
@@ -198,36 +256,16 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       })),
       turnOrder: Array.from(this.state.turnOrder),
       turnIndex: this.state.turnIndex,
-      battleEnded: result.battleEnded,
-      winner: result.winner
+      battleEnded: false,
+      nextPlayerId: nextPlayerId,
+      nextUnitId: nextUnitId
     }
     
-    // Broadcast action result to both players
-    this.clients.forEach(otherClient => {
-      if (otherClient.sessionId === client.sessionId) {
-        // Send to acting player
-        otherClient.send("action-executed", {
-          ...actionResult,
-          isPlayerTurn: false, // Their turn just ended
-          won: result.battleEnded ? result.winner === client.sessionId : undefined
-        })
-      } else {
-        // Send to opponent
-        otherClient.send("opponent-action", {
-          ...actionResult,
-          isPlayerTurn: this.state.currentTurn === otherClient.sessionId,
-          won: result.battleEnded ? result.winner === otherClient.sessionId : undefined
-        })
-      }
-    })
+    // Broadcast action result to both players (same message for both)
+    this.broadcast("action-result", actionResult)
     
-    // Check for battle end
-    if (result.battleEnded) {
-      this.endBattle(result.winner!)
-    } else {
-      // Continue to next turn
-      this.nextTurn()
-    }
+    // Now advance to next turn
+    this.nextTurn()
   }
   
   private startBattle() {
@@ -240,12 +278,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     const team1 = JSON.parse(player1.team).map((unit: any, i: number) => ({
       ...unit,
+      id: `${player1.id}:${unit.id}`, // Namespace unit ID with owner
       ownerId: player1.id,
       position: i
     }))
     
     const team2 = JSON.parse(player2.team).map((unit: any, i: number) => ({
       ...unit,
+      id: `${player2.id}:${unit.id}`, // Namespace unit ID with owner
       ownerId: player2.id,
       position: i + team1.length
     }))

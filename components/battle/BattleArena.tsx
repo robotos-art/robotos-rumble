@@ -19,6 +19,7 @@ interface BattleArenaProps {
   serverTimer?: number;
   onAction?: (action: any) => void;
   roomState?: any;
+  serverTurnEvent?: any;
 }
 
 export default function BattleArena({
@@ -30,6 +31,7 @@ export default function BattleArena({
   serverTimer,
   onAction,
   roomState,
+  serverTurnEvent,
 }: BattleArenaProps) {
   const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>(
     providedEnemyTeam || [],
@@ -111,6 +113,7 @@ export default function BattleArena({
       serverTimer={serverTimer}
       onAction={onAction}
       serverBattleResult={roomState}
+      serverTurnEvent={serverTurnEvent}
     />
   );
 }

@@ -35,6 +35,7 @@ export default function PvPLobby() {
   const [loadedTeam, setLoadedTeam] = useState<any[]>([]);
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
+  const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   
   // Settings mismatch handling
@@ -305,9 +306,15 @@ export default function PvPLobby() {
 
       // Handle turn-start messages
       joinedRoom.onMessage("turn-start", (data) => {
+        // Pass turn event to BattleArena for server-driven phase transitions
+        setServerTurnEvent({
+          unitId: data.unitId,
+          playerId: data.playerId,
+          timer: data.timer
+        });
+        
         if (data.playerId === joinedRoom.sessionId) {
           setIsPlayerTurn(true);
-          gameSounds.play("turnStart");
           // Show notification if tab is not visible
           if (document.visibilityState !== "visible") {
             BattleNotifications.showYourTurn();
@@ -317,17 +324,10 @@ export default function PvPLobby() {
         }
       });
 
-      // Handle action results from server
-      joinedRoom.onMessage("action-executed", (result) => {
-        // Our action was executed on server
+      // Handle action results from server (unified message for both players)
+      joinedRoom.onMessage("action-result", (result) => {
         setServerBattleResult(result);
-        setIsPlayerTurn(result.isPlayerTurn);
-      });
-
-      joinedRoom.onMessage("opponent-action", (result) => {
-        // Opponent's action was executed on server
-        setServerBattleResult(result);
-        setIsPlayerTurn(result.isPlayerTurn);
+        // Don't set turn here - wait for turn-start message
       });
 
       joinedRoom.onMessage("battle-start", (message) => {
@@ -445,6 +445,7 @@ export default function PvPLobby() {
             }
           }}
           roomState={serverBattleResult}
+          serverTurnEvent={serverTurnEvent}
         />
       </PageLayout>
     );

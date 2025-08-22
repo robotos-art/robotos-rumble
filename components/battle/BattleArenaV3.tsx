@@ -41,6 +41,11 @@ interface BattleArenaV3Props {
   serverTimer?: number;
   onAction?: (action: any) => void;
   serverBattleResult?: any;  // Direct result from server
+  serverTurnEvent?: {
+    unitId: string;
+    playerId: string;
+    timer: number;
+  };
 }
 
 type BattlePhase =
@@ -83,6 +88,7 @@ export default function BattleArenaV3({
   serverTimer,
   onAction: onPvPAction,
   serverBattleResult,
+  serverTurnEvent,
 }: BattleArenaV3Props) {
   const { address } = useAccount();
 
@@ -255,13 +261,46 @@ export default function BattleArenaV3({
     }
   }, [serverBattleResult, isPvP, applyServerBattleResult]);
 
+  // Handle server turn events in PvP
+  useEffect(() => {
+    if (serverTurnEvent && isPvP) {
+      const { unitId, playerId, timer } = serverTurnEvent;
+      
+      // Find the unit
+      const unit = [...playerTeam, ...enemyTeam].find(u => u.id === unitId);
+      if (!unit) return;
+      
+      setCurrentUnit(unit);
+      
+      // Determine if it's our turn
+      const isOurTurn = playerId === address;
+      
+      if (isOurTurn) {
+        // Our turn - show action selection
+        setPhase("selecting-action");
+        setActionCountdown(timer);
+        gameSounds.play("playerTurn");
+        showMessage(`${unit.name} steps forward!`);
+      } else {
+        // Opponent's turn - show waiting/defending
+        setPhase("waiting");
+        gameSounds.play("enemyTurn");
+        showMessage(`Opponent's ${unit.name} is attacking!`);
+      }
+    }
+  }, [serverTurnEvent, isPvP, address, playerTeam, enemyTeam]);
+
   // Initialize battle
   useEffect(() => {
     battleEngine.initializeBattle(playerTeam, enemyTeam);
     setBattleState(battleEngine.getState());
     gameSounds.play("roundStart");
     showMessage("Battle Start! Get ready!");
-    setTimeout(() => startNextTurn(), BATTLE_CONSTANTS.TIMERS.BATTLE_START_DELAY);
+    
+    // Only start local turn loop for PvE battles
+    if (!isPvP) {
+      setTimeout(() => startNextTurn(), BATTLE_CONSTANTS.TIMERS.BATTLE_START_DELAY);
+    }
 
     // Cleanup intervals on unmount
     return () => {
@@ -339,6 +378,9 @@ export default function BattleArenaV3({
   }, [battleEngine, playerTeam, enemyTeam, playerTurnIndex, enemyTurnIndex]);
 
   const handleUnitActivation = (unit: BattleUnitV3, isPlayer: boolean) => {
+    // In PvP, this should only be called by server turn events
+    if (isPvP) return;
+    
     // Play different sounds for player vs enemy turns
     if (isPlayerTurn) {
       gameSounds.play("playerTurn");
@@ -356,7 +398,7 @@ export default function BattleArenaV3({
         actionIntervalRef.current = null;
       }
     } else {
-      // AI turn - open defense window for player
+      // AI turn - open defense window for player (PvE only)
       setPhase("defending");
       setDefenseActive(true);
       setDefenseCommitted(false);
