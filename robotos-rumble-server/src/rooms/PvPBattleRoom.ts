@@ -247,8 +247,11 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Broadcast action result to both players (same message for both)
     this.broadcast("action-result", actionResult)
     
-    // Now advance to next turn
-    this.nextTurn()
+    // Wait for animation to complete before advancing to next turn
+    // This gives the client time to show attack animations and damage
+    setTimeout(() => {
+      this.nextTurn()
+    }, 2500) // 2.5 seconds for animation
   }
   
   private startBattle() {
@@ -390,7 +393,10 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     if (result.battleEnded) {
       this.endBattle(result.winner!)
     } else {
-      this.nextTurn()
+      // Wait for animation to complete before advancing to next turn
+      setTimeout(() => {
+        this.nextTurn()
+      }, 2500) // 2.5 seconds for animation
     }
   }
   

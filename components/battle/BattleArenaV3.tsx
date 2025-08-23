@@ -17,6 +17,7 @@ import { BattleEngineV3 } from "../../lib/game-engine/BattleEngineV3";
 import { gameSounds } from "../../lib/sounds/gameSounds";
 import RobotoUnit from "./RobotoUnit";
 import BattleFooter from "./BattleFooter";
+import ActionMenu from "./ActionMenu";
 import TimingMeter from "../ui/TimingMeter";
 import TimingMeterCharge from "../ui/TimingMeterCharge";
 import TimingMeterSpinner from "../ui/TimingMeterSpinner";
@@ -237,21 +238,25 @@ export default function BattleArenaV3({
       // Play appropriate sound
       playDamageSound(result.damage, result.critical);
       
-      // Show damage number
+      // Show damage number using the showDamage function to handle cleanup
       const damageType = result.critical ? "critical" : 
                         result.damage === 0 ? "miss" : "normal";
-      setDamageNumbers(prev => [...prev, {
-        unitId: result.targetId,
-        damage: result.damage,
-        type: damageType,
-        timestamp: Date.now(),
-      }]);
+      showDamage(result.targetId, result.damage, damageType);
     }
     
     // Check for battle end
     if (result.battleEnded) {
       handleBattleEnd(result.won);
     }
+    
+    // Reset phase to waiting for next turn
+    setPhase("waiting");
+    setTargetUnit(null);
+    setPendingAction(null);
+    setDefenseActive(false);
+    setDefenseCommitted(false);
+    setAttackingUnitId(null);
+    setDefendingUnitId(null);
   }, [isPvP, battleEngine, playerTeam]);
 
   // Apply server results when they arrive
@@ -855,7 +860,33 @@ export default function BattleArenaV3({
 
     // In PvP mode, send action to server instead of executing locally
     if (isPvP && onPvPAction) {
-      // Send action to server and let it handle execution
+      // Store attack type for animation
+      setCurrentAttackType("normal");
+      
+      // Start animation sequence
+      // 1. Launch projectile
+      setProjectileActive(true);
+      
+      // 2. After projectile travel time, trigger explosion
+      setTimeout(() => {
+        setProjectileActive(false);
+        
+        // Get fresh position for explosion
+        const freshDefenderPos = getUnitPosition(defender.id);
+        setDefenderPosition(freshDefenderPos);
+        
+        setExplosionActive(true);
+        setDefendingUnitId(defender.id); // This will trigger shake animation
+        gameSounds.play("explosion");
+        
+        // 3. Clear explosion after animation
+        setTimeout(() => {
+          setExplosionActive(false);
+          setDefendingUnitId(null);
+        }, 500);
+      }, 800); // Projectile travel time
+      
+      // Send action to server
       onPvPAction({
         type: pendingAction?.type || "attack",
         sourceId: attacker.id,
@@ -866,7 +897,7 @@ export default function BattleArenaV3({
       });
       
       // Server will send back results which will be handled by applyServerBattleResult
-      // For now, just show the attack animation
+      // The damage numbers will be shown when the server responds
       return;
     }
     
@@ -1031,12 +1062,16 @@ export default function BattleArenaV3({
 
   // Handle action countdown
   useEffect(() => {
-    if (phase === "selecting-action" && actionCountdown > 0 && !isPvP) {
-      // Only auto-execute in PvE; PvP server handles timeouts
+    if (phase === "selecting-action" && actionCountdown > 0) {
       const timer = setTimeout(() => {
         if (actionCountdown === 1) {
-          // Auto-select attack on timeout
-          handleAttack();
+          // In PvE, auto-select attack on timeout
+          // In PvP, just let the countdown reach 0 (server handles timeout)
+          if (!isPvP) {
+            handleAttack();
+          } else {
+            setActionCountdown(0); // Let it reach 0 to show timeout
+          }
         } else {
           setActionCountdown(actionCountdown - 1);
         }
@@ -1313,9 +1348,9 @@ export default function BattleArenaV3({
                     <AnimatePresence>
                       {damageNumbers
                         .filter((d) => d.unitId === unit.id)
-                        .map((damage, i) => (
+                        .map((damage) => (
                           <motion.div
-                            key={`${damage.unitId}-${i}`}
+                            key={`${damage.unitId}-${damage.timestamp}`}
                             initial={{ opacity: 0, y: 0 }}
                             animate={{ opacity: 1, y: -30 }}
                             exit={{ opacity: 0 }}
@@ -1392,9 +1427,9 @@ export default function BattleArenaV3({
                     <AnimatePresence>
                       {damageNumbers
                         .filter((d) => d.unitId === unit.id)
-                        .map((damage, i) => (
+                        .map((damage) => (
                           <motion.div
-                            key={`${damage.unitId}-${i}`}
+                            key={`${damage.unitId}-${damage.timestamp}`}
                             initial={{ opacity: 0, y: 0 }}
                             animate={{ opacity: 1, y: -30 }}
                             exit={{ opacity: 0 }}
@@ -1462,9 +1497,9 @@ export default function BattleArenaV3({
                     <AnimatePresence>
                       {damageNumbers
                         .filter((d) => d.unitId === unit.id)
-                        .map((damage, i) => (
+                        .map((damage) => (
                           <motion.div
-                            key={`${damage.unitId}-${i}`}
+                            key={`${damage.unitId}-${damage.timestamp}`}
                             initial={{ opacity: 0, y: 0 }}
                             animate={{ opacity: 1, y: -30 }}
                             exit={{ opacity: 0 }}
@@ -1495,6 +1530,41 @@ export default function BattleArenaV3({
             </div>
           </div>
         </div>
+
+        {/* Action Menu */}
+        {phase === "selecting-action" && currentUnit && (
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-50">
+            <div className="bg-black/90 p-4 rounded-lg border-2 border-green-800">
+              <div className="text-green-400 text-center mb-4">
+                <div className="text-sm opacity-80">Choose your action</div>
+                <div className="text-lg font-bold">{currentUnit.name}&apos;s Turn</div>
+                <div className="text-sm mt-1">Time: {actionCountdown}s</div>
+              </div>
+              <ActionMenu
+                unit={currentUnit}
+                onAttack={handleAttack}
+                onAbility={handleAbility}
+                onSwitch={() => {
+                  // Switch not implemented yet
+                  gameSounds.play("error");
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Target Selection UI */}
+        {phase === "selecting-target" && (
+          <div className="absolute top-32 left-1/2 -translate-x-1/2 z-50">
+            <div className="bg-black/90 px-6 py-3 rounded-lg border-2 border-yellow-600">
+              <div className="text-yellow-400 text-center">
+                <div className="text-sm opacity-80">Select Target</div>
+                <div className="text-lg font-bold">Time: {targetCountdown}s</div>
+                <div className="text-xs mt-1 opacity-60">Click on an enemy to target</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Attack Timing Meter */}
         {(phase === "attack-timing" ||
