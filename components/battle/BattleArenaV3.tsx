@@ -17,7 +17,6 @@ import { BattleEngineV3 } from "../../lib/game-engine/BattleEngineV3";
 import { gameSounds } from "../../lib/sounds/gameSounds";
 import RobotoUnit from "./RobotoUnit";
 import BattleFooter from "./BattleFooter";
-import ActionMenu from "./ActionMenu";
 import TimingMeter from "../ui/TimingMeter";
 import TimingMeterCharge from "../ui/TimingMeterCharge";
 import TimingMeterSpinner from "../ui/TimingMeterSpinner";
@@ -1530,28 +1529,6 @@ export default function BattleArenaV3({
             </div>
           </div>
         </div>
-
-        {/* Action Menu */}
-        {phase === "selecting-action" && currentUnit && (
-          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-50">
-            <div className="bg-black/90 p-4 rounded-lg border-2 border-green-800">
-              <div className="text-green-400 text-center mb-4">
-                <div className="text-sm opacity-80">Choose your action</div>
-                <div className="text-lg font-bold">{currentUnit.name}&apos;s Turn</div>
-                <div className="text-sm mt-1">Time: {actionCountdown}s</div>
-              </div>
-              <ActionMenu
-                unit={currentUnit}
-                onAttack={handleAttack}
-                onAbility={handleAbility}
-                onSwitch={() => {
-                  // Switch not implemented yet
-                  gameSounds.play("error");
-                }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Target Selection UI */}
         {phase === "selecting-target" && (
