@@ -40,6 +40,7 @@ export class BattleRoomState extends Schema {
   
   // Battle state
   @type("string") status: string = "waiting" // waiting, ready, battle, ended
+  @type("boolean") battleStarted: boolean = false // Track if battle has been initialized
   @type("string") currentTurn: string = "" // player id whose turn it is
   @type("number") turnTimer: number = 0
   @type("number") turnNumber: number = 0

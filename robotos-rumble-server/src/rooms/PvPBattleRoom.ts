@@ -382,6 +382,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     // Set battle status
     this.state.status = "battle"
+    this.state.battleStarted = true  // CRITICAL: Mark battle as started!
     this.state.turnNumber = 1
     
     // Start first turn

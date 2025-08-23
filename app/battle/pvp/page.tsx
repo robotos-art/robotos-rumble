@@ -283,20 +283,21 @@ export default function PvPLobby() {
           BattleNotifications.showMatchFound();
         }
 
-        // Set up battle state listener - ONLY ONCE
+        // Set up battle state listener
         let battleInitialized = false;
         
         joinedRoom.onStateChange((state) => {
           console.log("[PvP Client] State change:", {
             status: state.status,
+            battleStarted: state.battleStarted,
             battleInitialized,
             turnTimer: state.turnTimer,
             currentTurn: state.currentTurn,
             turnNumber: state.turnNumber
           });
           
-          // Only setup battle ONCE when status changes to battle
-          if (state.status === "battle" && !battleInitialized) {
+          // Only setup battle ONCE when battleStarted is true and we haven't initialized yet
+          if (state.status === "battle" && state.battleStarted && !battleInitialized) {
             battleInitialized = true;
             console.log("[PvP Client] Starting battle setup (ONE TIME ONLY)");
             // Build teams from state.units with proper data
