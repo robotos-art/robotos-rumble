@@ -146,29 +146,45 @@ export default function PvPBattlePage() {
   };
 
   const setupBattleTeams = (state: any, mySessionId: string) => {
+    // Load saved team data to get abilities and stats
+    const savedSettings = localStorage.getItem("battle_settings");
+    const settings = savedSettings
+      ? JSON.parse(savedSettings)
+      : { teamSize: 5, speed: "speedy" };
+    const teamKey = `roboto_rumble_team_${settings.teamSize}`;
+    const savedTeam = localStorage.getItem(teamKey);
+    const localTeamData = savedTeam ? JSON.parse(savedTeam) : [];
+
     // Parse teams from state
     const units = Array.from(state.units);
     const myUnits: BattleUnitV3[] = [];
     const opponentUnits: BattleUnitV3[] = [];
 
     units.forEach((unit: any) => {
+      // Try to find matching unit in saved team data for abilities and stats
+      const savedUnit = localTeamData.find((saved: any) => 
+        unit.id.includes(saved.id) || 
+        unit.name === saved.name ||
+        unit.id.endsWith(`:${saved.id}`)
+      );
+
       const battleUnit: BattleUnitV3 = {
         id: unit.id,
         name: unit.name,
         element: unit.element,
         type: "roboto",
-        stats: {
+        stats: savedUnit ? savedUnit.stats : {
           hp: unit.maxHp,
-          attack: 50, // Default values, server handles actual combat
+          attack: 50,
           defense: 40,
           speed: 45,
           energy: unit.maxEnergy,
           crit: 10,
         },
-        abilities: [],
-        traits: {},
+        abilities: savedUnit ? savedUnit.abilities : [],
+        traits: savedUnit ? savedUnit.traits : {},
         imageUrl: unit.imageUrl || "",
-        elementModifiers: {
+        elementModifiers: savedUnit ? savedUnit.elementModifiers : {
           strongAgainst: [],
           weakAgainst: [],
         },

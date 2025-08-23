@@ -11,7 +11,6 @@ import { PageLayout } from "../../../components/shared/PageLayout";
 import { Users, Swords, Clock, Search, Shield, Bell, Edit } from "lucide-react";
 import { gameSounds } from "../../../lib/sounds/gameSounds";
 import { BattleNotifications } from "../../../lib/notifications/battleNotifications";
-import BattleArena from "../../../components/battle/BattleArena";
 import {
   TraitProcessorV3,
   BattleUnitV3
@@ -33,12 +32,7 @@ export default function PvPLobby() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [battleStarted, setBattleStarted] = useState(false);
-  const [playerTeam, setPlayerTeam] = useState<any[]>([]);
-  const [enemyTeam, setEnemyTeam] = useState<any[]>([]);
   const [loadedTeam, setLoadedTeam] = useState<any[]>([]);
-  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
-  const [serverBattleResult, setServerBattleResult] = useState<any>(null);
-  const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Settings mismatch handling
@@ -282,91 +276,21 @@ export default function PvPLobby() {
           BattleNotifications.showMatchFound();
         }
 
-        // Set up battle state listener
+        // Navigate to the dedicated room page when battle starts
         joinedRoom.onStateChange((state) => {
           if (state.status === "battle" && !battleStarted) {
-            // Build teams from state.units with namespaced IDs
-            const mySessionId = joinedRoom.sessionId;
-            const units = Array.from(state.units);
-            const myUnits: BattleUnitV3[] = [];
-            const opponentUnits: BattleUnitV3[] = [];
-
-            units.forEach((unit: any) => {
-              const battleUnit: BattleUnitV3 = {
-                id: unit.id, // Already namespaced by server
-                name: unit.name,
-                element: unit.element,
-                type: "roboto",
-                stats: {
-                  hp: unit.maxHp,
-                  attack: 50, // Default values, server handles actual combat
-                  defense: 40,
-                  speed: 45,
-                  energy: unit.maxEnergy,
-                  crit: 10,
-                },
-                abilities: [],
-                traits: {},
-                imageUrl: unit.imageUrl || "",
-                elementModifiers: {
-                  strongAgainst: [],
-                  weakAgainst: [],
-                },
-              };
-
-              if (unit.ownerId === mySessionId) {
-                myUnits.push(battleUnit);
-              } else {
-                opponentUnits.push(battleUnit);
-              }
-            });
-
-            setPlayerTeam(myUnits);
-            setEnemyTeam(opponentUnits);
-            setBattleStarted(true);
-            setStatus("battle");
+            setBattleStarted(true); // Prevent multiple navigations
+            // Navigate to the dedicated battle room page
+            router.push(`/battle/pvp/${joinedRoom.roomId}`);
           }
         });
       });
 
-      // Handle turn-start messages
-      joinedRoom.onMessage("turn-start", (data) => {
-        // Pass turn event to BattleArena for server-driven phase transitions
-        setServerTurnEvent({
-          unitId: data.unitId,
-          playerId: data.playerId,
-          timer: data.timer
-        });
-
-        if (data.playerId === joinedRoom.sessionId) {
-          setIsPlayerTurn(true);
-          // Show notification if tab is not visible
-          if (document.visibilityState !== "visible") {
-            BattleNotifications.showYourTurn();
-          }
-        } else {
-          setIsPlayerTurn(false);
-        }
-      });
-
-      // Handle action results from server (unified message for both players)
-      joinedRoom.onMessage("action-result", (result) => {
-        setServerBattleResult(result);
-        // Don't set turn here - wait for turn-start message
-      });
-
+      // The battle will be handled in the dedicated room page
+      // Just listen for battle-start to know when to navigate
       joinedRoom.onMessage("battle-start", (message) => {
         gameSounds.play("confirm");
-      });
-
-      joinedRoom.onMessage("battle-end", (data) => {
-        const won = data.winner === joinedRoom.sessionId;
-        gameSounds.play(won ? "victory" : "defeat");
-
-        // Redirect after showing result
-        setTimeout(() => {
-          router.push("/battle");
-        }, 5000);
+        // Navigation happens via onStateChange above
       });
 
       joinedRoom.onMessage("error", (message) => {
@@ -442,39 +366,8 @@ export default function PvPLobby() {
     );
   }
 
-  // Show battle arena when battle starts
-  if (battleStarted && playerTeam.length > 0 && enemyTeam.length > 0) {
-    return (
-      <PageLayout>
-        <GameHeader title="PVP BATTLE" showBackButton backHref="/battle" />
-        <BattleArena
-          playerTeam={playerTeam}
-          enemyTeam={enemyTeam}
-          onBattleEnd={(won) => {
-            // Reset state
-            setBattleStarted(false);
-            setStatus("idle");
-            setPlayerTeam([]);
-            setEnemyTeam([]);
-            if (room) {
-              room.leave();
-              setRoom(null);
-            }
-          }}
-          isPvP={true}
-          serverTimer={room?.state?.turnTimer || 10}
-          isPlayerTurn={isPlayerTurn}
-          onAction={(action) => {
-            if (room) {
-              room.send("action", action);
-            }
-          }}
-          roomState={serverBattleResult}
-          serverTurnEvent={serverTurnEvent}
-        />
-      </PageLayout>
-    );
-  }
+  // Navigation to room page happens automatically when battle starts
+  // No need to render BattleArena here
 
   return (
     <PageLayout>

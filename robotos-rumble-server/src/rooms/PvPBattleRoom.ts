@@ -8,6 +8,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   private actionTimers: Map<string, NodeJS.Timeout> = new Map()
   private playerPreferences: Map<string, { teamSize: number, speed: string }> = new Map()
   private settingsAgreed: Map<string, boolean> = new Map()
+  private actionsInProgress: Set<string> = new Set() // Track who is actively selecting
   
   onCreate(options: any) {
     this.setState(new BattleRoomState())
@@ -40,8 +41,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
               client => client.sessionId === currentUnit.ownerId
             )
             
-            // Only auto-execute if the owner is disconnected
-            // Connected players should make their own actions
+            // Check if player is actively selecting (don't interrupt them)
+            const isSelecting = this.actionsInProgress.has(currentUnit.ownerId)
+            
             if (!ownerConnected) {
               console.log(`[PvP] Auto-executing for disconnected player ${currentUnit.ownerId}`)
               
@@ -56,9 +58,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
                 // Execute auto-action directly
                 this.executeAutoAction(currentUnit, target)
               }
-            } else {
-              console.log(`[PvP] Timer expired for connected player ${currentUnit.ownerId}`)
-              // For connected players who timeout, auto-execute with weak damage
+            } else if (!isSelecting) {
+              // Only auto-execute if player is not actively selecting
+              console.log(`[PvP] Timer expired for idle player ${currentUnit.ownerId}`)
               const enemies = Array.from(this.state.units).filter(u => 
                 u.ownerId !== currentUnit.ownerId && u.isAlive
               )
@@ -68,6 +70,10 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
                 // Auto-execute with very weak timing bonus for timeout
                 this.executeAutoAction(currentUnit, target, 0.5)
               }
+            } else {
+              // Player is actively selecting, give them 3 more seconds grace period
+              console.log(`[PvP] Player ${currentUnit.ownerId} is selecting, extending timer`)
+              this.state.turnTimer = 3
             }
           }
         }
@@ -189,6 +195,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return
     }
     
+    // Clear the "selecting" flag since action is complete
+    this.actionsInProgress.delete(client.sessionId)
+    
     // Reset the turn timer since action was received
     this.state.turnTimer = -1 // Set to -1 to indicate action was taken
     
@@ -308,7 +317,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Sync initial turn order from engine
     this.syncUnitsWithEngine()
     
-    // Initialize state units
+    // Initialize state units (pass through all unit data for client to use)
     const allUnits = [...team1, ...team2]
     allUnits.forEach((unit: any) => {
       const battleUnit = new BattleUnit()
@@ -317,12 +326,15 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       battleUnit.name = unit.name
       battleUnit.element = unit.element
       battleUnit.imageUrl = unit.imageUrl || ""
-      battleUnit.currentHp = unit.stats.hp
-      battleUnit.maxHp = unit.stats.hp
-      battleUnit.currentEnergy = unit.stats.energy
-      battleUnit.maxEnergy = unit.stats.energy
+      battleUnit.currentHp = unit.stats?.hp || unit.currentHp || 100
+      battleUnit.maxHp = unit.stats?.hp || unit.maxHp || 100
+      battleUnit.currentEnergy = unit.stats?.energy || unit.currentEnergy || 100
+      battleUnit.maxEnergy = unit.stats?.energy || unit.maxEnergy || 100
       battleUnit.isAlive = true
       battleUnit.position = unit.position
+      
+      // Store abilities in the server's battle engine
+      this.battleEngine.units.get(unit.id).abilities = unit.abilities || []
       
       this.state.units.push(battleUnit)
     })
@@ -356,7 +368,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.state.currentTurn = currentUnit.ownerId
     this.state.turnTimer = this.state.timerDuration
     
-    // No need for startActionTimer - clock interval handles timeout
+    // Mark player as "selecting" when their turn starts
+    this.actionsInProgress.add(currentUnit.ownerId)
     
     // Notify players
     console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}`)

@@ -195,9 +195,31 @@ export default function BattleArenaV3({
   const targetIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const attackIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Message deduplication for PvP
+  const processedMessages = useRef<Set<string>>(new Set());
+  const lastMessageTime = useRef<number>(0);
+
   // Apply battle results from server (PvP mode) - defined early to avoid hoisting issues
   const applyServerBattleResult = useCallback((result: any) => {
     if (!isPvP) return;
+    
+    // Deduplicate messages - create unique key
+    const messageKey = `${result.attackerId}-${result.targetId}-${result.damage}-${result.turnIndex}`;
+    const now = Date.now();
+    
+    // If we've seen this exact message within 500ms, skip it
+    if (processedMessages.current.has(messageKey) && (now - lastMessageTime.current) < 500) {
+      return;
+    }
+    
+    // Mark this message as processed
+    processedMessages.current.add(messageKey);
+    lastMessageTime.current = now;
+    
+    // Clean up old messages after 2 seconds
+    setTimeout(() => {
+      processedMessages.current.delete(messageKey);
+    }, 2000);
     
     // Update battle state from server
     const newState = battleEngine.getState();
@@ -220,7 +242,8 @@ export default function BattleArenaV3({
       newState.turnIndex = result.turnIndex || 0;
     }
     
-    setBattleState(newState);
+    // CRITICAL: Update the state to trigger UI re-render
+    setBattleState({ ...newState }); // Use spread to ensure new object reference
     
     // Handle animations and sounds
     if (result.damage !== undefined && result.targetId) {
@@ -299,13 +322,14 @@ export default function BattleArenaV3({
   useEffect(() => {
     battleEngine.initializeBattle(playerTeam, enemyTeam);
     setBattleState(battleEngine.getState());
-    gameSounds.play("roundStart");
-    showMessage("Battle Start! Get ready!");
     
-    // Only start local turn loop for PvE battles
     if (!isPvP) {
+      // PvE: Show message and start turns locally
+      gameSounds.play("roundStart");
+      showMessage("Battle Start! Get ready!");
       setTimeout(() => startNextTurn(), BATTLE_CONSTANTS.TIMERS.BATTLE_START_DELAY);
     }
+    // PvP: Server will send "battle-start" message and manage turns
 
     // Cleanup intervals on unmount
     return () => {
@@ -1065,15 +1089,12 @@ export default function BattleArenaV3({
       const timer = setTimeout(() => {
         if (actionCountdown === 1) {
           // In PvE, auto-select attack on timeout
-          // In PvP, just let the countdown reach 0 (server handles timeout)
           if (!isPvP) {
             handleAttack();
-          } else {
-            setActionCountdown(0); // Let it reach 0 to show timeout
           }
-        } else {
-          setActionCountdown(actionCountdown - 1);
+          // In PvP, just decrement to 0 and let server handle timeout
         }
+        setActionCountdown(actionCountdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -1084,8 +1105,8 @@ export default function BattleArenaV3({
     if (phase === "selecting-target" && targetCountdown > 0) {
       const timer = setTimeout(() => {
         if (targetCountdown === 1) {
-          // Auto-confirm whatever target is selected on timeout
-          // (Target should already be pre-selected from handleAttack/handleAbility)
+          // Auto-confirm target selection on timeout (both PvE and PvP)
+          // This is OK because player had time to change target if desired
           handleTargetConfirm();
         } else {
           setTargetCountdown(targetCountdown - 1);
