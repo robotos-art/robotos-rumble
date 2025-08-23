@@ -35,16 +35,39 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
         if (this.state.turnTimer === 0) {
           const currentUnit = this.battleEngine.getCurrentUnit()
           if (currentUnit) {
-            // Find a random alive enemy
-            const enemies = Array.from(this.state.units).filter(u => 
-              u.ownerId !== currentUnit.ownerId && u.isAlive
+            // Check if the player who owns this unit is connected
+            const ownerConnected = Array.from(this.clients).some(
+              client => client.sessionId === currentUnit.ownerId
             )
             
-            if (enemies.length > 0) {
-              const target = enemies[Math.floor(Math.random() * enemies.length)]
+            // Only auto-execute if the owner is disconnected
+            // Connected players should make their own actions
+            if (!ownerConnected) {
+              console.log(`[PvP] Auto-executing for disconnected player ${currentUnit.ownerId}`)
               
-              // Execute auto-action directly without fake client
-              this.executeAutoAction(currentUnit, target)
+              // Find a random alive enemy
+              const enemies = Array.from(this.state.units).filter(u => 
+                u.ownerId !== currentUnit.ownerId && u.isAlive
+              )
+              
+              if (enemies.length > 0) {
+                const target = enemies[Math.floor(Math.random() * enemies.length)]
+                
+                // Execute auto-action directly
+                this.executeAutoAction(currentUnit, target)
+              }
+            } else {
+              console.log(`[PvP] Timer expired for connected player ${currentUnit.ownerId}`)
+              // For connected players who timeout, auto-execute with weak damage
+              const enemies = Array.from(this.state.units).filter(u => 
+                u.ownerId !== currentUnit.ownerId && u.isAlive
+              )
+              
+              if (enemies.length > 0) {
+                const target = enemies[Math.floor(Math.random() * enemies.length)]
+                // Auto-execute with very weak timing bonus for timeout
+                this.executeAutoAction(currentUnit, target, 0.5)
+              }
             }
           }
         }
@@ -166,7 +189,10 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return
     }
     
-    // Clear action timer
+    // Reset the turn timer since action was received
+    this.state.turnTimer = -1 // Set to -1 to indicate action was taken
+    
+    // Clear action timer (if using separate timer system)
     const timer = this.actionTimers.get(client.sessionId)
     if (timer) {
       clearTimeout(timer)
@@ -343,14 +369,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   // Removed startActionTimer - using clock interval for timeouts instead
   
-  private executeAutoAction(unit: any, target: any): void {
+  private executeAutoAction(unit: any, target: any, timingBonus: number = 0.5): void {
     // Execute action directly when timer expires
     const result = this.battleEngine.executeAction({
       playerId: unit.ownerId,
       type: "attack",
       sourceId: unit.id,
       targetId: target.id,
-      timingBonus: 0.5, // Weak timing for timeout
+      timingBonus: timingBonus, // Weak timing for timeout
       defenseBonus: 0.8 // Default defense
     })
     

@@ -1530,19 +1530,6 @@ export default function BattleArenaV3({
           </div>
         </div>
 
-        {/* Target Selection UI */}
-        {phase === "selecting-target" && (
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 z-50">
-            <div className="bg-black/90 px-6 py-3 rounded-lg border-2 border-yellow-600">
-              <div className="text-yellow-400 text-center">
-                <div className="text-sm opacity-80">Select Target</div>
-                <div className="text-lg font-bold">Time: {targetCountdown}s</div>
-                <div className="text-xs mt-1 opacity-60">Click on an enemy to target</div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Attack Timing Meter */}
         {(phase === "attack-timing" ||
           (phase === "executing" && isPlayerTurn)) &&
