@@ -51,14 +51,6 @@ export default function PvPBattlePage() {
         process.env.NEXT_PUBLIC_COLYSEUS_URL || "ws://localhost:2567";
       const client = new Client(wsUrl);
 
-      // Check if we're coming from the lobby with an existing connection
-      const isConnected = sessionStorage.getItem('pvp_room_connected');
-      const storedRoomId = sessionStorage.getItem('pvp_room_id');
-      const storedSessionId = sessionStorage.getItem('pvp_session_id');
-      
-      // Clear the flag
-      sessionStorage.removeItem('pvp_room_connected');
-      
       // Load saved team
       const savedSettings = localStorage.getItem("battle_settings");
       const settings = savedSettings
@@ -73,28 +65,13 @@ export default function PvPBattlePage() {
         return;
       }
 
-      let joinedRoom;
-      
-      if (isConnected === 'true' && storedRoomId === roomId && storedSessionId) {
-        // Try to reconnect with the existing session
-        try {
-          joinedRoom = await client.reconnect(roomId, storedSessionId);
-          console.log("Reconnected to existing room");
-        } catch (reconnectErr) {
-          console.log("Reconnect failed, trying fresh join:", reconnectErr);
-          // Fall back to regular join
-          joinedRoom = await client.joinById(roomId, {
-            address: address,
-            team: JSON.parse(savedTeam),
-          });
-        }
-      } else {
-        // Regular join
-        joinedRoom = await client.joinById(roomId, {
-          address: address,
-          team: JSON.parse(savedTeam),
-        });
-      }
+      // Direct join to the room
+      // Note: This page is now primarily for direct room links or reconnection scenarios
+      // Normal flow goes through the lobby page which handles the battle directly
+      const joinedRoom = await client.joinById(roomId, {
+        address: address,
+        team: JSON.parse(savedTeam),
+      });
 
       setRoom(joinedRoom);
 
