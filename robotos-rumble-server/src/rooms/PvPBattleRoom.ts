@@ -35,6 +35,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
         // Auto-execute on timeout
         if (this.state.turnTimer === 0) {
           const currentUnit = this.battleEngine.getCurrentUnit()
+          console.log(`[PvP Server] Timer reached 0, current unit: ${currentUnit?.id}, isSelecting: ${currentUnit ? this.actionsInProgress.has(currentUnit.ownerId) : false}`)
           if (currentUnit) {
             // Check if the player who owns this unit is connected
             const ownerConnected = Array.from(this.clients).some(
@@ -83,6 +84,15 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   }
   
   onJoin(client: Client, options: any) {
+    console.log(`[PvP Server] Player joining: ${client.sessionId}, address: ${options.address}`)
+    
+    // Special handling for test wallet - treat each session as different player
+    const TEST_WALLET = "0x63989a803b61581683B54AB6188ffa0F4bAAdf28"
+    const isTestWallet = options.address?.toLowerCase() === TEST_WALLET.toLowerCase()
+    
+    if (isTestWallet) {
+      console.log(`[PvP Server] Test wallet detected - allowing multiple sessions`)
+    }
     
     // Store player preferences
     this.playerPreferences.set(client.sessionId, {
@@ -93,8 +103,12 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Create player
     const player = new Player()
     player.id = client.sessionId
-    player.address = options.address || "0x0000"
-    player.name = options.name || `Player ${this.state.players.size + 1}`
+    // For test wallet, use session ID as unique identifier
+    player.address = isTestWallet ? `${options.address}_${client.sessionId.slice(0, 6)}` : (options.address || "0x0000")
+    // Add tab identifier for same-wallet testing
+    player.name = isTestWallet 
+      ? `Test Player ${this.state.players.size + 1} (Tab ${client.sessionId.slice(0, 4)})`
+      : (options.name || `Player ${this.state.players.size + 1}`)
     player.wins = options.wins || 0
     player.losses = options.losses || 0
     player.team = JSON.stringify(options.team || [])

@@ -293,9 +293,14 @@ export default function BattleArenaV3({
     if (serverTurnEvent && isPvP) {
       const { unitId, playerId, timer } = serverTurnEvent;
       
+      console.log("[BattleArena] Server turn event:", { unitId, playerId, timer, phase, actionCountdown });
+      
       // Find the unit
       const unit = [...playerTeam, ...enemyTeam].find(u => u.id === unitId);
-      if (!unit) return;
+      if (!unit) {
+        console.error("[BattleArena] Unit not found for turn:", unitId);
+        return;
+      }
       
       setCurrentUnit(unit);
       
@@ -305,23 +310,43 @@ export default function BattleArenaV3({
       
       if (isOurTurn) {
         // Our turn - show action selection
-        setPhase("selecting-action");
-        setActionCountdown(timer);
-        gameSounds.play("playerTurn");
-        showMessage(`${unit.name} steps forward!`);
+        // Only change phase if we're not already in an action phase
+        if (phase === "waiting" || phase === "executing") {
+          console.log("[BattleArena] Setting phase to selecting-action from", phase);
+          setPhase("selecting-action");
+          setActionCountdown(timer);
+          gameSounds.play("playerTurn");
+          showMessage(`${unit.name} steps forward!`);
+        } else {
+          console.log("[BattleArena] Already in phase:", phase, "- not changing");
+        }
       } else {
         // Opponent's turn - show waiting (could add defense later)
-        setPhase("waiting");
-        gameSounds.play("enemyTurn");
-        showMessage(`Opponent's ${unit.name} is preparing to attack!`);
+        if (phase !== "waiting") {
+          console.log("[BattleArena] Setting phase to waiting from", phase);
+          setPhase("waiting");
+          gameSounds.play("enemyTurn");
+          showMessage(`Opponent's ${unit.name} is preparing to attack!`);
+        }
       }
     }
   }, [serverTurnEvent, isPvP, playerTeam, enemyTeam]);
 
+  // Track if battle is initialized to prevent re-initialization
+  const battleInitialized = useRef(false);
+  
   // Initialize battle
   useEffect(() => {
+    // Prevent re-initialization if teams haven't actually changed
+    if (battleInitialized.current) {
+      console.log("[BattleArena] Battle already initialized, skipping");
+      return;
+    }
+    
+    console.log("[BattleArena] Initializing battle, isPvP:", isPvP);
     battleEngine.initializeBattle(playerTeam, enemyTeam);
     setBattleState(battleEngine.getState());
+    battleInitialized.current = true;
     
     if (!isPvP) {
       // PvE: Show message and start turns locally
@@ -336,6 +361,7 @@ export default function BattleArenaV3({
       if (actionIntervalRef.current) clearInterval(actionIntervalRef.current);
       if (targetIntervalRef.current) clearInterval(targetIntervalRef.current);
       if (attackIntervalRef.current) clearInterval(attackIntervalRef.current);
+      battleInitialized.current = false;
     };
   }, [playerTeam, enemyTeam, isPvP]);
 
@@ -679,6 +705,7 @@ export default function BattleArenaV3({
   };
 
   const handleAttack = useCallback(() => {
+    console.log("[BattleArena] handleAttack called, current phase:", phase);
     setPendingAction({ type: "attack" });
     setPhase("selecting-target");
     setTargetCountdown(timerDuration);

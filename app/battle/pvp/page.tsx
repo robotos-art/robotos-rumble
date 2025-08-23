@@ -275,6 +275,7 @@ export default function PvPLobby() {
 
       // Set up room event listeners
       joinedRoom.onMessage("match-ready", (message) => {
+        console.log("[PvP Client] Match ready received:", message);
         gameSounds.play("confirm");
 
         // Show notification if tab is not visible
@@ -284,7 +285,16 @@ export default function PvPLobby() {
 
         // Set up battle state listener
         joinedRoom.onStateChange((state) => {
+          console.log("[PvP Client] State change:", {
+            status: state.status,
+            battleStarted,
+            turnTimer: state.turnTimer,
+            currentTurn: state.currentTurn,
+            turnNumber: state.turnNumber
+          });
+          
           if (state.status === "battle" && !battleStarted) {
+            console.log("[PvP Client] Starting battle setup");
             // Build teams from state.units with proper data
             const mySessionId = joinedRoom.sessionId;
             const units = Array.from(state.units);
@@ -331,6 +341,11 @@ export default function PvPLobby() {
               }
             });
 
+            console.log("[PvP Client] Teams built:", {
+              myUnits: myUnits.map(u => ({ id: u.id, name: u.name, abilities: u.abilities })),
+              opponentUnits: opponentUnits.map(u => ({ id: u.id, name: u.name }))
+            });
+            
             setPlayerTeam(myUnits);
             setEnemyTeam(opponentUnits);
             setBattleStarted(true);
@@ -341,6 +356,7 @@ export default function PvPLobby() {
 
       // Handle turn-start messages
       joinedRoom.onMessage("turn-start", (data) => {
+        console.log("[PvP Client] Turn start received:", data);
         setServerTurnEvent({
           unitId: data.unitId,
           playerId: data.playerId,
@@ -360,10 +376,12 @@ export default function PvPLobby() {
 
       // Handle action results
       joinedRoom.onMessage("action-result", (result) => {
+        console.log("[PvP Client] Action result received:", result);
         setServerBattleResult(result);
       });
 
       joinedRoom.onMessage("battle-start", (message) => {
+        console.log("[PvP Client] Battle start message:", message);
         gameSounds.play("confirm");
       });
 
@@ -474,8 +492,11 @@ export default function PvPLobby() {
           serverTimer={room?.state?.turnTimer}
           isPlayerTurn={isPlayerTurn}
           onAction={(action) => {
+            console.log("[PvP Client] Sending action:", action);
             if (room) {
               room.send("action", action);
+            } else {
+              console.error("[PvP Client] No room connection!");
             }
           }}
           roomState={serverBattleResult}

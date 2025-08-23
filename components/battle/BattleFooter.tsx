@@ -98,9 +98,10 @@ export default function BattleFooter({
 
   // Handler functions
   const handleAttack = useCallback(() => {
+    console.log("[BattleFooter] Attack button clicked, phase:", phase);
     setSelectedAction("attack");
     onAttack();
-  }, [onAttack]);
+  }, [onAttack, phase]);
 
   const handleAbility = useCallback(
     (index: number) => {
