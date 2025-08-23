@@ -8,7 +8,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   private actionTimers: Map<string, NodeJS.Timeout> = new Map()
   private playerPreferences: Map<string, { teamSize: number, speed: string }> = new Map()
   private settingsAgreed: Map<string, boolean> = new Map()
-  private actionsInProgress: Set<string> = new Set() // Track who is actively selecting
+  // Removed actionsInProgress - no longer needed with simplified timer logic
   
   onCreate(options: any) {
     this.setState(new BattleRoomState())
@@ -35,46 +35,20 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
         // Auto-execute on timeout
         if (this.state.turnTimer === 0) {
           const currentUnit = this.battleEngine.getCurrentUnit()
-          console.log(`[PvP Server] Timer reached 0, current unit: ${currentUnit?.id}, isSelecting: ${currentUnit ? this.actionsInProgress.has(currentUnit.ownerId) : false}`)
+          console.log(`[PvP Server] Timer reached 0, current unit: ${currentUnit?.id}`)
+          
           if (currentUnit) {
-            // Check if the player who owns this unit is connected
-            const ownerConnected = Array.from(this.clients).some(
-              client => client.sessionId === currentUnit.ownerId
+            // Find a random alive enemy
+            const enemies = Array.from(this.state.units).filter(u => 
+              u.ownerId !== currentUnit.ownerId && u.isAlive
             )
             
-            // Check if player is actively selecting (don't interrupt them)
-            const isSelecting = this.actionsInProgress.has(currentUnit.ownerId)
-            
-            if (!ownerConnected) {
-              console.log(`[PvP] Auto-executing for disconnected player ${currentUnit.ownerId}`)
+            if (enemies.length > 0) {
+              const target = enemies[Math.floor(Math.random() * enemies.length)]
+              console.log(`[PvP Server] Auto-executing action for timeout: ${currentUnit.id} -> ${target.id}`)
               
-              // Find a random alive enemy
-              const enemies = Array.from(this.state.units).filter(u => 
-                u.ownerId !== currentUnit.ownerId && u.isAlive
-              )
-              
-              if (enemies.length > 0) {
-                const target = enemies[Math.floor(Math.random() * enemies.length)]
-                
-                // Execute auto-action directly
-                this.executeAutoAction(currentUnit, target)
-              }
-            } else if (!isSelecting) {
-              // Only auto-execute if player is not actively selecting
-              console.log(`[PvP] Timer expired for idle player ${currentUnit.ownerId}`)
-              const enemies = Array.from(this.state.units).filter(u => 
-                u.ownerId !== currentUnit.ownerId && u.isAlive
-              )
-              
-              if (enemies.length > 0) {
-                const target = enemies[Math.floor(Math.random() * enemies.length)]
-                // Auto-execute with very weak timing bonus for timeout
-                this.executeAutoAction(currentUnit, target, 0.5)
-              }
-            } else {
-              // Player is actively selecting, give them 3 more seconds grace period
-              console.log(`[PvP] Player ${currentUnit.ownerId} is selecting, extending timer`)
-              this.state.turnTimer = 3
+              // Execute auto-action with weak timing bonus for timeout
+              this.executeAutoAction(currentUnit, target, 0.5)
             }
           }
         }
@@ -209,11 +183,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return
     }
     
-    // Clear the "selecting" flag since action is complete
-    this.actionsInProgress.delete(client.sessionId)
-    
-    // Reset the turn timer since action was received
-    this.state.turnTimer = -1 // Set to -1 to indicate action was taken
+    // Reset the turn timer to -1 to indicate action was taken
+    this.state.turnTimer = -1
     
     // Clear action timer (if using separate timer system)
     const timer = this.actionTimers.get(client.sessionId)
@@ -410,8 +381,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.state.currentTurn = currentUnit.ownerId
     this.state.turnTimer = this.state.timerDuration
     
-    // Mark player as "selecting" when their turn starts
-    this.actionsInProgress.add(currentUnit.ownerId)
+    // Don't mark as "selecting" anymore - let the timer handle timeouts
     
     // Notify players
     console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}`)
@@ -426,9 +396,6 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   private executeAutoAction(unit: any, target: any, timingBonus: number = 0.5): void {
     console.log(`[PvP Server] Executing auto-action for unit ${unit.id} against ${target.id}`)
-    
-    // Clear the selecting flag since we're auto-executing
-    this.actionsInProgress.delete(unit.ownerId)
     
     // Execute action directly when timer expires
     const result = this.battleEngine.executeAction({

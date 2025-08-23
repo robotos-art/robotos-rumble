@@ -226,14 +226,23 @@ export default function BattleArenaV3({
     
     // Update unit HP and energy from server
     if (result.units) {
+      // Create a new Map to trigger re-render
+      const newUnitStatuses = new Map(newState.unitStatuses);
+      
       result.units.forEach((unit: any) => {
-        const unitStatus = newState.unitStatuses.get(unit.id);
+        const unitStatus = newUnitStatuses.get(unit.id);
         if (unitStatus) {
-          unitStatus.currentHp = unit.currentHp;
-          unitStatus.currentEnergy = unit.currentEnergy;
-          unitStatus.isAlive = unit.isAlive;
+          // Create a new status object to ensure immutability
+          newUnitStatuses.set(unit.id, {
+            ...unitStatus,
+            currentHp: unit.currentHp,
+            currentEnergy: unit.currentEnergy,
+            isAlive: unit.isAlive
+          });
         }
       });
+      
+      newState.unitStatuses = newUnitStatuses;
     }
     
     // Update turn order from server
@@ -242,8 +251,11 @@ export default function BattleArenaV3({
       newState.turnIndex = result.turnIndex || 0;
     }
     
-    // CRITICAL: Update the state to trigger UI re-render
-    setBattleState({ ...newState }); // Use spread to ensure new object reference
+    // CRITICAL: Update the state to trigger UI re-render with new object reference
+    setBattleState({ 
+      ...newState,
+      unitStatuses: newState.unitStatuses // Ensure the new Map is included
+    });
     
     // Handle animations and sounds
     if (result.damage !== undefined && result.targetId) {
