@@ -11,6 +11,7 @@ import { PageLayout } from "../../../components/shared/PageLayout";
 import { Users, Swords, Clock, Search, Shield, Bell, Edit } from "lucide-react";
 import { gameSounds } from "../../../lib/sounds/gameSounds";
 import { BattleNotifications } from "../../../lib/notifications/battleNotifications";
+import BattleArena from "../../../components/battle/BattleArena";
 import {
   TraitProcessorV3,
   BattleUnitV3
@@ -32,7 +33,12 @@ export default function PvPLobby() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [battleStarted, setBattleStarted] = useState(false);
+  const [playerTeam, setPlayerTeam] = useState<BattleUnitV3[]>([]);
+  const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>([]);
   const [loadedTeam, setLoadedTeam] = useState<any[]>([]);
+  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
+  const [serverBattleResult, setServerBattleResult] = useState<any>(null);
+  const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Settings mismatch handling
@@ -276,21 +282,101 @@ export default function PvPLobby() {
           BattleNotifications.showMatchFound();
         }
 
-        // Navigate to the dedicated room page when battle starts
+        // Set up battle state listener
         joinedRoom.onStateChange((state) => {
           if (state.status === "battle" && !battleStarted) {
-            setBattleStarted(true); // Prevent multiple navigations
-            // Navigate to the dedicated battle room page
-            router.push(`/battle/pvp/${joinedRoom.roomId}`);
+            // Build teams from state.units with proper data
+            const mySessionId = joinedRoom.sessionId;
+            const units = Array.from(state.units);
+            const myUnits: BattleUnitV3[] = [];
+            const opponentUnits: BattleUnitV3[] = [];
+            
+            // Load local team data for abilities
+            const localTeamData = loadedTeam || [];
+
+            units.forEach((unit: any) => {
+              // Find matching unit in saved team data
+              const savedUnit = localTeamData.find((saved: any) => 
+                unit.id.includes(saved.id) || 
+                unit.name === saved.name ||
+                unit.id.endsWith(`:${saved.id}`)
+              );
+
+              const battleUnit: BattleUnitV3 = {
+                id: unit.id,
+                name: unit.name,
+                element: unit.element,
+                type: "roboto",
+                stats: savedUnit ? savedUnit.stats : {
+                  hp: unit.maxHp,
+                  attack: 50,
+                  defense: 40,
+                  speed: 45,
+                  energy: unit.maxEnergy,
+                  crit: 10,
+                },
+                abilities: savedUnit ? savedUnit.abilities : [],
+                traits: savedUnit ? savedUnit.traits : {},
+                imageUrl: unit.imageUrl || "",
+                elementModifiers: savedUnit ? savedUnit.elementModifiers : {
+                  strongAgainst: [],
+                  weakAgainst: [],
+                },
+              };
+
+              if (unit.ownerId === mySessionId) {
+                myUnits.push(battleUnit);
+              } else {
+                opponentUnits.push(battleUnit);
+              }
+            });
+
+            setPlayerTeam(myUnits);
+            setEnemyTeam(opponentUnits);
+            setBattleStarted(true);
+            setStatus("battle");
           }
         });
       });
 
-      // The battle will be handled in the dedicated room page
-      // Just listen for battle-start to know when to navigate
+      // Handle turn-start messages
+      joinedRoom.onMessage("turn-start", (data) => {
+        setServerTurnEvent({
+          unitId: data.unitId,
+          playerId: data.playerId,
+          timer: data.timer
+        });
+
+        if (data.playerId === joinedRoom.sessionId) {
+          setIsPlayerTurn(true);
+          gameSounds.play("turnStart");
+          if (document.visibilityState !== "visible") {
+            BattleNotifications.showYourTurn();
+          }
+        } else {
+          setIsPlayerTurn(false);
+        }
+      });
+
+      // Handle action results
+      joinedRoom.onMessage("action-result", (result) => {
+        setServerBattleResult(result);
+      });
+
       joinedRoom.onMessage("battle-start", (message) => {
         gameSounds.play("confirm");
-        // Navigation happens via onStateChange above
+      });
+
+      joinedRoom.onMessage("battle-end", (data) => {
+        const won = data.winner === joinedRoom.sessionId;
+        gameSounds.play(won ? "victory" : "defeat");
+        
+        setTimeout(() => {
+          setBattleStarted(false);
+          setStatus("idle");
+          setPlayerTeam([]);
+          setEnemyTeam([]);
+        }, 5000);
       });
 
       joinedRoom.onMessage("error", (message) => {
@@ -366,8 +452,38 @@ export default function PvPLobby() {
     );
   }
 
-  // Navigation to room page happens automatically when battle starts
-  // No need to render BattleArena here
+  // Show battle arena when battle starts
+  if (battleStarted && playerTeam.length > 0 && enemyTeam.length > 0) {
+    return (
+      <PageLayout fullScreen>
+        <BattleArena
+          playerTeam={playerTeam}
+          enemyTeam={enemyTeam}
+          onBattleEnd={(won) => {
+            // Reset state
+            setBattleStarted(false);
+            setStatus("idle");
+            setPlayerTeam([]);
+            setEnemyTeam([]);
+            if (room) {
+              room.leave();
+              setRoom(null);
+            }
+          }}
+          isPvP={true}
+          serverTimer={room?.state?.turnTimer}
+          isPlayerTurn={isPlayerTurn}
+          onAction={(action) => {
+            if (room) {
+              room.send("action", action);
+            }
+          }}
+          roomState={serverBattleResult}
+          serverTurnEvent={serverTurnEvent}
+        />
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
