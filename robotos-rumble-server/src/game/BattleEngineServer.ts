@@ -32,7 +32,7 @@ export interface BattleAction {
 }
 
 export class BattleEngineServer {
-  private units: Map<string, BattleUnit> = new Map()
+  public units: Map<string, BattleUnit> = new Map() // Made public for ability assignment
   private turnOrder: string[] = []
   private turnIndex: number = 0
   private battleLog: string[] = []
@@ -41,10 +41,23 @@ export class BattleEngineServer {
     // Store all units
     const allUnits = [...playerTeam, ...enemyTeam]
     allUnits.forEach(unit => {
+      console.log(`[BattleEngineServer] Initializing unit ${unit.id} with stats:`, unit.stats)
+      
+      // Ensure stats exist with defaults if missing
+      const stats = unit.stats || {
+        hp: 100,
+        attack: 50,
+        defense: 50,
+        speed: 50,
+        energy: 100,
+        crit: 10
+      }
+      
       this.units.set(unit.id, {
         ...unit,
-        currentHp: unit.stats.hp,
-        currentEnergy: unit.stats.energy,
+        stats: stats, // Ensure stats are stored
+        currentHp: stats.hp,
+        currentEnergy: stats.energy,
         isAlive: true
       })
     })
@@ -101,18 +114,30 @@ export class BattleEngineServer {
     battleEnded?: boolean,
     winner?: string 
   } {
+    console.log(`[BattleEngineServer] Executing action:`, action)
+    
     if (!this.validateAction(action)) {
+      console.log(`[BattleEngineServer] Action validation failed`)
       return {}
     }
     
     const attacker = this.units.get(action.sourceId)!
     const target = action.targetId ? this.units.get(action.targetId) : null
     
+    console.log(`[BattleEngineServer] Attacker stats:`, attacker.stats)
+    console.log(`[BattleEngineServer] Target stats:`, target?.stats)
+    
     let result: any = {}
     
     if (action.type === 'attack' && target) {
+      // Make sure we have proper stats - default if missing
+      const attackPower = attacker.stats?.attack || 50
+      const defensePower = target.stats?.defense || 40
+      
       // Simple damage calculation
-      const baseDamage = Math.max(5, attacker.stats.attack * 2 - target.stats.defense)
+      const baseDamage = Math.max(10, attackPower * 2 - defensePower)
+      
+      console.log(`[BattleEngineServer] Base damage: ${baseDamage} (attack: ${attackPower}, defense: ${defensePower})`)
       
       // Apply element multiplier
       const elementMultiplier = this.getElementMultiplier(attacker.element, target.element)
@@ -129,10 +154,12 @@ export class BattleEngineServer {
       }
       
       // Critical hit chance
-      if (Math.random() * 100 < attacker.stats.crit) {
+      if (Math.random() * 100 < (attacker.stats?.crit || 10)) {
         damage *= 2
         this.battleLog.push('Critical hit!')
       }
+      
+      console.log(`[BattleEngineServer] Final damage: ${damage}`)
       
       // Apply damage
       target.currentHp = Math.max(0, target.currentHp - damage)
@@ -191,12 +218,17 @@ export class BattleEngineServer {
   
   private nextTurn() {
     this.turnIndex++
+    console.log(`[BattleEngineServer] nextTurn() - turnIndex now: ${this.turnIndex}, turnOrder length: ${this.turnOrder.length}`)
     
     // If we've gone through all units, recalculate turn order
     if (this.turnIndex >= this.turnOrder.length) {
+      console.log(`[BattleEngineServer] End of round, recalculating turn order`)
       this.calculateTurnOrder()
       this.battleLog.push('=== NEW ROUND ===')
     }
+    
+    const nextUnit = this.getCurrentUnit()
+    console.log(`[BattleEngineServer] Next unit after turn advance: ${nextUnit?.id || 'none'}`)
   }
   
   private checkBattleEnd(): { winner: string } | null {

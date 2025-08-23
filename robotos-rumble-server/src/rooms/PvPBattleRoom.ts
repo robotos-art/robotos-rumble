@@ -311,19 +311,43 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     const player1 = players[0]
     const player2 = players[1]
     
-    const team1 = JSON.parse(player1.team).map((unit: any, i: number) => ({
-      ...unit,
-      id: `${player1.id}:${unit.id}`, // Namespace unit ID with owner
-      ownerId: player1.id,
-      position: i
-    }))
+    const team1 = JSON.parse(player1.team).map((unit: any, i: number) => {
+      console.log(`[PvP Server] Team 1 unit ${i} stats:`, unit.stats)
+      return {
+        ...unit,
+        id: `${player1.id}:${unit.id}`, // Namespace unit ID with owner
+        ownerId: player1.id,
+        position: i,
+        // Ensure stats are passed through
+        stats: unit.stats || {
+          hp: 100,
+          attack: 50,
+          defense: 50,
+          speed: 50,
+          energy: 100,
+          crit: 10
+        }
+      }
+    })
     
-    const team2 = JSON.parse(player2.team).map((unit: any, i: number) => ({
-      ...unit,
-      id: `${player2.id}:${unit.id}`, // Namespace unit ID with owner
-      ownerId: player2.id,
-      position: i + team1.length
-    }))
+    const team2 = JSON.parse(player2.team).map((unit: any, i: number) => {
+      console.log(`[PvP Server] Team 2 unit ${i} stats:`, unit.stats)
+      return {
+        ...unit,
+        id: `${player2.id}:${unit.id}`, // Namespace unit ID with owner
+        ownerId: player2.id,
+        position: i + team1.length,
+        // Ensure stats are passed through
+        stats: unit.stats || {
+          hp: 100,
+          attack: 50,
+          defense: 50,
+          speed: 50,
+          energy: 100,
+          crit: 10
+        }
+      }
+    })
     
     // Initialize battle engine
     this.battleEngine.initializeBattle(team1, team2)
@@ -348,7 +372,10 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       battleUnit.position = unit.position
       
       // Store abilities in the server's battle engine
-      this.battleEngine.units.get(unit.id).abilities = unit.abilities || []
+      const engineUnit = this.battleEngine.units.get(unit.id)
+      if (engineUnit) {
+        engineUnit.abilities = unit.abilities || []
+      }
       
       this.state.units.push(battleUnit)
     })
@@ -397,6 +424,11 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   // Removed startActionTimer - using clock interval for timeouts instead
   
   private executeAutoAction(unit: any, target: any, timingBonus: number = 0.5): void {
+    console.log(`[PvP Server] Executing auto-action for unit ${unit.id} against ${target.id}`)
+    
+    // Clear the selecting flag since we're auto-executing
+    this.actionsInProgress.delete(unit.ownerId)
+    
     // Execute action directly when timer expires
     const result = this.battleEngine.executeAction({
       playerId: unit.ownerId,
@@ -406,6 +438,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       timingBonus: timingBonus, // Weak timing for timeout
       defenseBonus: 0.8 // Default defense
     })
+    
+    console.log(`[PvP Server] Auto-action result:`, result)
     
     // Sync state
     this.syncUnitsWithEngine()
@@ -418,6 +452,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     if (nextUnit) {
       nextPlayerId = nextUnit.ownerId
       nextUnitId = nextUnit.id
+      console.log(`[PvP Server] Next unit will be: ${nextUnitId}`)
+    } else {
+      console.log(`[PvP Server] No next unit - turn order needs recalculation`)
     }
     
     // Build and broadcast result (BattleEngineServer returns simplified result)
