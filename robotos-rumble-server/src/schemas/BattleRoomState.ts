@@ -46,7 +46,7 @@ export class BattleRoomState extends Schema {
   @type("number") turnNumber: number = 0
   
   // Phase tracking for multi-step actions
-  @type("string") currentPhase: string = "selecting" // selecting, targeting, timing, executing
+  @type("string") currentPhase: string = "selecting-action" // selecting-action, selecting-target, attack-timing, executing
   @type("number") phaseTimer: number = 0 // Timer for current phase
   @type("string") selectedAction: string = "" // attack, ability, switch
   @type("string") targetPreview: string = "" // Unit ID being targeted (for preview)

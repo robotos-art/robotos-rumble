@@ -325,10 +325,10 @@ export default function BattleArenaV3({
       // Handle phase-specific events
       if (eventPhase) {
         // Server is telling us about a phase change
-        if (eventPhase === "targeting" && action) {
+        if (eventPhase === "selecting-target" && action) {
           setPendingAction({ type: action as "attack" | "ability" });
         }
-        if (eventPhase === "timing" && targetId) {
+        if (eventPhase === "attack-timing" && targetId) {
           const target = [...playerTeam, ...enemyTeam].find(u => u.id === targetId);
           if (target) {
             setTargetUnit(target);

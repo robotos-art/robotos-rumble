@@ -371,10 +371,13 @@ export default function PvPLobby() {
       // Handle turn-start messages
       joinedRoom.onMessage("turn-start", (data) => {
         console.log("[PvP Client] Turn start received:", data);
+        // Reset to selecting-action phase when turn starts
+        setCurrentPhase("selecting-action");
         setServerTurnEvent({
           unitId: data.unitId,
           playerId: data.playerId,
-          timer: data.timer
+          timer: data.timer,
+          phase: "selecting-action"
         });
 
         if (data.playerId === joinedRoom.sessionId) {

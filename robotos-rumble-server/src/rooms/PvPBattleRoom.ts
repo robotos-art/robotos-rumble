@@ -173,9 +173,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   handleAction(client: Client, action: any) {
     if (this.state.status !== "battle") return
     
-    // If we're using phase system and not in timing phase, reject
-    if (this.state.currentPhase && this.state.currentPhase !== "timing") {
-      console.log(`[PvP Server] Action received but not in timing phase: ${this.state.currentPhase}`)
+    // If we're using phase system and not in attack-timing phase, reject
+    if (this.state.currentPhase && this.state.currentPhase !== "attack-timing") {
+      console.log(`[PvP Server] Action received but not in attack-timing phase: ${this.state.currentPhase}`)
       return
     }
     
@@ -381,19 +381,19 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return this.nextTurn()
     }
     
-    // Reset phase to selecting for new turn
-    this.state.currentPhase = "selecting"
+    // Reset phase to selecting-action for new turn
+    this.state.currentPhase = "selecting-action"
     this.state.selectedAction = ""
     this.state.targetPreview = ""
     
     // Update state
     this.state.currentTurn = currentUnit.ownerId
     // Set phase timer based on current phase
-    this.state.phaseTimer = this.getPhaseTimeout("selecting")
+    this.state.phaseTimer = this.getPhaseTimeout("selecting-action")
     this.state.turnTimer = this.state.phaseTimer // Keep backward compatibility
     
     // Notify players
-    console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}, phase: selecting`)
+    console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}, phase: selecting-action`)
     this.broadcast("turn-start", {
       unitId: currentUnit.id,
       playerId: currentUnit.ownerId,
@@ -596,11 +596,11 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     const baseTimeout = this.state.speed === "speedy" ? 5 : 10
     
     switch(phase) {
-      case "selecting":
+      case "selecting-action":
         return baseTimeout // 5 or 10 seconds to select action
-      case "targeting":
+      case "selecting-target":
         return baseTimeout // 5 or 10 seconds to select target
-      case "timing":
+      case "attack-timing":
         return 3 // 3 seconds for timing minigame
       default:
         return baseTimeout
@@ -614,21 +614,21 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     console.log(`[PvP Server] Phase timeout in phase: ${this.state.currentPhase}`)
     
     switch(this.state.currentPhase) {
-      case "selecting":
+      case "selecting-action":
         // Auto-select attack action
         this.state.selectedAction = "attack"
-        this.state.currentPhase = "targeting"
-        this.state.phaseTimer = this.getPhaseTimeout("targeting")
+        this.state.currentPhase = "selecting-target"
+        this.state.phaseTimer = this.getPhaseTimeout("selecting-target")
         
         // Notify clients about phase change
         this.broadcast("phase-change", {
-          phase: "targeting",
+          phase: "selecting-target",
           action: "attack",
           unitId: currentUnit.id
         })
         break
         
-      case "targeting":
+      case "selecting-target":
         // Auto-select random target
         const enemies = Array.from(this.state.units).filter(u => 
           u.ownerId !== currentUnit.ownerId && u.isAlive
@@ -637,19 +637,19 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
         if (enemies.length > 0) {
           const target = enemies[Math.floor(Math.random() * enemies.length)]
           this.state.targetPreview = target.id
-          this.state.currentPhase = "timing"
-          this.state.phaseTimer = this.getPhaseTimeout("timing")
+          this.state.currentPhase = "attack-timing"
+          this.state.phaseTimer = this.getPhaseTimeout("attack-timing")
           
           // Notify clients about phase change
           this.broadcast("phase-change", {
-            phase: "timing",
+            phase: "attack-timing",
             targetId: target.id,
             unitId: currentUnit.id
           })
         }
         break
         
-      case "timing":
+      case "attack-timing":
         // Execute action with weak timing bonus
         const target = this.state.units.find(u => u.id === this.state.targetPreview)
         if (target) {
@@ -662,7 +662,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   // Modified handleAction to work with phases
   handleActionPhase(client: Client, data: { action: string }) {
     if (this.state.status !== "battle") return
-    if (this.state.currentPhase !== "selecting") return
+    if (this.state.currentPhase !== "selecting-action") return
     
     const currentUnit = this.battleEngine.getCurrentUnit()
     if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
@@ -672,12 +672,12 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     // Store selected action and move to targeting phase
     this.state.selectedAction = data.action
-    this.state.currentPhase = "targeting"
-    this.state.phaseTimer = this.getPhaseTimeout("targeting")
+    this.state.currentPhase = "selecting-target"
+    this.state.phaseTimer = this.getPhaseTimeout("selecting-target")
     
     // Notify all clients
     this.broadcast("phase-change", {
-      phase: "targeting",
+      phase: "selecting-target",
       action: data.action,
       unitId: currentUnit.id
     })
@@ -685,7 +685,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   
   handleTargetPhase(client: Client, data: { targetId: string }) {
     if (this.state.status !== "battle") return
-    if (this.state.currentPhase !== "targeting") return
+    if (this.state.currentPhase !== "selecting-target") return
     
     const currentUnit = this.battleEngine.getCurrentUnit()
     if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
@@ -695,12 +695,12 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     // Store target and move to timing phase
     this.state.targetPreview = data.targetId
-    this.state.currentPhase = "timing"
-    this.state.phaseTimer = this.getPhaseTimeout("timing")
+    this.state.currentPhase = "attack-timing"
+    this.state.phaseTimer = this.getPhaseTimeout("attack-timing")
     
     // Notify all clients
     this.broadcast("phase-change", {
-      phase: "timing",
+      phase: "attack-timing",
       targetId: data.targetId,
       unitId: currentUnit.id
     })
