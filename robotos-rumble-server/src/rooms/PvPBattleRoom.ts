@@ -67,6 +67,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     
     if (isTestWallet) {
       console.log(`[PvP Server] Test wallet detected - allowing multiple sessions`)
+      console.log(`[PvP Server] Creating unique player for session: ${client.sessionId}`)
+      console.log(`[PvP Server] Current room has ${this.state.players.size} players`)
     }
     
     // Store player preferences

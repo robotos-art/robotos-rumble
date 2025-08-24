@@ -233,9 +233,16 @@ export default function PvPLobby() {
 
       // Use joinOrCreate which will automatically handle room creation
       try {
+        // Add tab identifier for test wallet
+        const TEST_WALLET = "0x63989a803b61581683B54AB6188ffa0F4bAAdf28";
+        const isTestWallet = address?.toLowerCase() === TEST_WALLET.toLowerCase();
+        const playerName = isTestWallet 
+          ? `Test ${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+          : `Player ${address.slice(0, 6)}`;
+        
         joinedRoom = await client.joinOrCreate("pvp_battle", {
           address: address,
-          name: `Player ${address.slice(0, 6)}`,
+          name: playerName,
           team: JSON.parse(savedTeam),
           teamSize: settings.teamSize,
           speed: settings.speed,
