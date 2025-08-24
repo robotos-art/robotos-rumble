@@ -212,7 +212,7 @@ export class BattleEngineServer {
     }
     
     // Track who just went
-    this.lastPlayerId = source.ownerId
+    this.lastPlayerId = attacker.ownerId
     
     // Move to next turn
     this.nextTurn()
