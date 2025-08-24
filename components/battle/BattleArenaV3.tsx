@@ -282,10 +282,8 @@ export default function BattleArenaV3({
       showDamage(result.targetId, result.damage, damageType);
     }
     
-    // Check for battle end
-    if (result.battleEnded) {
-      handleBattleEnd(result.won);
-    }
+    // In PvP, battle end is handled by the "battle-end" message, not action results
+    // Don't check for battle end here in PvP mode
     
     // Reset phase to waiting for next turn
     setPhase("waiting");
@@ -413,17 +411,20 @@ export default function BattleArenaV3({
     const state = battleEngine.getState();
     setBattleState(state);
 
-    // Check for battle end
-    const alivePlayerUnits = playerTeam.filter(
-      (u) => state.unitStatuses.get(u.id)?.isAlive,
-    ).length;
-    const aliveEnemyUnits = enemyTeam.filter(
-      (u) => state.unitStatuses.get(u.id)?.isAlive,
-    ).length;
+    // In PvP, server manages battle end - don't check locally
+    if (!isPvP) {
+      // Check for battle end only in PvE
+      const alivePlayerUnits = playerTeam.filter(
+        (u) => state.unitStatuses.get(u.id)?.isAlive,
+      ).length;
+      const aliveEnemyUnits = enemyTeam.filter(
+        (u) => state.unitStatuses.get(u.id)?.isAlive,
+      ).length;
 
-    if (alivePlayerUnits === 0 || aliveEnemyUnits === 0) {
-      handleBattleEnd(alivePlayerUnits > 0);
-      return;
+      if (alivePlayerUnits === 0 || aliveEnemyUnits === 0) {
+        handleBattleEnd(alivePlayerUnits > 0);
+        return;
+      }
     }
 
     // Alternate between teams
