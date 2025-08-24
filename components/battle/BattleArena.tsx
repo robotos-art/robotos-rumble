@@ -18,8 +18,10 @@ interface BattleArenaProps {
   isPlayerTurn?: boolean;
   serverTimer?: number;
   onAction?: (action: any) => void;
+  onTargetPreview?: (targetId: string) => void;
   roomState?: any;
   serverTurnEvent?: any;
+  opponentTargetPreview?: string | null;
 }
 
 export default function BattleArena({
@@ -30,8 +32,10 @@ export default function BattleArena({
   isPlayerTurn,
   serverTimer,
   onAction,
+  onTargetPreview,
   roomState,
   serverTurnEvent,
+  opponentTargetPreview,
 }: BattleArenaProps) {
   const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>(
     providedEnemyTeam || [],
@@ -112,8 +116,10 @@ export default function BattleArena({
       isPlayerTurn={isPlayerTurn}
       serverTimer={serverTimer}
       onAction={onAction}
+      onTargetPreview={onTargetPreview}
       serverBattleResult={roomState}
       serverTurnEvent={serverTurnEvent}
+      opponentTargetPreview={opponentTargetPreview}
     />
   );
 }

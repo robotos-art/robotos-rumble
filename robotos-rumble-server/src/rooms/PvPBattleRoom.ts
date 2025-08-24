@@ -26,6 +26,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.onMessage("team", this.handleTeamUpdate.bind(this))
     this.onMessage("accept-settings", (client, settings) => this.handleAcceptSettings(client, settings))
     this.onMessage("propose-settings", (client, settings) => this.handleProposeSettings(client, settings))
+    this.onMessage("target-preview", this.handleTargetPreview.bind(this))
     
     // Set up turn timer countdown
     this.clock.setInterval(() => {
@@ -171,6 +172,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     if (allHaveTeams && players.every(p => p.ready)) {
       this.startBattle()
     }
+  }
+  
+  handleTargetPreview(client: Client, data: { targetId: string }) {
+    // Broadcast target preview to opponent
+    this.broadcast("target-preview", {
+      attackerId: client.sessionId,
+      targetId: data.targetId
+    }, { except: client })
   }
   
   handleAction(client: Client, action: any) {

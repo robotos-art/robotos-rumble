@@ -39,6 +39,7 @@ export default function PvPLobby() {
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
   const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
+  const [opponentTargetPreview, setOpponentTargetPreview] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Settings mismatch handling
@@ -383,6 +384,12 @@ export default function PvPLobby() {
       joinedRoom.onMessage("action-result", (result) => {
         console.log("[PvP Client] Action result received:", result);
         setServerBattleResult(result);
+        setOpponentTargetPreview(null); // Clear target preview after action
+      });
+      
+      joinedRoom.onMessage("target-preview", (data) => {
+        console.log("[PvP Client] Target preview received:", data);
+        setOpponentTargetPreview(data.targetId);
       });
 
       joinedRoom.onMessage("battle-start", (message) => {
@@ -504,8 +511,14 @@ export default function PvPLobby() {
               console.error("[PvP Client] No room connection!");
             }
           }}
+          onTargetPreview={(targetId) => {
+            if (room) {
+              room.send("target-preview", { targetId });
+            }
+          }}
           roomState={serverBattleResult}
           serverTurnEvent={serverTurnEvent}
+          opponentTargetPreview={opponentTargetPreview}
         />
       </PageLayout>
     );

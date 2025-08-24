@@ -36,6 +36,7 @@ export class BattleEngineServer {
   private turnOrder: string[] = []
   private turnIndex: number = 0
   private battleLog: string[] = []
+  private lastPlayerId: string | null = null // Track who went last for alternating turns
   
   initializeBattle(playerTeam: BattleUnit[], enemyTeam: BattleUnit[]) {
     // Store all units
@@ -70,15 +71,41 @@ export class BattleEngineServer {
   private calculateTurnOrder() {
     const aliveUnits = Array.from(this.units.values()).filter(u => u.isAlive)
     
-    // Sort by speed with small random factor
-    aliveUnits.sort((a, b) => {
-      const aSpeed = a.stats.speed + Math.random() * 10
-      const bSpeed = b.stats.speed + Math.random() * 10
-      return bSpeed - aSpeed
+    // Group units by owner
+    const unitsByOwner: Record<string, BattleUnit[]> = {}
+    aliveUnits.forEach(unit => {
+      if (!unitsByOwner[unit.ownerId]) {
+        unitsByOwner[unit.ownerId] = []
+      }
+      unitsByOwner[unit.ownerId].push(unit)
     })
     
-    this.turnOrder = aliveUnits.map(u => u.id)
+    // Sort units within each owner group by speed
+    Object.values(unitsByOwner).forEach(units => {
+      units.sort((a, b) => {
+        const aSpeed = a.stats.speed + Math.random() * 10
+        const bSpeed = b.stats.speed + Math.random() * 10
+        return bSpeed - aSpeed
+      })
+    })
+    
+    // Build alternating turn order
+    const owners = Object.keys(unitsByOwner)
+    const newTurnOrder: string[] = []
+    let maxUnits = Math.max(...Object.values(unitsByOwner).map(units => units.length))
+    
+    for (let i = 0; i < maxUnits; i++) {
+      // Alternate between owners
+      for (const owner of owners) {
+        if (unitsByOwner[owner][i]) {
+          newTurnOrder.push(unitsByOwner[owner][i].id)
+        }
+      }
+    }
+    
+    this.turnOrder = newTurnOrder
     this.turnIndex = 0
+    console.log(`[BattleEngineServer] Turn order calculated (alternating):`, this.turnOrder)
   }
   
   getCurrentUnit(): BattleUnit | null {
@@ -183,6 +210,9 @@ export class BattleEngineServer {
       
       this.battleLog.push(`${attacker.name} attacks ${target.name} for ${damage} damage!`)
     }
+    
+    // Track who just went
+    this.lastPlayerId = source.ownerId
     
     // Move to next turn
     this.nextTurn()

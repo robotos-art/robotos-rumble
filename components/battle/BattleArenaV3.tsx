@@ -40,12 +40,14 @@ interface BattleArenaV3Props {
   isPlayerTurn?: boolean;
   serverTimer?: number;
   onAction?: (action: any) => void;
+  onTargetPreview?: (targetId: string) => void;
   serverBattleResult?: any;  // Direct result from server
   serverTurnEvent?: {
     unitId: string;
     playerId: string;
     timer: number;
   };
+  opponentTargetPreview?: string | null;
 }
 
 type BattlePhase =
@@ -87,8 +89,10 @@ export default function BattleArenaV3({
   isPlayerTurn: serverIsPlayerTurn,
   serverTimer,
   onAction: onPvPAction,
+  onTargetPreview,
   serverBattleResult,
   serverTurnEvent,
+  opponentTargetPreview,
 }: BattleArenaV3Props) {
   const { address } = useAccount();
 
@@ -324,9 +328,10 @@ export default function BattleArenaV3({
         // Our turn - show action selection
         // Only change phase if we're not already in an action phase
         if (phase === "waiting" || phase === "executing") {
-          console.log("[BattleArena] Setting phase to selecting-action from", phase);
+          console.log("[BattleArena] Setting phase to selecting-action from", phase, "with timer:", timer);
           setPhase("selecting-action");
-          setActionCountdown(timer);
+          // Ensure we have a reasonable countdown (minimum 3 seconds)
+          setActionCountdown(Math.max(timer || timerDuration, 3));
           gameSounds.play("playerTurn");
           showMessage(`${unit.name} steps forward!`);
         } else {
@@ -762,6 +767,11 @@ export default function BattleArenaV3({
       gameSounds.play("targetSelect");
     }
     setTargetUnit(unit || null);
+    
+    // Broadcast target preview in PvP
+    if (isPvP && onTargetPreview && unit) {
+      onTargetPreview(unit.id);
+    }
 
     // Auto-confirm if this was a mouse click
     if (autoConfirm && unit) {
@@ -1117,6 +1127,10 @@ export default function BattleArenaV3({
       // Show the selected target
       return targetUnit?.id === unitId;
     }
+    // Show opponent's target preview in PvP when it's their turn
+    if (isPvP && opponentTargetPreview && !isPlayerTurn && phase === "waiting") {
+      return opponentTargetPreview === unitId;
+    }
     return false;
   };
   const isAlive = (unitId: string) =>
@@ -1124,7 +1138,7 @@ export default function BattleArenaV3({
 
   // Handle action countdown
   useEffect(() => {
-    if (phase === "selecting-action" && actionCountdown > 0) {
+    if (phase === "selecting-action" && actionCountdown > 0 && isPlayerTurn) {
       const timer = setTimeout(() => {
         if (actionCountdown === 1) {
           // In PvE, auto-select attack on timeout
@@ -1137,7 +1151,7 @@ export default function BattleArenaV3({
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [phase, actionCountdown, handleAttack, isPvP]);
+  }, [phase, actionCountdown, handleAttack, isPvP, isPlayerTurn]);
 
   // Handle target countdown
   useEffect(() => {
