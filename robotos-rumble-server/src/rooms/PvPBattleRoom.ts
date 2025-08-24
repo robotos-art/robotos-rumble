@@ -22,36 +22,22 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     // Set up message handlers
     this.onMessage("ready", this.handleReady.bind(this))
     this.onMessage("action", this.handleAction.bind(this))
+    this.onMessage("action-phase", this.handleActionPhase.bind(this))
+    this.onMessage("target-phase", this.handleTargetPhase.bind(this))
     this.onMessage("forfeit", this.handleForfeit.bind(this))
     this.onMessage("team", this.handleTeamUpdate.bind(this))
     this.onMessage("accept-settings", (client, settings) => this.handleAcceptSettings(client, settings))
     this.onMessage("propose-settings", (client, settings) => this.handleProposeSettings(client, settings))
     this.onMessage("target-preview", this.handleTargetPreview.bind(this))
     
-    // Set up turn timer countdown
+    // Set up phase timer countdown
     this.clock.setInterval(() => {
-      if (this.state.status === "battle" && this.state.turnTimer > 0) {
-        this.state.turnTimer--
+      if (this.state.status === "battle" && this.state.phaseTimer > 0) {
+        this.state.phaseTimer--
         
-        // Auto-execute on timeout
-        if (this.state.turnTimer === 0) {
-          const currentUnit = this.battleEngine.getCurrentUnit()
-          console.log(`[PvP Server] Timer reached 0, current unit: ${currentUnit?.id}`)
-          
-          if (currentUnit) {
-            // Find a random alive enemy
-            const enemies = Array.from(this.state.units).filter(u => 
-              u.ownerId !== currentUnit.ownerId && u.isAlive
-            )
-            
-            if (enemies.length > 0) {
-              const target = enemies[Math.floor(Math.random() * enemies.length)]
-              console.log(`[PvP Server] Auto-executing action for timeout: ${currentUnit.id} -> ${target.id}`)
-              
-              // Execute auto-action with weak timing bonus for timeout
-              this.executeAutoAction(currentUnit, target, 0.5)
-            }
-          }
+        // Handle phase timeout
+        if (this.state.phaseTimer === 0) {
+          this.handlePhaseTimeout()
         }
       }
     }, 1000) // Update every second
@@ -187,6 +173,12 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
   handleAction(client: Client, action: any) {
     if (this.state.status !== "battle") return
     
+    // If we're using phase system and not in timing phase, reject
+    if (this.state.currentPhase && this.state.currentPhase !== "timing") {
+      console.log(`[PvP Server] Action received but not in timing phase: ${this.state.currentPhase}`)
+      return
+    }
+    
     // Validate it's the player's turn
     const currentUnit = this.battleEngine.getCurrentUnit()
     if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
@@ -194,8 +186,9 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return
     }
     
-    // Reset the turn timer to -1 to indicate action was taken
+    // Reset the timers to indicate action was taken
     this.state.turnTimer = -1
+    this.state.phaseTimer = -1
     
     // Clear action timer (if using separate timer system)
     const timer = this.actionTimers.get(client.sessionId)
@@ -388,14 +381,19 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       return this.nextTurn()
     }
     
+    // Reset phase to selecting for new turn
+    this.state.currentPhase = "selecting"
+    this.state.selectedAction = ""
+    this.state.targetPreview = ""
+    
     // Update state
     this.state.currentTurn = currentUnit.ownerId
-    this.state.turnTimer = this.state.timerDuration
-    
-    // Don't mark as "selecting" anymore - let the timer handle timeouts
+    // Set phase timer based on current phase
+    this.state.phaseTimer = this.getPhaseTimeout("selecting")
+    this.state.turnTimer = this.state.phaseTimer // Keep backward compatibility
     
     // Notify players
-    console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}`)
+    console.log(`[PvP] Broadcasting turn-start for unit ${currentUnit.id}, owner ${currentUnit.ownerId}, phase: selecting`)
     this.broadcast("turn-start", {
       unitId: currentUnit.id,
       playerId: currentUnit.ownerId,
@@ -590,5 +588,121 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     if (winnerId) {
       this.endBattle(winnerId)
     }
+  }
+  
+  // Phase management methods
+  private getPhaseTimeout(phase: string): number {
+    // Different timeout for each phase
+    const baseTimeout = this.state.speed === "speedy" ? 5 : 10
+    
+    switch(phase) {
+      case "selecting":
+        return baseTimeout // 5 or 10 seconds to select action
+      case "targeting":
+        return baseTimeout // 5 or 10 seconds to select target
+      case "timing":
+        return 3 // 3 seconds for timing minigame
+      default:
+        return baseTimeout
+    }
+  }
+  
+  private handlePhaseTimeout() {
+    const currentUnit = this.battleEngine.getCurrentUnit()
+    if (!currentUnit) return
+    
+    console.log(`[PvP Server] Phase timeout in phase: ${this.state.currentPhase}`)
+    
+    switch(this.state.currentPhase) {
+      case "selecting":
+        // Auto-select attack action
+        this.state.selectedAction = "attack"
+        this.state.currentPhase = "targeting"
+        this.state.phaseTimer = this.getPhaseTimeout("targeting")
+        
+        // Notify clients about phase change
+        this.broadcast("phase-change", {
+          phase: "targeting",
+          action: "attack",
+          unitId: currentUnit.id
+        })
+        break
+        
+      case "targeting":
+        // Auto-select random target
+        const enemies = Array.from(this.state.units).filter(u => 
+          u.ownerId !== currentUnit.ownerId && u.isAlive
+        )
+        
+        if (enemies.length > 0) {
+          const target = enemies[Math.floor(Math.random() * enemies.length)]
+          this.state.targetPreview = target.id
+          this.state.currentPhase = "timing"
+          this.state.phaseTimer = this.getPhaseTimeout("timing")
+          
+          // Notify clients about phase change
+          this.broadcast("phase-change", {
+            phase: "timing",
+            targetId: target.id,
+            unitId: currentUnit.id
+          })
+        }
+        break
+        
+      case "timing":
+        // Execute action with weak timing bonus
+        const target = this.state.units.find(u => u.id === this.state.targetPreview)
+        if (target) {
+          this.executeAutoAction(currentUnit, target, 0.5)
+        }
+        break
+    }
+  }
+  
+  // Modified handleAction to work with phases
+  handleActionPhase(client: Client, data: { action: string }) {
+    if (this.state.status !== "battle") return
+    if (this.state.currentPhase !== "selecting") return
+    
+    const currentUnit = this.battleEngine.getCurrentUnit()
+    if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
+      client.send("error", { message: "Not your turn!" })
+      return
+    }
+    
+    // Store selected action and move to targeting phase
+    this.state.selectedAction = data.action
+    this.state.currentPhase = "targeting"
+    this.state.phaseTimer = this.getPhaseTimeout("targeting")
+    
+    // Notify all clients
+    this.broadcast("phase-change", {
+      phase: "targeting",
+      action: data.action,
+      unitId: currentUnit.id
+    })
+  }
+  
+  handleTargetPhase(client: Client, data: { targetId: string }) {
+    if (this.state.status !== "battle") return
+    if (this.state.currentPhase !== "targeting") return
+    
+    const currentUnit = this.battleEngine.getCurrentUnit()
+    if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
+      client.send("error", { message: "Not your turn!" })
+      return
+    }
+    
+    // Store target and move to timing phase
+    this.state.targetPreview = data.targetId
+    this.state.currentPhase = "timing"
+    this.state.phaseTimer = this.getPhaseTimeout("timing")
+    
+    // Notify all clients
+    this.broadcast("phase-change", {
+      phase: "timing",
+      targetId: data.targetId,
+      unitId: currentUnit.id
+    })
   }
 }

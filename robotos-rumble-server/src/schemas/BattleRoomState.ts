@@ -45,6 +45,12 @@ export class BattleRoomState extends Schema {
   @type("number") turnTimer: number = 0
   @type("number") turnNumber: number = 0
   
+  // Phase tracking for multi-step actions
+  @type("string") currentPhase: string = "selecting" // selecting, targeting, timing, executing
+  @type("number") phaseTimer: number = 0 // Timer for current phase
+  @type("string") selectedAction: string = "" // attack, ability, switch
+  @type("string") targetPreview: string = "" // Unit ID being targeted (for preview)
+  
   // Turn order
   @type([ "string" ]) turnOrder = new ArraySchema<string>() // unit ids in turn order
   @type("number") turnIndex: number = 0

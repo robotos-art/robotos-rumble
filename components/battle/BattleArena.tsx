@@ -17,7 +17,10 @@ interface BattleArenaProps {
   enemyTeam?: BattleUnitV3[];
   isPlayerTurn?: boolean;
   serverTimer?: number;
+  currentPhase?: string;
   onAction?: (action: any) => void;
+  onActionPhase?: (action: string) => void;
+  onTargetPhase?: (targetId: string) => void;
   onTargetPreview?: (targetId: string) => void;
   roomState?: any;
   serverTurnEvent?: any;
@@ -31,7 +34,10 @@ export default function BattleArena({
   enemyTeam: providedEnemyTeam,
   isPlayerTurn,
   serverTimer,
+  currentPhase,
   onAction,
+  onActionPhase,
+  onTargetPhase,
   onTargetPreview,
   roomState,
   serverTurnEvent,
@@ -115,7 +121,10 @@ export default function BattleArena({
       isPvP={isPvP}
       isPlayerTurn={isPlayerTurn}
       serverTimer={serverTimer}
+      currentPhase={currentPhase}
       onAction={onAction}
+      onActionPhase={onActionPhase}
+      onTargetPhase={onTargetPhase}
       onTargetPreview={onTargetPreview}
       serverBattleResult={roomState}
       serverTurnEvent={serverTurnEvent}

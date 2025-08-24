@@ -39,13 +39,19 @@ interface BattleArenaV3Props {
   isPvP?: boolean;
   isPlayerTurn?: boolean;
   serverTimer?: number;
+  currentPhase?: string;
   onAction?: (action: any) => void;
+  onActionPhase?: (action: string) => void;
+  onTargetPhase?: (targetId: string) => void;
   onTargetPreview?: (targetId: string) => void;
   serverBattleResult?: any;  // Direct result from server
   serverTurnEvent?: {
     unitId: string;
     playerId: string;
     timer: number;
+    phase?: string;
+    action?: string;
+    targetId?: string;
   };
   opponentTargetPreview?: string | null;
 }
@@ -88,7 +94,10 @@ export default function BattleArenaV3({
   isPvP = false,
   isPlayerTurn: serverIsPlayerTurn,
   serverTimer,
+  currentPhase: serverPhase,
   onAction: onPvPAction,
+  onActionPhase,
+  onTargetPhase,
   onTargetPreview,
   serverBattleResult,
   serverTurnEvent,
@@ -128,7 +137,11 @@ export default function BattleArenaV3({
   const [targetUnit, setTargetUnit] = useState<BattleUnitV3 | null>(null);
 
   // UI state
-  const [phase, setPhase] = useState<BattlePhase>("waiting");
+  const [localPhase, setLocalPhase] = useState<BattlePhase>("waiting");
+  // In PvP mode, use server's phase state, otherwise manage locally
+  const phase = isPvP && serverPhase ? (serverPhase as BattlePhase) : localPhase;
+  const setPhase = isPvP ? () => {} : setLocalPhase;
+  
   // In PvP mode, use server's turn state, otherwise manage locally
   const [localIsPlayerTurn, setLocalIsPlayerTurn] = useState(false);
   const isPlayerTurn = isPvP
@@ -305,9 +318,25 @@ export default function BattleArenaV3({
   // Handle server turn events in PvP
   useEffect(() => {
     if (serverTurnEvent && isPvP) {
-      const { unitId, playerId, timer } = serverTurnEvent;
+      const { unitId, playerId, timer, phase: eventPhase, action, targetId } = serverTurnEvent;
       
-      console.log("[BattleArena] Server turn event:", { unitId, playerId, timer, phase, actionCountdown });
+      console.log("[BattleArena] Server turn event:", { unitId, playerId, timer, eventPhase, action, targetId });
+      
+      // Handle phase-specific events
+      if (eventPhase) {
+        // Server is telling us about a phase change
+        if (eventPhase === "targeting" && action) {
+          setPendingAction({ type: action as "attack" | "ability" });
+        }
+        if (eventPhase === "timing" && targetId) {
+          const target = [...playerTeam, ...enemyTeam].find(u => u.id === targetId);
+          if (target) {
+            setTargetUnit(target);
+            setAttackingUnitId(unitId);
+            setDefendingUnitId(targetId);
+          }
+        }
+      }
       
       // Find the unit
       const unit = [...playerTeam, ...enemyTeam].find(u => u.id === unitId);
@@ -724,6 +753,14 @@ export default function BattleArenaV3({
 
   const handleAttack = useCallback(() => {
     console.log("[BattleArena] handleAttack called, current phase:", phase);
+    
+    // In PvP mode, send action phase message to server
+    if (isPvP && onActionPhase) {
+      onActionPhase("attack");
+      return; // Server will handle phase transition
+    }
+    
+    // Local handling for non-PvP
     setPendingAction({ type: "attack" });
     setPhase("selecting-target");
     setTargetCountdown(timerDuration);

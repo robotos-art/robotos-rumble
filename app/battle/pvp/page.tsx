@@ -40,6 +40,7 @@ export default function PvPLobby() {
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
   const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
   const [opponentTargetPreview, setOpponentTargetPreview] = useState<string | null>(null);
+  const [currentPhase, setCurrentPhase] = useState<string>("selecting");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Settings mismatch handling
@@ -398,6 +399,20 @@ export default function PvPLobby() {
         console.log("[PvP Client] Target preview received:", data);
         setOpponentTargetPreview(data.targetId);
       });
+      
+      // Handle phase changes from server
+      joinedRoom.onMessage("phase-change", (data) => {
+        console.log("[PvP Client] Phase change received:", data);
+        setCurrentPhase(data.phase);
+        // Pass phase change to BattleArena through server turn event
+        setServerTurnEvent((prev: any) => ({
+          ...prev,
+          phase: data.phase,
+          action: data.action,
+          targetId: data.targetId,
+          unitId: data.unitId
+        }));
+      });
 
       joinedRoom.onMessage("battle-start", (message) => {
         console.log("[PvP Client] Battle start message:", message);
@@ -496,7 +511,7 @@ export default function PvPLobby() {
         <BattleArena
           playerTeam={playerTeam}
           enemyTeam={enemyTeam}
-          onBattleEnd={(won) => {
+          onBattleEnd={() => {
             // Reset state
             setBattleStarted(false);
             setStatus("idle");
@@ -508,14 +523,27 @@ export default function PvPLobby() {
             }
           }}
           isPvP={true}
-          serverTimer={room?.state?.turnTimer}
+          serverTimer={room?.state?.phaseTimer || room?.state?.turnTimer}
           isPlayerTurn={isPlayerTurn}
+          currentPhase={currentPhase}
           onAction={(action) => {
             console.log("[PvP Client] Sending action:", action);
             if (room) {
               room.send("action", action);
             } else {
               console.error("[PvP Client] No room connection!");
+            }
+          }}
+          onActionPhase={(action: string) => {
+            console.log("[PvP Client] Sending action phase:", action);
+            if (room) {
+              room.send("action-phase", { action });
+            }
+          }}
+          onTargetPhase={(targetId: string) => {
+            console.log("[PvP Client] Sending target phase:", targetId);
+            if (room) {
+              room.send("target-phase", { targetId });
             }
           }}
           onTargetPreview={(targetId) => {
