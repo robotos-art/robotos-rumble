@@ -96,7 +96,11 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
         this.state.speed = prefs[0].speed;
         this.state.timerDuration = this.state.speed === 'speedy' ? 5 : 10;
         this.state.status = 'ready';
-        this.broadcast('match-ready', { message: 'Both players connected! Send your teams.' });
+        this.broadcast('match-ready', { 
+          message: 'Both players connected! Send your teams.',
+          player1: Array.from(this.state.players.values())[0].simpleId,
+          player2: Array.from(this.state.players.values())[1].simpleId
+        });
       } else {
         // Settings don't match - need negotiation
         const players = Array.from(this.state.players.entries());
@@ -194,8 +198,14 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     }
 
     // Validate it's the player's turn
+    const player = this.state.players.get(client.sessionId);
+    if (!player) {
+      client.send('error', { message: 'Player not found!' });
+      return;
+    }
+    
     const currentUnit = this.battleEngine.getCurrentUnit();
-    if (!currentUnit || currentUnit.ownerId !== client.sessionId) {
+    if (!currentUnit || currentUnit.ownerId !== player.simpleId) {
       client.send('error', { message: 'Not your turn!' });
       return;
     }
@@ -213,7 +223,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
 
     // Create battle action
     const battleAction = new BattleAction();
-    battleAction.playerId = client.sessionId;
+    battleAction.playerId = player.simpleId;
     battleAction.type = action.type;
     battleAction.sourceId = action.sourceId;
     battleAction.targetId = action.targetId;
@@ -223,7 +233,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
 
     // Execute action on server
     const result = this.battleEngine.executeAction({
-      playerId: client.sessionId,
+      playerId: player.simpleId,
       type: action.type,
       sourceId: action.sourceId,
       targetId: action.targetId,
@@ -304,8 +314,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       console.log(`[PvP Server] Team 1 unit ${i} stats:`, unit.stats);
       return {
         ...unit,
-        id: `${player1.id}:${unit.id}`, // Namespace unit ID with owner
-        ownerId: player1.id,
+        id: `${player1.simpleId}:${unit.id}`, // Namespace unit ID with simple player ID
+        ownerId: player1.simpleId, // Use simple ID for turn management
         position: i,
         // Ensure stats are passed through
         stats: unit.stats || {
@@ -323,8 +333,8 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       console.log(`[PvP Server] Team 2 unit ${i} stats:`, unit.stats);
       return {
         ...unit,
-        id: `${player2.id}:${unit.id}`, // Namespace unit ID with owner
-        ownerId: player2.id,
+        id: `${player2.simpleId}:${unit.id}`, // Namespace unit ID with simple player ID
+        ownerId: player2.simpleId, // Use simple ID for turn management
         position: i + team1.length,
         // Ensure stats are passed through
         stats: unit.stats || {
@@ -504,15 +514,19 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
     this.state.turnIndex = engineState.turnIndex;
   }
 
-  private endBattle(winnerId: string) {
+  private endBattle(winnerSimpleId: string) {
     this.state.status = 'ended';
-    this.state.winner = winnerId;
-
-    // Find loser
+    
+    // Map simple ID back to session ID for proper tracking
     const players = Array.from(this.state.players.values());
-    const loser = players.find((p) => p.id !== winnerId);
+    const winner = players.find((p) => p.simpleId === winnerSimpleId);
+    const loser = players.find((p) => p.simpleId !== winnerSimpleId);
+    
+    if (winner) {
+      this.state.winner = winner.id; // Use session ID for compatibility
+    }
     if (loser) {
-      this.state.loser = loser.id;
+      this.state.loser = loser.id; // Use session ID for compatibility
     }
 
     // Clear all timers
@@ -537,7 +551,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       const players = Array.from(this.state.players.values());
       const remainingPlayer = players.find((p) => p.id !== playerId);
       if (remainingPlayer) {
-        this.endBattle(remainingPlayer.id);
+        this.endBattle(remainingPlayer.simpleId); // Use simple ID
       }
     } else {
       // Remove player and reset room
@@ -593,22 +607,24 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
 
   private handleForfeit(client: Client) {
     // Find the other player as the winner
-    let winnerId = '';
-    this.state.players.forEach((player, id) => {
-      if (id !== client.sessionId) {
-        winnerId = id;
+    const forfeitingPlayer = this.state.players.get(client.sessionId);
+    let winnerSimpleId = '';
+    
+    this.state.players.forEach((player) => {
+      if (player.id !== client.sessionId) {
+        winnerSimpleId = player.simpleId;
       }
     });
 
     // Notify all clients about the forfeit
     this.broadcast('player-forfeited', {
       playerId: client.sessionId,
-      playerName: this.state.players.get(client.sessionId)?.name || 'Player',
+      playerName: forfeitingPlayer?.name || 'Player',
     });
 
     // End the battle with the other player as winner
-    if (winnerId) {
-      this.endBattle(winnerId);
+    if (winnerSimpleId) {
+      this.endBattle(winnerSimpleId);
     }
   }
 

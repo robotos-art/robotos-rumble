@@ -29,6 +29,7 @@ export default function PvPBattlePage() {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [serverBattleResult, setServerBattleResult] = useState<any>(null);
   const [serverTurnEvent, setServerTurnEvent] = useState<any>(null);
+  const [mySimpleId, setMySimpleId] = useState<string>(''); // Track our simple ID
 
   useEffect(() => {
     if (!roomId || !address) {
@@ -74,6 +75,12 @@ export default function PvPBattlePage() {
 
       // Send ready signal
       joinedRoom.send('ready');
+      
+      // Listen for our simple player ID assignment
+      joinedRoom.onMessage('player-id', (data) => {
+        console.log('[PvP Client] Received simple ID:', data.simpleId);
+        setMySimpleId(data.simpleId);
+      });
 
       // Set up room event listeners
       joinedRoom.onStateChange((state: any) => {
@@ -103,7 +110,8 @@ export default function PvPBattlePage() {
           timer: data.timer,
         });
 
-        if (data.playerId === joinedRoom.sessionId) {
+        // Use simple ID for turn determination
+        if (data.playerId === mySimpleId) {
           setIsPlayerTurn(true);
           gameSounds.play('turnStart');
           // Show notification if tab is not visible

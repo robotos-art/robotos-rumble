@@ -2,6 +2,7 @@ import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 
 export class Player extends Schema {
   @type('string') id: string = '';
+  @type('string') simpleId: string = ''; // Simple ID like 'player1' or 'player2'
   @type('string') address: string = '';
   @type('string') name: string = '';
   @type('boolean') ready: boolean = false;

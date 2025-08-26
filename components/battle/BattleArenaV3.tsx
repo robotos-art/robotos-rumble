@@ -342,9 +342,9 @@ export default function BattleArenaV3({
 
       setCurrentUnit(unit);
 
-      // Determine if it's our turn by checking if the active unit belongs to our team
-      // Unit IDs are namespaced with sessionId, so check if unit is in playerTeam
-      const isOurTurn = playerTeam.some((u) => u.id === unitId);
+      // Use the isPlayerTurn prop which is already correctly set from server
+      // This ensures proper turn alternation in PvP
+      const isOurTurn = isPlayerTurn;
 
       if (isOurTurn) {
         // Our turn - show action selection
