@@ -7,7 +7,7 @@ import { Button } from '../../../components/ui/button';
 import { Card } from '../../../components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { gameSounds } from '../../../lib/sounds/gameSounds';
-import { BattleUnitV3 } from '../../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../../shared/game-engine/TraitProcessorV3';
 import BattleArena from '../../../components/battle/BattleArena';
 import { GameHeader } from '../../../components/shared/GameHeader';
 import { PageLayout } from '../../../components/shared/PageLayout';

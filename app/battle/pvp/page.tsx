@@ -12,7 +12,7 @@ import { Users, Swords, Clock, Search, Shield, Bell, Edit } from 'lucide-react';
 import { gameSounds } from '../../../lib/sounds/gameSounds';
 import { BattleNotifications } from '../../../lib/notifications/battleNotifications';
 import BattleArena from '../../../components/battle/BattleArena';
-import { BattleUnitV3 } from '../../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../../shared/game-engine/TraitProcessorV3';
 import { UnitLightbox } from '../../../components/team-builder/UnitLightbox';
 import { MatchProposalModal } from '../../../components/battle/MatchProposalModal';
 

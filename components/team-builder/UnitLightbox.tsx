@@ -14,7 +14,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3, TraitProcessorV3 } from '../../shared/game-engine/TraitProcessorV3';
 import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface UnitLightboxProps {

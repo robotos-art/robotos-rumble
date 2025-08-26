@@ -6,7 +6,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { cn } from '../../lib/utils';
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
 import { ChevronLeft, Shield, Zap, Heart, Clock, Target } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Image from 'next/image';

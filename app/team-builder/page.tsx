@@ -19,7 +19,7 @@ import {
 } from '../../components/ui/tooltip';
 import { WalletConnect } from '../../components/shared/WalletConnect';
 import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext';
-import { TraitProcessorV3, BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { TraitProcessorV3, BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
 import {
   ArrowLeft,
   Shield,

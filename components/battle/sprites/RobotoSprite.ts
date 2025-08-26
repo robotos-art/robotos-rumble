@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { BattleUnitV3, TraitProcessorV3 } from '../../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3, TraitProcessorV3 } from '../../../shared/game-engine/TraitProcessorV3';
 
 export class RobotoSprite extends Phaser.GameObjects.Container {
   private unit: BattleUnitV3;

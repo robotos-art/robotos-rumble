@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
 
 interface PhaserGameProps {
   playerTeam: BattleUnitV3[];

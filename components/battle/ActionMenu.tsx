@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
-import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3, TraitProcessorV3 } from '../../shared/game-engine/TraitProcessorV3';
 import { gameSounds } from '../../lib/sounds/gameSounds';
 import { Sword, Sparkles, Repeat } from 'lucide-react';
 

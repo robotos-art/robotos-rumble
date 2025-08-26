@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3, TraitProcessorV3 } from '../../shared/game-engine/TraitProcessorV3';
 import BattleArenaV3 from './BattleArenaV3';
 import sampleRobotoDatabase from '../../lib/data/sample-roboto-database.json';
 import type { BattleSettings } from '../../app/battle/page';

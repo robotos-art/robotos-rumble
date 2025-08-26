@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { TraitProcessorV3 } from '../../shared/game-engine/TraitProcessorV3';
 import { gameSounds } from '../../lib/sounds/gameSounds';
 
 type Element = 'SURGE' | 'CODE' | 'METAL' | 'GLITCH' | 'NEUTRAL';

@@ -1,10 +1,10 @@
 import { Room, Client } from '@colyseus/core';
 import { BattleRoomState, Player, BattleUnit, BattleAction } from '../schemas/BattleRoomState';
-import { BattleEngineServer } from '../game/BattleEngineServer';
+import { BattleEngineAdapter } from '../game/BattleEngineAdapter';
 
 export class PvPBattleRoom extends Room<BattleRoomState> {
   maxClients = 2;
-  private battleEngine: BattleEngineServer = new BattleEngineServer();
+  private battleEngine: BattleEngineAdapter = new BattleEngineAdapter();
   private actionTimers: Map<string, NodeJS.Timeout> = new Map();
   private playerPreferences: Map<string, { teamSize: number; speed: string }> = new Map();
   private settingsAgreed: Map<string, boolean> = new Map();
@@ -452,7 +452,7 @@ export class PvPBattleRoom extends Room<BattleRoomState> {
       console.log(`[PvP Server] No next unit - turn order needs recalculation`);
     }
 
-    // Build and broadcast result (BattleEngineServer returns simplified result)
+    // Build and broadcast result (BattleEngineAdapter returns unified result)
     const actionResult = {
       damage: result.damage || 0,
       critical: false, // Server doesn't track critical separately

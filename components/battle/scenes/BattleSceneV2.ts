@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
-import { BattleUnitV3 } from '../../../lib/game-engine/TraitProcessorV3';
-import { BattleEngineV3 } from '../../../lib/game-engine/BattleEngineV3';
+import { BattleUnitV3 } from '../../../shared/game-engine/TraitProcessorV3';
+import { BattleEngineV3 } from '../../../shared/game-engine/BattleEngineV3';
 import { TimingSystem } from '../systems/TimingSystem';
 import { BattleUI } from '../ui/BattleUI';
 import { RobotoSprite } from '../sprites/RobotoSprite';

@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "description": "Maps real NFT trait combinations to abilities",
+  "combinations": [
+    {
+      "id": "electron_surge",
+      "name": "Electron Surge",
+      "element": "SURGE",
+      "requirements": {
+        "Backpack": "Electron Battery"
+      },
+      "description": "Channel stored electricity into attacks"
+    },
+    {
+      "id": "katana_strike",
+      "name": "Katana Strike",
+      "element": "METAL",
+      "requirements": {
+        "Backpack": "Katanas"
+      },
+      "description": "Swift blade attacks"
+    },
+    {
+      "id": "compressor_blast",
+      "name": "Compressor Blast",
+      "element": "SURGE",
+      "requirements": {
+        "Arm": "Compressor"
+      },
+      "description": "Compressed air burst attack"
+    },
+    {
+      "id": "cruncher_grip",
+      "name": "Cruncher Grip",
+      "element": "METAL",
+      "requirements": {
+        "Arm": "Cruncher"
+      },
+      "description": "Crushing physical attack"
+    },
+    {
+      "id": "saw_blade_fury",
+      "name": "Saw Blade Fury",
+      "element": "METAL",
+      "requirements": {
+        "Backpack": "Saw"
+      },
+      "description": "Spinning saw attack"
+    },
+    {
+      "id": "jetpack_assault",
+      "name": "Jetpack Assault",
+      "element": "SURGE",
+      "requirements": {
+        "Backpack": "Jetpack"
+      },
+      "description": "Aerial energy attack"
+    },
+    {
+      "id": "mullet_power",
+      "name": "Mullet Power",
+      "element": "GLITCH",
+      "requirements": {
+        "Helmet": "Mullet"
+      },
+      "description": "The legendary power of the Mulletos"
+    },
+    {
+      "id": "cyborg_superiority",
+      "name": "Cyborg Superiority",
+      "element": "CODE",
+      "requirements": {
+        "Robot Type": "Roboto Cyborgo"
+      },
+      "description": "Upper class precision strikes"
+    },
+    {
+      "id": "punk_rebellion",
+      "name": "Punk Rebellion",
+      "element": "GLITCH",
+      "requirements": {
+        "Top": "Mohawk",
+        "Body": "Punk Jacket"
+      },
+      "description": "Anarchy in the mainframe"
+    },
+    {
+      "id": "pirate_plunder",
+      "name": "Pirate Plunder",
+      "element": "METAL",
+      "requirements": {
+        "Top": "Pirate Hat"
+      },
+      "description": "Steal enemy buffs and energy"
+    },
+    {
+      "id": "computo_overclock",
+      "name": "Computo Overclock",
+      "element": "CODE",
+      "requirements": {
+        "Robot Type": "Roboto Computo"
+      },
+      "description": "Legendary computational supremacy"
+    },
+    {
+      "id": "war_veteran_rage",
+      "name": "War Veteran Rage",
+      "element": "METAL",
+      "requirements": {
+        "Body": "Zapata"
+      },
+      "description": "Survivor of the human-roboto war"
+    },
+    {
+      "id": "golden_aegis",
+      "name": "Golden Aegis",
+      "element": "SPECIAL",
+      "requirements": {
+        "Special": "Golden"
+      },
+      "description": "Legendary golden protection"
+    },
+    {
+      "id": "ancient_protocol",
+      "name": "Ancient Protocol",
+      "element": "SPECIAL",
+      "requirements": {
+        "Special": "Ancient Marking"
+      },
+      "description": "Activate primordial roboto powers"
+    }
+  ]
+}

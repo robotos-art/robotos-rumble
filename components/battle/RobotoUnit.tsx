@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { cn } from '../../lib/utils';
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
 
 interface RobotoUnitProps {
   unit: BattleUnitV3;

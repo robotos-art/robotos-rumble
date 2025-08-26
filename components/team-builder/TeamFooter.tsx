@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
 import { gameSounds } from '../../lib/sounds/gameSounds';
 import type { BattleSettings } from '../../app/battle/page';
 

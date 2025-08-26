@@ -1,0 +1,212 @@
+[
+  {
+    "tokenId": "42",
+    "name": "Roboto #42",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/42/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Jetpack Shark" },
+      { "trait_type": "Bicep", "value": "Muscular" },
+      { "trait_type": "Chest", "value": "Bandolier" },
+      { "trait_type": "Forearm", "value": "Gauntlet" },
+      { "trait_type": "Head", "value": "Cap Backwards" },
+      { "trait_type": "Legs", "value": "Ripped Jeans" },
+      { "trait_type": "Visor", "value": "Cool Shades" }
+    ]
+  },
+  {
+    "tokenId": "99",
+    "name": "Roboto #99",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/99/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Turtle Shell" },
+      { "trait_type": "Bicep", "value": "Clamps" },
+      { "trait_type": "Chest", "value": "Portal" },
+      { "trait_type": "Forearm", "value": "Gold" },
+      { "trait_type": "Head", "value": "Helmet" },
+      { "trait_type": "Legs", "value": "Wheels" },
+      { "trait_type": "Visor", "value": "3D Glasses" }
+    ]
+  },
+  {
+    "tokenId": "123",
+    "name": "Roboto #123",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/123/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Hologram" },
+      { "trait_type": "Bicep", "value": "Detached" },
+      { "trait_type": "Chest", "value": "Bomb" },
+      { "trait_type": "Forearm", "value": "Titanium" },
+      { "trait_type": "Head", "value": "Cyborgo" },
+      { "trait_type": "Legs", "value": "Spring" },
+      { "trait_type": "Visor", "value": "Hearts" }
+    ]
+  },
+  {
+    "tokenId": "256",
+    "name": "Roboto #256",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/256/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Rocket Engine" },
+      { "trait_type": "Bicep", "value": "Pistons" },
+      { "trait_type": "Chest", "value": "Chain" },
+      { "trait_type": "Forearm", "value": "Crab Arm" },
+      { "trait_type": "Head", "value": "TV Static" },
+      { "trait_type": "Legs", "value": "Rocket Boots" },
+      { "trait_type": "Visor", "value": "Angry" }
+    ]
+  },
+  {
+    "tokenId": "512",
+    "name": "Roboto #512",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/512/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "AI" },
+      { "trait_type": "Bicep", "value": "Shoulder Pads Spiked" },
+      { "trait_type": "Chest", "value": "Screen Error" },
+      { "trait_type": "Forearm", "value": "Sledgehammer" },
+      { "trait_type": "Head", "value": "Brain" },
+      { "trait_type": "Legs", "value": "Pegleg" },
+      { "trait_type": "Visor", "value": "Monocle" }
+    ]
+  },
+  {
+    "tokenId": "777",
+    "name": "Roboto #777",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/777/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Amplifier" },
+      { "trait_type": "Bicep", "value": "Thunder Bolts" },
+      { "trait_type": "Chest", "value": "Voltage" },
+      { "trait_type": "Forearm", "value": "Thunder Fist" },
+      { "trait_type": "Head", "value": "Plasma Brain" },
+      { "trait_type": "Legs", "value": "Lightning" },
+      { "trait_type": "Visor", "value": "Lightning" }
+    ]
+  },
+  {
+    "tokenId": "888",
+    "name": "Roboto #888",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/888/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Wings Butterfly" },
+      { "trait_type": "Bicep", "value": "Wires Exposed" },
+      { "trait_type": "Chest", "value": "Ancient Relic" },
+      { "trait_type": "Forearm", "value": "Clamps" },
+      { "trait_type": "Head", "value": "Mullet" },
+      { "trait_type": "Legs", "value": "Flares" },
+      { "trait_type": "Visor", "value": "Cyclops" }
+    ]
+  },
+  {
+    "tokenId": "1000",
+    "name": "Roboto #1000",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/1000/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Glitch" },
+      { "trait_type": "Bicep", "value": "Numbers" },
+      { "trait_type": "Chest", "value": "Core Reactor" },
+      { "trait_type": "Forearm", "value": "Hacker Tool" },
+      { "trait_type": "Head", "value": "Hoodie" },
+      { "trait_type": "Legs", "value": "Bell Bottoms" },
+      { "trait_type": "Visor", "value": "Laser" }
+    ]
+  },
+  {
+    "tokenId": "1234",
+    "name": "Roboto #1234",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/1234/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Shield Generator" },
+      { "trait_type": "Bicep", "value": "Blaster" },
+      { "trait_type": "Chest", "value": "Heart" },
+      { "trait_type": "Forearm", "value": "Shield" },
+      { "trait_type": "Head", "value": "Knight" },
+      { "trait_type": "Legs", "value": "Armored" },
+      { "trait_type": "Visor", "value": "Knight" }
+    ]
+  },
+  {
+    "tokenId": "1500",
+    "name": "Roboto #1500",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/1500/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Tentacles" },
+      { "trait_type": "Bicep", "value": "Tentacle" },
+      { "trait_type": "Chest", "value": "Champ Belt" },
+      { "trait_type": "Forearm", "value": "Boxing Gloves" },
+      { "trait_type": "Head", "value": "Boxing" },
+      { "trait_type": "Legs", "value": "Trunks" },
+      { "trait_type": "Visor", "value": "X" }
+    ]
+  },
+  {
+    "tokenId": "2000",
+    "name": "Roboto #2000",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/2000/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Fire" },
+      { "trait_type": "Bicep", "value": "Fire" },
+      { "trait_type": "Chest", "value": "Fire" },
+      { "trait_type": "Forearm", "value": "Fire" },
+      { "trait_type": "Head", "value": "Fire Skull" },
+      { "trait_type": "Legs", "value": "Fire" },
+      { "trait_type": "Visor", "value": "Fire" }
+    ]
+  },
+  {
+    "tokenId": "2500",
+    "name": "Roboto #2500",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/2500/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Ice" },
+      { "trait_type": "Bicep", "value": "Ice Spikes" },
+      { "trait_type": "Chest", "value": "Frozen Core" },
+      { "trait_type": "Forearm", "value": "Ice" },
+      { "trait_type": "Head", "value": "Beanie" },
+      { "trait_type": "Legs", "value": "Ski" },
+      { "trait_type": "Visor", "value": "Ski Goggles" }
+    ]
+  },
+  {
+    "tokenId": "3000",
+    "name": "Roboto #3000",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/3000/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Gold Chains" },
+      { "trait_type": "Bicep", "value": "Gold" },
+      { "trait_type": "Chest", "value": "Gold Chain" },
+      { "trait_type": "Forearm", "value": "Gold" },
+      { "trait_type": "Head", "value": "Crown" },
+      { "trait_type": "Legs", "value": "Gold Pants" },
+      { "trait_type": "Visor", "value": "Gold Shades" }
+    ]
+  },
+  {
+    "tokenId": "3500",
+    "name": "Roboto #3500",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/3500/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "School Bag" },
+      { "trait_type": "Bicep", "value": "Basic" },
+      { "trait_type": "Chest", "value": "Tie" },
+      { "trait_type": "Forearm", "value": "Basic" },
+      { "trait_type": "Head", "value": "Basic" },
+      { "trait_type": "Legs", "value": "Pants" },
+      { "trait_type": "Visor", "value": "Glasses" }
+    ]
+  },
+  {
+    "tokenId": "4000",
+    "name": "Roboto #4000",
+    "image": "https://d2lp2vbc3umjmr.cloudfront.net/4000/roboto-transparent.png",
+    "attributes": [
+      { "trait_type": "Backpack", "value": "Swords" },
+      { "trait_type": "Bicep", "value": "Samurai" },
+      { "trait_type": "Chest", "value": "Samurai" },
+      { "trait_type": "Forearm", "value": "Katana" },
+      { "trait_type": "Head", "value": "Oni Mask" },
+      { "trait_type": "Legs", "value": "Hakama" },
+      { "trait_type": "Visor", "value": "Red Eyes" }
+    ]
+  }
+]
