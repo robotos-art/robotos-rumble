@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "description": "All abilities in Roboto Rumble with detailed stats",
-  
+
   "basic_abilities": {
     "spark_shot": {
       "name": "Spark Shot",
@@ -79,7 +79,7 @@
       "effects": []
     }
   },
-  
+
   "real_trait_abilities": {
     "electron_surge": {
       "name": "Electron Surge",
@@ -304,7 +304,7 @@
       "animation": "war_rage"
     }
   },
-  
+
   "surge_abilities": {
     "synchronized_devastation": {
       "name": "Synchronized Devastation",
@@ -373,7 +373,7 @@
       "animation": "lightning_field"
     }
   },
-  
+
   "code_abilities": {
     "hack_protocol": {
       "name": "Hack Protocol",
@@ -435,7 +435,7 @@
       "animation": "reboot_sequence"
     }
   },
-  
+
   "metal_abilities": {
     "fortress_mode": {
       "name": "Fortress Mode",
@@ -499,7 +499,7 @@
       "animation": "repair_beam"
     }
   },
-  
+
   "glitch_abilities": {
     "system_crash": {
       "name": "System Crash",
@@ -561,7 +561,7 @@
       "animation": "corruption_pulse"
     }
   },
-  
+
   "legendary_abilities": {
     "genesis_protocol": {
       "name": "Genesis Protocol",
@@ -636,10 +636,10 @@
       }
     }
   },
-  
+
   "robopet_abilities": {
     "_description": "Robopet-specific abilities with unique BOND and WILD elements",
-    
+
     "quick_reflexes": {
       "name": "Quick Reflexes",
       "element": "SURGE",
@@ -651,7 +651,7 @@
         "cooldown": 3
       },
       "targeting": "single_ally",
-      "effects": {"evasion": 30, "speed": 20}
+      "effects": { "evasion": 30, "speed": 20 }
     },
     "nine_lives": {
       "name": "Nine Lives",
@@ -681,7 +681,7 @@
       "effects": ["always_goes_first", "bleed"],
       "timingType": "spinner"
     },
-    
+
     "loyal_guard": {
       "name": "Loyal Guard",
       "element": "METAL",
@@ -721,7 +721,7 @@
       "effects": ["remove_debuffs", "morale_boost", "fear_immunity"],
       "timingType": "charge"
     },
-    
+
     "aerial_recon": {
       "name": "Aerial Recon",
       "element": "CODE",
@@ -763,7 +763,7 @@
       "effects": ["ignore_defense_50", "stun_chance"],
       "timingType": "spinner"
     },
-    
+
     "venom_corruption": {
       "name": "Venom Corruption",
       "element": "GLITCH",
@@ -806,7 +806,7 @@
       "effects": ["immobilize", "damage_over_time", "energy_drain"],
       "timingType": "charge"
     },
-    
+
     "harmony_pulse": {
       "name": "Harmony Pulse",
       "element": "BOND",
@@ -863,7 +863,7 @@
       "timingType": "spinner"
     }
   },
-  
+
   "effect_definitions": {
     "pierce_defense": "Ignores 50% of target's defense",
     "overcharge": "25% chance to shock target",

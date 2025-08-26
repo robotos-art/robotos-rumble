@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { StorageService } from "../../../../../lib/storage/storage-service";
-import { normalizeAddress } from "../../../../../lib/utils/address";
+import { NextRequest, NextResponse } from 'next/server';
+import { StorageService } from '../../../../../lib/storage/storage-service';
+import { normalizeAddress } from '../../../../../lib/utils/address';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 const storage = new StorageService();
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { address: string } },
-) {
+export async function POST(request: NextRequest, { params }: { params: { address: string } }) {
   try {
     const normalizedAddress = normalizeAddress(params.address);
 
@@ -19,10 +16,10 @@ export async function POST(
     if (!battles || battles.length === 0) {
       return NextResponse.json(
         {
-          error: "No battle history found",
+          error: 'No battle history found',
           address: normalizedAddress,
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -41,8 +38,7 @@ export async function POST(
 
     // Process battles in chronological order
     const sortedBattles = battles.sort(
-      (a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
     for (const battle of sortedBattles) {
@@ -50,7 +46,7 @@ export async function POST(
       totalDamageReceived += battle.damageReceived || 0;
       totalDuration += battle.duration || 0;
 
-      if (battle.result === "victory") {
+      if (battle.result === 'victory') {
         wins++;
         currentStreak++;
         bestStreak = Math.max(bestStreak, currentStreak);
@@ -74,25 +70,22 @@ export async function POST(
       bestWinStreak: bestStreak,
       totalDamageDealt,
       totalDamageReceived,
-      favoriteElement:
-        Object.entries(elementCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||
-        null,
+      favoriteElement: Object.entries(elementCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || null,
       favoriteRoboto: null,
-      averageBattleDuration:
-        battles.length > 0 ? Math.round(totalDuration / battles.length) : 0,
+      averageBattleDuration: battles.length > 0 ? Math.round(totalDuration / battles.length) : 0,
     };
 
     // Check for achievements based on rebuilt stats
     const achievements: string[] = [];
 
-    if (wins >= 1) achievements.push("first_blood");
-    if (bestStreak >= 3) achievements.push("winning_streak_3");
-    if (bestStreak >= 5) achievements.push("winning_streak_5");
-    if (bestStreak >= 10) achievements.push("winning_streak_10");
-    if (totalDamageDealt >= 500) achievements.push("damage_dealer_500");
-    if (totalDamageDealt >= 2000) achievements.push("damage_dealer_2000");
-    if (totalDamageDealt >= 5000) achievements.push("damage_dealer_5000");
-    if (totalDamageDealt >= 10000) achievements.push("damage_dealer_10000");
+    if (wins >= 1) achievements.push('first_blood');
+    if (bestStreak >= 3) achievements.push('winning_streak_3');
+    if (bestStreak >= 5) achievements.push('winning_streak_5');
+    if (bestStreak >= 10) achievements.push('winning_streak_10');
+    if (totalDamageDealt >= 500) achievements.push('damage_dealer_500');
+    if (totalDamageDealt >= 2000) achievements.push('damage_dealer_2000');
+    if (totalDamageDealt >= 5000) achievements.push('damage_dealer_5000');
+    if (totalDamageDealt >= 10000) achievements.push('damage_dealer_10000');
 
     profile.achievements = achievements;
 
@@ -105,10 +98,7 @@ export async function POST(
       profile,
     });
   } catch (error) {
-    console.error("Error rebuilding profile:", error);
-    return NextResponse.json(
-      { error: "Failed to rebuild profile" },
-      { status: 500 },
-    );
+    console.error('Error rebuilding profile:', error);
+    return NextResponse.json({ error: 'Failed to rebuild profile' }, { status: 500 });
   }
 }

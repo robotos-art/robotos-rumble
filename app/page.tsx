@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Button } from "../components/ui/button";
-import { Swords, Trophy, Users, User } from "lucide-react";
-import { gameSounds } from "../lib/sounds/gameSounds";
-import { GameHeader } from "../components/shared/GameHeader";
-import { PageLayout } from "../components/shared/PageLayout";
-import { useAccount } from "wagmi";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Button } from '../components/ui/button';
+import { Swords, Trophy, Users, User } from 'lucide-react';
+import { gameSounds } from '../lib/sounds/gameSounds';
+import { GameHeader } from '../components/shared/GameHeader';
+import { PageLayout } from '../components/shared/PageLayout';
+import { useAccount } from 'wagmi';
 
 export default function Home() {
-  const [bootText, setBootText] = useState("");
+  const [bootText, setBootText] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const { isConnected } = useAccount();
 
@@ -42,13 +42,13 @@ PRESS ANY KEY TO CONTINUE`;
       gameSounds.playClick();
     };
 
-    document.addEventListener("click", skipBoot);
-    document.addEventListener("keydown", skipBoot);
+    document.addEventListener('click', skipBoot);
+    document.addEventListener('keydown', skipBoot);
 
     return () => {
       clearInterval(interval);
-      document.removeEventListener("click", skipBoot);
-      document.removeEventListener("keydown", skipBoot);
+      document.removeEventListener('click', skipBoot);
+      document.removeEventListener('keydown', skipBoot);
     };
   }, []);
 
@@ -77,14 +77,14 @@ PRESS ANY KEY TO CONTINUE`;
           <div
             className="mb-6 sm:mb-8"
             style={{
-              perspective: "300px",
+              perspective: '300px',
             }}
           >
             <div
               className="flex flex-col items-center relative"
               style={{
-                transform: "rotateX(30deg)",
-                transformOrigin: "center top",
+                transform: 'rotateX(30deg)',
+                transformOrigin: 'center top',
               }}
             >
               {/* Cyber scanlines effect */}
@@ -105,10 +105,9 @@ PRESS ANY KEY TO CONTINUE`;
               <h2
                 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-green-500 relative"
                 style={{
-                  letterSpacing: "-0.05em",
-                  lineHeight: "0.9",
-                  textShadow:
-                    "0 0 16px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.4)",
+                  letterSpacing: '-0.05em',
+                  lineHeight: '0.9',
+                  textShadow: '0 0 16px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.4)',
                 }}
               >
                 {/* Reduced glow and added glitch layers */}
@@ -127,8 +126,8 @@ PRESS ANY KEY TO CONTINUE`;
                   className="absolute inset-0"
                   style={{
                     backgroundImage:
-                      "linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent)",
-                    backgroundSize: "50px 50px",
+                      'linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent)',
+                    backgroundSize: '50px 50px',
                   }}
                 />
               </div>
@@ -198,8 +197,8 @@ PRESS ANY KEY TO CONTINUE`;
           {/* Status */}
           <div className="mt-8 sm:mt-12 text-green-400/60 text-xs sm:text-sm space-y-1">
             <p>SYSTEM STATUS: OPERATIONAL</p>
-            <p className={isConnected ? "text-green-400" : ""}>
-              WALLET: {isConnected ? "CONNECTED" : "NOT CONNECTED"}
+            <p className={isConnected ? 'text-green-400' : ''}>
+              WALLET: {isConnected ? 'CONNECTED' : 'NOT CONNECTED'}
             </p>
           </div>
         </div>

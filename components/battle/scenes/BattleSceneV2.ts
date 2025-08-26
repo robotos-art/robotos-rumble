@@ -1,10 +1,10 @@
-import * as Phaser from "phaser";
-import { BattleUnitV3 } from "../../../lib/game-engine/TraitProcessorV3";
-import { BattleEngineV3 } from "../../../lib/game-engine/BattleEngineV3";
-import { TimingSystem } from "../systems/TimingSystem";
-import { BattleUI } from "../ui/BattleUI";
-import { RobotoSprite } from "../sprites/RobotoSprite";
-import { gameSounds } from "../../../lib/sounds/gameSounds";
+import * as Phaser from 'phaser';
+import { BattleUnitV3 } from '../../../lib/game-engine/TraitProcessorV3';
+import { BattleEngineV3 } from '../../../lib/game-engine/BattleEngineV3';
+import { TimingSystem } from '../systems/TimingSystem';
+import { BattleUI } from '../ui/BattleUI';
+import { RobotoSprite } from '../sprites/RobotoSprite';
+import { gameSounds } from '../../../lib/sounds/gameSounds';
 
 interface BattleSceneConfig {
   playerTeam: BattleUnitV3[];
@@ -40,7 +40,7 @@ export class BattleSceneV2 extends Phaser.Scene {
   // Current acting unit
   private currentActingUnit: BattleUnitV3 | null = null;
   private pendingAction: {
-    type: "attack" | "ability";
+    type: 'attack' | 'ability';
     abilityId?: string;
   } | null = null;
 
@@ -60,14 +60,14 @@ export class BattleSceneV2 extends Phaser.Scene {
   };
 
   // Layout mode based on screen orientation
-  private layoutMode: "landscape" | "portrait" = "landscape";
+  private layoutMode: 'landscape' | 'portrait' = 'landscape';
 
   // Base sprite size
   private readonly BASE_SPRITE_SIZE = 120;
   private readonly SPRITE_PADDING = 20;
 
   constructor(config: BattleSceneConfig) {
-    super({ key: "BattleSceneV2" });
+    super({ key: 'BattleSceneV2' });
     this.playerTeam = config.playerTeam;
     this.enemyTeam = config.enemyTeam;
     this.onBattleEnd = config.onBattleEnd;
@@ -75,9 +75,9 @@ export class BattleSceneV2 extends Phaser.Scene {
 
   preload() {
     // Load sprites and UI elements
-    this.load.image("default-sprite", "/battle/ui/default-sprite.svg");
-    this.load.image("target-arrow", "/battle/ui/target-arrow.svg");
-    this.load.image("glow-effect", "/battle/ui/glow.png");
+    this.load.image('default-sprite', '/battle/ui/default-sprite.svg');
+    this.load.image('target-arrow', '/battle/ui/target-arrow.svg');
+    this.load.image('glow-effect', '/battle/ui/glow.png');
   }
 
   create() {
@@ -97,10 +97,10 @@ export class BattleSceneV2 extends Phaser.Scene {
     const enemyContainer = this.add.container(0, 0);
 
     // Position all player team members (left side)
-    this.createTeamFormation(this.playerTeam, this.playerLayout, "player");
+    this.createTeamFormation(this.playerTeam, this.playerLayout, 'player');
 
     // Position all enemy team members (right side)
-    this.createTeamFormation(this.enemyTeam, this.enemyLayout, "enemy");
+    this.createTeamFormation(this.enemyTeam, this.enemyLayout, 'enemy');
 
     // Initialize battle state
     this.battleEngine.initializeBattle(this.playerTeam, this.enemyTeam);
@@ -112,10 +112,10 @@ export class BattleSceneV2 extends Phaser.Scene {
     this.createTargetSelectionSystem();
 
     // Listen for resize events
-    this.scale.on("resize", this.handleResize, this);
+    this.scale.on('resize', this.handleResize, this);
 
     // Play round start sound
-    gameSounds.play("roundStart");
+    gameSounds.play('roundStart');
 
     // Start the battle
     this.startNextTurn();
@@ -126,9 +126,9 @@ export class BattleSceneV2 extends Phaser.Scene {
     const height = this.scale.height;
 
     // Determine layout mode based on aspect ratio
-    this.layoutMode = width > height * 1.2 ? "landscape" : "portrait";
+    this.layoutMode = width > height * 1.2 ? 'landscape' : 'portrait';
 
-    if (this.layoutMode === "landscape") {
+    if (this.layoutMode === 'landscape') {
       // LANDSCAPE: Teams on left and right sides
       this.calculateLandscapeLayout(width, height);
     } else {
@@ -146,7 +146,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     const spriteSize = Math.min(
       availableHeight / 3.5, // Height for 2 rows with good spacing
       width / 12, // Width constraint for both teams
-      140, // Max sprite size
+      140 // Max sprite size
     );
     const finalSpriteSize = Math.max(80, spriteSize); // Min size
 
@@ -178,7 +178,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     const maxSpriteSize = Math.min(
       (width - 40) / 5, // 5 sprites horizontally with padding
       (height * 0.35) / 3, // Don't take more than 35% of height per team
-      100, // Smaller max in portrait
+      100 // Smaller max in portrait
     );
     const spriteSize = Math.max(60, maxSpriteSize);
 
@@ -237,15 +237,15 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     // Clear any active glow effects
     this.children.list
-      .filter((child) => child.getData && child.getData("glowEffect"))
+      .filter((child) => child.getData && child.getData('glowEffect'))
       .forEach((child) => {
-        const glow = child.getData("glowEffect");
+        const glow = child.getData('glowEffect');
         if (glow) glow.destroy();
       });
 
     // Recreate sprites with new positions
-    this.createTeamFormation(this.playerTeam, this.playerLayout, "player");
-    this.createTeamFormation(this.enemyTeam, this.enemyLayout, "enemy");
+    this.createTeamFormation(this.playerTeam, this.playerLayout, 'player');
+    this.createTeamFormation(this.enemyTeam, this.enemyLayout, 'enemy');
 
     // Re-highlight active unit if there is one
     if (this.currentActingUnit) {
@@ -256,11 +256,11 @@ export class BattleSceneV2 extends Phaser.Scene {
   private createBackground() {
     // Clear any existing background
     this.children.list
-      .filter((child) => child.name === "background")
+      .filter((child) => child.name === 'background')
       .forEach((child) => child.destroy());
 
     const graphics = this.add.graphics();
-    graphics.name = "background";
+    graphics.name = 'background';
 
     const width = this.scale.width;
     const height = this.scale.height;
@@ -286,12 +286,8 @@ export class BattleSceneV2 extends Phaser.Scene {
     }
   }
 
-  private createTeamFormation(
-    team: BattleUnitV3[],
-    layout: TeamLayout,
-    side: "player" | "enemy",
-  ) {
-    const isPortrait = this.layoutMode === "portrait";
+  private createTeamFormation(team: BattleUnitV3[], layout: TeamLayout, side: 'player' | 'enemy') {
+    const isPortrait = this.layoutMode === 'portrait';
 
     // Create a container for this team to ensure proper bounds
     const teamContainer = this.add.container(0, 0);
@@ -309,12 +305,7 @@ export class BattleSceneV2 extends Phaser.Scene {
         y = layout.y;
       } else {
         // Landscape: pyramid formation (3-2 arrangement)
-        const positions = this.getPyramidPosition(
-          index,
-          layout,
-          side,
-          scaledSpriteSize,
-        );
+        const positions = this.getPyramidPosition(index, layout, side, scaledSpriteSize);
         x = positions.x;
         y = positions.y;
       }
@@ -328,7 +319,7 @@ export class BattleSceneV2 extends Phaser.Scene {
           x - scaledSpriteSize / 2,
           y - scaledSpriteSize / 2,
           scaledSpriteSize,
-          scaledSpriteSize,
+          scaledSpriteSize
         );
         debug.setDepth(200);
       }
@@ -337,7 +328,7 @@ export class BattleSceneV2 extends Phaser.Scene {
       const sprite = new RobotoSprite(this, x, y, unit, side);
 
       // Add to appropriate sprite map
-      if (side === "player") {
+      if (side === 'player') {
         this.playerSprites.set(unit.id, sprite);
       } else {
         this.enemySprites.set(unit.id, sprite);
@@ -358,7 +349,7 @@ export class BattleSceneV2 extends Phaser.Scene {
         delay: baseDelay,
         yoyo: true,
         repeat: -1,
-        ease: "Sine.inOut",
+        ease: 'Sine.inOut',
       });
 
       // Set up interaction
@@ -369,14 +360,14 @@ export class BattleSceneV2 extends Phaser.Scene {
   private getPyramidPosition(
     index: number,
     layout: TeamLayout,
-    side: "player" | "enemy",
-    spriteSize: number,
+    side: 'player' | 'enemy',
+    spriteSize: number
   ): { x: number; y: number } {
     const horizontalSpacing = spriteSize * 1.3;
     const verticalSpacing = spriteSize * 1.1;
 
     // Check team size from battle settings
-    const savedSettings = localStorage.getItem("battle_settings");
+    const savedSettings = localStorage.getItem('battle_settings');
     const teamSize = savedSettings ? JSON.parse(savedSettings).teamSize : 5;
 
     let row: number, col: number;
@@ -410,7 +401,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     }
 
     // Mirror formation for enemy team
-    const mirrorMultiplier = side === "enemy" ? -1 : 1;
+    const mirrorMultiplier = side === 'enemy' ? -1 : 1;
 
     // Calculate vertical offset to center the formation
     // Total height is about 1 row spacing
@@ -429,12 +420,8 @@ export class BattleSceneV2 extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
 
-    if (this.layoutMode === "portrait") {
-      const maxSpriteSize = Math.min(
-        (width - 40) / 5,
-        (height * 0.35) / 3,
-        100,
-      );
+    if (this.layoutMode === 'portrait') {
+      const maxSpriteSize = Math.min((width - 40) / 5, (height * 0.35) / 3, 100);
       return Math.max(60, maxSpriteSize) / this.BASE_SPRITE_SIZE;
     } else {
       // Landscape mode - match the layout calculation
@@ -450,32 +437,27 @@ export class BattleSceneV2 extends Phaser.Scene {
     // Fix interactive area for proper clicking
     const scale = sprite.scale;
     const hitSize = this.BASE_SPRITE_SIZE * scale;
-    const hitArea = new Phaser.Geom.Rectangle(
-      -hitSize / 2,
-      -hitSize / 2,
-      hitSize,
-      hitSize,
-    );
+    const hitArea = new Phaser.Geom.Rectangle(-hitSize / 2, -hitSize / 2, hitSize, hitSize);
     sprite.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
 
     // Add hover effects
-    sprite.on("pointerover", () => {
+    sprite.on('pointerover', () => {
       if (this.selectingTarget && this.validTargets.includes(unit.id)) {
         this.onUnitHover(unit, sprite);
         if (this.input && this.input.manager) {
-          this.input.setDefaultCursor("pointer");
+          this.input.setDefaultCursor('pointer');
         }
       }
     });
 
-    sprite.on("pointerout", () => {
+    sprite.on('pointerout', () => {
       this.onUnitOut(unit, sprite);
       if (this.input && this.input.manager) {
-        this.input.setDefaultCursor("default");
+        this.input.setDefaultCursor('default');
       }
     });
 
-    sprite.on("pointerdown", () => {
+    sprite.on('pointerdown', () => {
       if (this.selectingTarget && this.validTargets.includes(unit.id)) {
         this.onUnitClick(unit);
       }
@@ -491,17 +473,17 @@ export class BattleSceneV2 extends Phaser.Scene {
     }
 
     // Keyboard controls for target selection
-    this.input.keyboard?.on("keydown-UP", () => this.navigateTargets(-1));
-    this.input.keyboard?.on("keydown-DOWN", () => this.navigateTargets(1));
-    this.input.keyboard?.on("keydown-SPACE", () => this.confirmTarget());
-    this.input.keyboard?.on("keydown-ENTER", () => this.confirmTarget());
-    this.input.keyboard?.on("keydown-ESC", () => this.cancelTargeting());
+    this.input.keyboard?.on('keydown-UP', () => this.navigateTargets(-1));
+    this.input.keyboard?.on('keydown-DOWN', () => this.navigateTargets(1));
+    this.input.keyboard?.on('keydown-SPACE', () => this.confirmTarget());
+    this.input.keyboard?.on('keydown-ENTER', () => this.confirmTarget());
+    this.input.keyboard?.on('keydown-ESC', () => this.cancelTargeting());
   }
 
   private startNextTurn() {
     // Check battle state first
     const state = this.battleEngine.getState();
-    if (state.status !== "active") {
+    if (state.status !== 'active') {
       return;
     }
 
@@ -544,26 +526,25 @@ export class BattleSceneV2 extends Phaser.Scene {
       this.tweens.killTweensOf(sprite);
       sprite.setScale(normalScale);
       // Remove any existing glow effects
-      const glow = sprite.getData("glowEffect");
+      const glow = sprite.getData('glowEffect');
       if (glow) {
         glow.destroy();
-        sprite.setData("glowEffect", null);
+        sprite.setData('glowEffect', null);
       }
     });
     this.enemySprites.forEach((sprite) => {
       this.tweens.killTweensOf(sprite);
       sprite.setScale(normalScale);
       // Remove any existing glow effects
-      const glow = sprite.getData("glowEffect");
+      const glow = sprite.getData('glowEffect');
       if (glow) {
         glow.destroy();
-        sprite.setData("glowEffect", null);
+        sprite.setData('glowEffect', null);
       }
     });
 
     // Highlight active unit
-    const sprite =
-      this.playerSprites.get(unit.id) || this.enemySprites.get(unit.id);
+    const sprite = this.playerSprites.get(unit.id) || this.enemySprites.get(unit.id);
     if (sprite) {
       // Make active unit larger and add glow
       sprite.setScale(normalScale * 1.2);
@@ -579,16 +560,16 @@ export class BattleSceneV2 extends Phaser.Scene {
         duration: 600,
         yoyo: true,
         repeat: -1,
-        ease: "Sine.inOut",
+        ease: 'Sine.inOut',
       });
 
       // Store reference to remove later
-      sprite.setData("glowEffect", glowGraphics);
+      sprite.setData('glowEffect', glowGraphics);
     }
   }
 
   private startPlayerTurn(unit: BattleUnitV3) {
-    gameSounds.play("turnStart");
+    gameSounds.play('turnStart');
 
     this.battleUI.showActionMenu(unit, {
       onAttack: () => this.initiateAttack(),
@@ -611,7 +592,7 @@ export class BattleSceneV2 extends Phaser.Scene {
         const newEvents = logAfter.slice(logBefore);
         // Find the attack/ability event
         const attackEvent = newEvents.find(
-          (e) => e.type === "ability" && e.description.includes("uses"),
+          (e) => e.type === 'ability' && e.description.includes('uses')
         );
 
         if (attackEvent) {
@@ -636,17 +617,17 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     const attackText = this.add
       .text(centerX, centerY, message, {
-        fontSize: "28px",
-        fontFamily: "monospace",
-        color: "#00ff00",
-        stroke: "#000000",
+        fontSize: '28px',
+        fontFamily: 'monospace',
+        color: '#00ff00',
+        stroke: '#000000',
         strokeThickness: 4,
-        align: "center",
+        align: 'center',
       })
       .setOrigin(0.5);
 
     // Add glow effect
-    attackText.setShadow(0, 0, "#00ff00", 10, true, true);
+    attackText.setShadow(0, 0, '#00ff00', 10, true, true);
 
     // Animate the text
     this.tweens.add({
@@ -654,7 +635,7 @@ export class BattleSceneV2 extends Phaser.Scene {
       y: centerY - 30,
       alpha: { from: 1, to: 0 },
       duration: 2000,
-      ease: "Power2",
+      ease: 'Power2',
       onComplete: () => {
         attackText.destroy();
       },
@@ -666,35 +647,35 @@ export class BattleSceneV2 extends Phaser.Scene {
       scaleX: { from: 0.8, to: 1.1 },
       scaleY: { from: 0.8, to: 1.1 },
       duration: 300,
-      ease: "Back.out",
+      ease: 'Back.out',
     });
   }
 
   private initiateAttack() {
-    this.pendingAction = { type: "attack" };
-    this.startTargetSelection("enemy");
+    this.pendingAction = { type: 'attack' };
+    this.startTargetSelection('enemy');
   }
 
   private initiateAbility(abilityIndex: number) {
     const abilityId = this.currentActingUnit?.abilities[abilityIndex];
     if (abilityId) {
-      this.pendingAction = { type: "ability", abilityId };
+      this.pendingAction = { type: 'ability', abilityId };
       // TODO: Check ability targeting type
-      this.startTargetSelection("enemy");
+      this.startTargetSelection('enemy');
     }
   }
 
-  private startTargetSelection(targetTeam: "player" | "enemy" | "all") {
+  private startTargetSelection(targetTeam: 'player' | 'enemy' | 'all') {
     this.selectingTarget = true;
     this.battleUI.hideActionMenu();
 
     // Determine valid targets
     const state = this.battleEngine.getState();
-    if (targetTeam === "enemy") {
+    if (targetTeam === 'enemy') {
       this.validTargets = this.enemyTeam
         .filter((unit) => state.unitStatuses.get(unit.id)?.isAlive)
         .map((unit) => unit.id);
-    } else if (targetTeam === "player") {
+    } else if (targetTeam === 'player') {
       this.validTargets = this.playerTeam
         .filter((unit) => state.unitStatuses.get(unit.id)?.isAlive)
         .map((unit) => unit.id);
@@ -719,8 +700,7 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     // Add target indicators for valid targets
     this.validTargets.forEach((targetId, index) => {
-      const sprite =
-        this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
+      const sprite = this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
       if (sprite && index < this.targetIndicators.length) {
         const indicator = this.targetIndicators[index];
         indicator.setVisible(true);
@@ -737,7 +717,7 @@ export class BattleSceneV2 extends Phaser.Scene {
           duration: 800,
           yoyo: true,
           repeat: -1,
-          ease: "Sine.inOut",
+          ease: 'Sine.inOut',
         });
       }
     });
@@ -750,25 +730,18 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     // Get target sprite
     const sprite =
-      this.playerSprites.get(this.selectedTarget) ||
-      this.enemySprites.get(this.selectedTarget);
+      this.playerSprites.get(this.selectedTarget) || this.enemySprites.get(this.selectedTarget);
     if (!sprite) return;
 
     // Find the main selection indicator
-    const mainIndicator =
-      this.targetIndicators[this.targetIndicators.length - 1];
+    const mainIndicator = this.targetIndicators[this.targetIndicators.length - 1];
     mainIndicator.setVisible(true);
     mainIndicator.clear();
 
     // Draw thick selection box
     mainIndicator.lineStyle(4, 0xffff00, 1);
     const size = 70 * baseScale;
-    mainIndicator.strokeRect(
-      sprite.x - size,
-      sprite.y - size,
-      size * 2,
-      size * 2,
-    );
+    mainIndicator.strokeRect(sprite.x - size, sprite.y - size, size * 2, size * 2);
 
     // Add corner accents
     const cornerSize = 15 * baseScale;
@@ -800,23 +773,11 @@ export class BattleSceneV2 extends Phaser.Scene {
 
         // Redraw box
         mainIndicator.lineStyle(4, 0xffff00, 1);
-        mainIndicator.strokeRect(
-          sprite.x - size,
-          sprite.y - size,
-          size * 2,
-          size * 2,
-        );
+        mainIndicator.strokeRect(sprite.x - size, sprite.y - size, size * 2, size * 2);
 
         // Draw arrow
         mainIndicator.fillStyle(0xffff00, 1);
-        mainIndicator.fillTriangle(
-          sprite.x,
-          y,
-          sprite.x - 10,
-          y - 15,
-          sprite.x + 10,
-          y - 15,
-        );
+        mainIndicator.fillTriangle(sprite.x, y, sprite.x - 10, y - 15, sprite.x + 10, y - 15);
       },
     });
   }
@@ -824,7 +785,7 @@ export class BattleSceneV2 extends Phaser.Scene {
   private navigateTargets(direction: number) {
     if (!this.selectingTarget || this.validTargets.length === 0) return;
 
-    const currentIndex = this.validTargets.indexOf(this.selectedTarget || "");
+    const currentIndex = this.validTargets.indexOf(this.selectedTarget || '');
     let newIndex = currentIndex + direction;
 
     // Wrap around
@@ -834,26 +795,22 @@ export class BattleSceneV2 extends Phaser.Scene {
     this.selectedTarget = this.validTargets[newIndex];
     this.updateTargetIndicator();
 
-    gameSounds.play("menuNavigate");
+    gameSounds.play('menuNavigate');
   }
 
   private confirmTarget() {
-    if (!this.selectingTarget || !this.selectedTarget || !this.pendingAction)
-      return;
+    if (!this.selectingTarget || !this.selectedTarget || !this.pendingAction) return;
 
-    gameSounds.play("select");
+    gameSounds.play('select');
 
     // Execute the pending action
-    if (this.pendingAction.type === "attack") {
+    if (this.pendingAction.type === 'attack') {
       this.executeAttack(this.currentActingUnit!, this.selectedTarget);
-    } else if (
-      this.pendingAction.type === "ability" &&
-      this.pendingAction.abilityId
-    ) {
+    } else if (this.pendingAction.type === 'ability' && this.pendingAction.abilityId) {
       this.executeAbility(
         this.currentActingUnit!,
         this.selectedTarget,
-        this.pendingAction.abilityId,
+        this.pendingAction.abilityId
       );
     }
 
@@ -863,7 +820,7 @@ export class BattleSceneV2 extends Phaser.Scene {
   private cancelTargeting() {
     if (!this.selectingTarget) return;
 
-    gameSounds.play("cancel");
+    gameSounds.play('cancel');
     this.endTargeting();
 
     // Show action menu again
@@ -886,7 +843,7 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     // Reset cursor
     if (this.input && this.input.manager) {
-      this.input.setDefaultCursor("default");
+      this.input.setDefaultCursor('default');
     }
 
     this.battleUI.hideTargetingHint();
@@ -921,13 +878,12 @@ export class BattleSceneV2 extends Phaser.Scene {
     }
 
     // Play attack sound
-    gameSounds.play("attack");
+    gameSounds.play('attack');
 
     // Get sprites
     const attackerSprite =
       this.playerSprites.get(attacker.id) || this.enemySprites.get(attacker.id);
-    const targetSprite =
-      this.playerSprites.get(target.id) || this.enemySprites.get(target.id);
+    const targetSprite = this.playerSprites.get(target.id) || this.enemySprites.get(target.id);
 
     // Simple attack animation
     if (attackerSprite) {
@@ -939,7 +895,7 @@ export class BattleSceneV2 extends Phaser.Scene {
         targets: attackerSprite,
         x: attackerSprite.x + moveDistance,
         duration: 150,
-        ease: "Power2",
+        ease: 'Power2',
       });
 
       // Move back
@@ -947,7 +903,7 @@ export class BattleSceneV2 extends Phaser.Scene {
         targets: attackerSprite,
         x: attackerSprite.x,
         duration: 150,
-        ease: "Power2",
+        ease: 'Power2',
       });
     }
 
@@ -956,7 +912,7 @@ export class BattleSceneV2 extends Phaser.Scene {
 
     // Execute attack through battle engine
     const result = this.battleEngine.executeAction({
-      type: "attack",
+      type: 'attack',
       sourceId: attacker.id,
       targetId: target.id,
       timingBonus,
@@ -972,19 +928,15 @@ export class BattleSceneV2 extends Phaser.Scene {
 
       // Show damage number
       if (result.events && result.events.length > 0) {
-        const damageEvent = result.events.find((e) => e.type === "damage");
+        const damageEvent = result.events.find((e) => e.type === 'damage');
         if (damageEvent && damageEvent.value) {
-          this.showDamageNumber(
-            targetSprite.x,
-            targetSprite.y,
-            damageEvent.value,
-          );
+          this.showDamageNumber(targetSprite.x, targetSprite.y, damageEvent.value);
         }
       }
     }
 
     // Play damage sound
-    gameSounds.play("damage");
+    gameSounds.play('damage');
 
     // Update HP bars and check for KO
     this.applyBattleResult(result);
@@ -999,18 +951,14 @@ export class BattleSceneV2 extends Phaser.Scene {
     this.startNextTurn();
   }
 
-  private async executeAbility(
-    attacker: BattleUnitV3,
-    targetId: string,
-    abilityId: string,
-  ) {
+  private async executeAbility(attacker: BattleUnitV3, targetId: string, abilityId: string) {
     // Similar to attack but with ability-specific animations
     this.battleUI.hideActionMenu();
 
     const timingBonus = await this.timingSystem.startAbilityTiming(abilityId);
 
     const result = this.battleEngine.executeAction({
-      type: "ability",
+      type: 'ability',
       sourceId: attacker.id,
       targetId: targetId,
       abilityId,
@@ -1029,15 +977,10 @@ export class BattleSceneV2 extends Phaser.Scene {
   private showSwitchMenu() {
     // For now, switching isn't implemented in 5v5 mode
     // Could implement later if needed
-    gameSounds.play("cancel");
+    gameSounds.play('cancel');
   }
 
-  private flashSprite(
-    sprite: RobotoSprite,
-    color: number,
-    times: number,
-    duration: number,
-  ) {
+  private flashSprite(sprite: RobotoSprite, color: number, times: number, duration: number) {
     // Since RobotoSprite is a container, we'll use alpha flashing instead
     let count = 0;
 
@@ -1055,11 +998,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     flash();
   }
 
-  private shakeSprite(
-    sprite: RobotoSprite,
-    intensity: number,
-    duration: number,
-  ) {
+  private shakeSprite(sprite: RobotoSprite, intensity: number, duration: number) {
     const originalX = sprite.x;
     const originalY = sprite.y;
 
@@ -1077,9 +1016,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     });
   }
 
-  private tweenPromise(
-    config: Phaser.Types.Tweens.TweenBuilderConfig,
-  ): Promise<void> {
+  private tweenPromise(config: Phaser.Types.Tweens.TweenBuilderConfig): Promise<void> {
     return new Promise((resolve) => {
       this.tweens.add({
         ...config,
@@ -1100,8 +1037,7 @@ export class BattleSceneV2 extends Phaser.Scene {
     const state = this.battleEngine.getState();
     state.unitStatuses.forEach((status, unitId) => {
       if (!status.isAlive) {
-        const sprite =
-          this.playerSprites.get(unitId) || this.enemySprites.get(unitId);
+        const sprite = this.playerSprites.get(unitId) || this.enemySprites.get(unitId);
         if (sprite) {
           // Mark as defeated with reduced opacity
           sprite.setAlpha(0.3);
@@ -1113,10 +1049,10 @@ export class BattleSceneV2 extends Phaser.Scene {
   private checkBattleEnd(): boolean {
     const state = this.battleEngine.getState();
 
-    if (state.status === "victory") {
+    if (state.status === 'victory') {
       this.handleVictory();
       return true;
-    } else if (state.status === "defeat") {
+    } else if (state.status === 'defeat') {
       this.handleDefeat();
       return true;
     }
@@ -1125,7 +1061,7 @@ export class BattleSceneV2 extends Phaser.Scene {
   }
 
   private handleVictory() {
-    gameSounds.play("victory");
+    gameSounds.play('victory');
     this.battleUI.showVictoryScreen();
 
     this.time.delayedCall(3000, () => {
@@ -1134,7 +1070,7 @@ export class BattleSceneV2 extends Phaser.Scene {
   }
 
   private handleDefeat() {
-    gameSounds.play("defeat");
+    gameSounds.play('defeat');
     this.battleUI.showDefeatScreen();
 
     this.time.delayedCall(3000, () => {
@@ -1144,10 +1080,8 @@ export class BattleSceneV2 extends Phaser.Scene {
 
   private async playAttackAnimation(attackerId: string, targetId: string) {
     // Basic attack animation
-    const attackerSprite =
-      this.playerSprites.get(attackerId) || this.enemySprites.get(attackerId);
-    const targetSprite =
-      this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
+    const attackerSprite = this.playerSprites.get(attackerId) || this.enemySprites.get(attackerId);
+    const targetSprite = this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
 
     if (!attackerSprite || !targetSprite) return;
 
@@ -1159,7 +1093,7 @@ export class BattleSceneV2 extends Phaser.Scene {
       targets: attackerSprite,
       x: originalX + moveDistance,
       duration: 200,
-      ease: "Power2",
+      ease: 'Power2',
     });
 
     // Flash target
@@ -1170,20 +1104,15 @@ export class BattleSceneV2 extends Phaser.Scene {
       targets: attackerSprite,
       x: originalX,
       duration: 200,
-      ease: "Power2",
+      ease: 'Power2',
     });
   }
 
-  private async playAbilityAnimation(
-    attackerId: string,
-    targetId: string,
-    abilityId: string,
-  ) {
+  private async playAbilityAnimation(attackerId: string, targetId: string, abilityId: string) {
     // Placeholder for ability-specific animations
     // Could add particle effects, screen flashes, etc based on ability type
 
-    const targetSprite =
-      this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
+    const targetSprite = this.playerSprites.get(targetId) || this.enemySprites.get(targetId);
     if (targetSprite) {
       // Generic ability effect
       this.flashSprite(targetSprite, 0x00ffff, 5, 150);
@@ -1192,11 +1121,11 @@ export class BattleSceneV2 extends Phaser.Scene {
 
   private showDamageNumber(x: number, y: number, damage: number) {
     const text = this.add.text(x, y - 50, `-${damage}`, {
-      fontSize: "32px",
-      color: "#ff0000",
-      stroke: "#000000",
+      fontSize: '32px',
+      color: '#ff0000',
+      stroke: '#000000',
       strokeThickness: 4,
-      fontFamily: "monospace",
+      fontFamily: 'monospace',
     });
     text.setOrigin(0.5);
 
@@ -1206,7 +1135,7 @@ export class BattleSceneV2 extends Phaser.Scene {
       y: y - 100,
       alpha: 0,
       duration: 1000,
-      ease: "Power2",
+      ease: 'Power2',
       onComplete: () => text.destroy(),
     });
   }

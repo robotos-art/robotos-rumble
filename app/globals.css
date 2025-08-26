@@ -6,32 +6,32 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 120 100% 50%;
-    
+
     --card: 120 10% 5%;
     --card-foreground: 120 100% 50%;
-    
+
     --popover: 120 10% 5%;
     --popover-foreground: 120 100% 50%;
-    
+
     --primary: 120 100% 50%;
     --primary-foreground: 0 0% 0%;
-    
+
     --secondary: 120 20% 15%;
     --secondary-foreground: 120 100% 50%;
-    
+
     --muted: 120 20% 15%;
     --muted-foreground: 120 60% 70%;
-    
+
     --accent: 180 100% 50%;
     --accent-foreground: 0 0% 0%;
-    
+
     --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 0%;
-    
+
     --border: 120 100% 30%;
     --input: 120 100% 30%;
     --ring: 120 100% 50%;
-    
+
     --radius: 0.25rem;
   }
 }
@@ -52,20 +52,19 @@
 }
 
 .crt-effect::before {
-  content: "";
+  content: '';
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 255, 0, 0.03) 2px,
-      rgba(0, 255, 0, 0.03) 4px
-    );
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.03) 2px,
+    rgba(0, 255, 0, 0.03) 4px
+  );
   pointer-events: none;
   z-index: 1;
 }
@@ -77,10 +76,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    transparent 50%,
-    rgba(0, 255, 0, 0.02) 50%
-  );
+  background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.02) 50%);
   background-size: 100% 4px;
   pointer-events: none;
   z-index: 2;
@@ -88,26 +84,30 @@
 }
 
 @keyframes scan {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(10px); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(10px);
+  }
 }
 
 /* Phosphor Glow */
 .glow {
-  text-shadow: 
+  text-shadow:
     0 0 5px currentColor,
     0 0 10px currentColor,
     0 0 15px currentColor;
 }
 
 .glow-sm {
-  text-shadow: 
+  text-shadow:
     0 0 3px currentColor,
     0 0 6px currentColor;
 }
 
 .glow-lg {
-  text-shadow: 
+  text-shadow:
     0 0 10px currentColor,
     0 0 20px currentColor,
     0 0 30px currentColor,
@@ -116,13 +116,19 @@
 
 /* Terminal Cursor */
 .terminal-cursor::after {
-  content: "█";
+  content: '█';
   animation: blink 1s infinite;
 }
 
 @keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Glitch Effect */
@@ -132,11 +138,22 @@
 }
 
 @keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-1px, 1px); }
-  40% { transform: translate(1px, -1px); }
-  60% { transform: translate(-1px, 0); }
-  80% { transform: translate(1px, 0); }
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(1px, 0);
+  }
 }
 
 /* Cyber Glitch Animations */
@@ -149,11 +166,12 @@
 }
 
 @keyframes glitch-1 {
-  0%, 100% { 
+  0%,
+  100% {
     transform: translate(0);
     opacity: 0;
   }
-  20% { 
+  20% {
     transform: translate(-2px, 0);
     opacity: 0.3;
   }
@@ -164,7 +182,8 @@
 }
 
 @keyframes glitch-2 {
-  0%, 100% { 
+  0%,
+  100% {
     transform: translate(0);
     opacity: 0;
   }
@@ -208,8 +227,13 @@
 }
 
 @keyframes flicker {
-  0%, 100% { opacity: 1; }
-  92% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.8;
+  }
 }
 
 /* Pixelated Images */
@@ -221,13 +245,21 @@
 
 /* Dropdown animations */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-from-top-1 {
-  from { transform: translateY(-0.25rem); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-0.25rem);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .animate-in {

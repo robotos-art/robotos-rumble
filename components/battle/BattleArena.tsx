@@ -1,13 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import {
-  BattleUnitV3,
-  TraitProcessorV3,
-} from "../../lib/game-engine/TraitProcessorV3";
-import BattleArenaV3 from "./BattleArenaV3";
-import sampleRobotoDatabase from "../../lib/data/sample-roboto-database.json";
-import type { BattleSettings } from "../../app/battle/page";
+import { useState, useEffect } from 'react';
+import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import BattleArenaV3 from './BattleArenaV3';
+import sampleRobotoDatabase from '../../lib/data/sample-roboto-database.json';
+import type { BattleSettings } from '../../app/battle/page';
 
 interface BattleArenaProps {
   playerTeam: BattleUnitV3[];
@@ -43,18 +40,16 @@ export default function BattleArena({
   serverTurnEvent,
   opponentTargetPreview,
 }: BattleArenaProps) {
-  const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>(
-    providedEnemyTeam || [],
-  );
+  const [enemyTeam, setEnemyTeam] = useState<BattleUnitV3[]>(providedEnemyTeam || []);
   const [loading, setLoading] = useState(!isPvP); // No loading for PvP (teams already provided)
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
-    speed: "speedy",
+    speed: 'speedy',
   });
 
   useEffect(() => {
     // Load battle settings
-    const savedSettings = localStorage.getItem("battle_settings");
+    const savedSettings = localStorage.getItem('battle_settings');
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
@@ -78,9 +73,7 @@ export default function BattleArena({
 
       // Pick random Robotos from the database matching team size
       while (enemies.length < teamSize) {
-        const randomIndex = Math.floor(
-          Math.random() * sampleRobotoDatabase.length,
-        );
+        const randomIndex = Math.floor(Math.random() * sampleRobotoDatabase.length);
         if (usedIndices.has(randomIndex)) continue;
 
         usedIndices.add(randomIndex);
@@ -106,9 +99,7 @@ export default function BattleArena({
   if (loading || enemyTeam.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-green-400 text-xl animate-pulse">
-          LOADING BATTLE ARENA...
-        </p>
+        <p className="text-green-400 text-xl animate-pulse">LOADING BATTLE ARENA...</p>
       </div>
     );
   }

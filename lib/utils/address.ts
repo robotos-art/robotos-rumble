@@ -1,17 +1,17 @@
 export function formatAddress(
   address: string,
-  length: "short" | "medium" | "long" = "medium",
+  length: 'short' | 'medium' | 'long' = 'medium'
 ): string {
-  if (!address) return "";
+  if (!address) return '';
 
   switch (length) {
-    case "short":
+    case 'short':
       // 0x1234...5678
       return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    case "medium":
+    case 'medium':
       // 0x12345678...12345678
       return `${address.slice(0, 10)}...${address.slice(-8)}`;
-    case "long":
+    case 'long':
       // Full address
       return address;
     default:
@@ -20,7 +20,7 @@ export function formatAddress(
 }
 
 export function normalizeAddress(address: string): string {
-  if (!address) return "";
+  if (!address) return '';
   return address.toLowerCase();
 }
 

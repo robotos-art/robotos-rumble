@@ -8,7 +8,9 @@
     "dev:all": "concurrently -n \"GAME,PVP\" -c \"green,blue\" \"yarn dev\" \"yarn dev:server\"",
     "build": "next build",
     "start": "next start -p 3003",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -32,13 +34,11 @@
     "phaser": "^3.70.0",
     "react": "^18",
     "react-dom": "^18",
-    "socket.io-client": "^4.7.4",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "viem": "^1.21.4",
     "wagmi": "^1.4.13",
-    "web3": "^1.10.3",
-    "zustand": "^4.5.0"
+    "web3": "^1.10.3"
   },
   "devDependencies": {
     "@types/node": "^20",

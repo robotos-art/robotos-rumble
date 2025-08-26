@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "../ui/card";
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card } from '../ui/card';
 
 interface BattleLogProps {
   events?: Array<{
@@ -22,18 +22,18 @@ export default function BattleLog({ events = [] }: BattleLogProps) {
 
     const newMessages = events.map((event) => {
       switch (event.type) {
-        case "damage":
-          return `${event.description || "Attack"} dealt ${event.value} damage!`;
-        case "ability":
-          return event.description || "Used ability!";
-        case "ko":
-          return `${event.description || "Unit"} was defeated!`;
-        case "critical":
-          return "Critical hit!";
-        case "miss":
-          return "Attack missed!";
+        case 'damage':
+          return `${event.description || 'Attack'} dealt ${event.value} damage!`;
+        case 'ability':
+          return event.description || 'Used ability!';
+        case 'ko':
+          return `${event.description || 'Unit'} was defeated!`;
+        case 'critical':
+          return 'Critical hit!';
+        case 'miss':
+          return 'Attack missed!';
         default:
-          return event.description || "Action performed";
+          return event.description || 'Action performed';
       }
     });
 
@@ -56,7 +56,7 @@ export default function BattleLog({ events = [] }: BattleLogProps) {
               transition={{ duration: 0.3 }}
               className="text-green-400 text-sm font-mono"
             >
-              {">"} {message}
+              {'>'} {message}
             </motion.div>
           ))}
         </AnimatePresence>

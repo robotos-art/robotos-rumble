@@ -1,36 +1,33 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { motion } from "framer-motion";
-import { Card } from "../ui/card";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Card } from '../ui/card';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface TargetSelectorProps {
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export default function TargetSelector({
-  onConfirm,
-  onCancel,
-}: TargetSelectorProps) {
+export default function TargetSelector({ onConfirm, onCancel }: TargetSelectorProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
-        case "Enter":
-        case " ":
+        case 'Enter':
+        case ' ':
           e.preventDefault();
           onConfirm();
           break;
-        case "Escape":
+        case 'Escape':
           e.preventDefault();
           onCancel();
           break;
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onConfirm, onCancel]);
 
   return (

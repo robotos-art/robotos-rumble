@@ -1,21 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { TraitProcessorV3 } from "../../lib/game-engine/TraitProcessorV3";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import { useState } from 'react';
+import { Search, Filter, X } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
-type Element = "SURGE" | "CODE" | "METAL" | "GLITCH" | "NEUTRAL";
-type RobotType =
-  | "all"
-  | "roboto"
-  | "robopet"
-  | "helmeto"
-  | "mulleto"
-  | "cyborgo"
-  | "computo";
+type Element = 'SURGE' | 'CODE' | 'METAL' | 'GLITCH' | 'NEUTRAL';
+type RobotType = 'all' | 'roboto' | 'robopet' | 'helmeto' | 'mulleto' | 'cyborgo' | 'computo';
 
 interface FilterState {
   search: string;
@@ -29,8 +22,8 @@ interface FilterState {
   maxDefense?: number;
   minSpeed?: number;
   maxSpeed?: number;
-  sortBy: "name" | "element" | "hp" | "attack" | "defense" | "speed";
-  sortOrder: "asc" | "desc";
+  sortBy: 'name' | 'element' | 'hp' | 'attack' | 'defense' | 'speed';
+  sortOrder: 'asc' | 'desc';
 }
 
 interface UnitFiltersProps {
@@ -39,22 +32,18 @@ interface UnitFiltersProps {
   filteredCount: number;
 }
 
-export function UnitFilters({
-  onFiltersChange,
-  unitCount,
-  filteredCount,
-}: UnitFiltersProps) {
+export function UnitFilters({ onFiltersChange, unitCount, filteredCount }: UnitFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
-    search: "",
+    search: '',
     elements: [],
-    robotType: "all",
-    sortBy: "name",
-    sortOrder: "asc",
+    robotType: 'all',
+    sortBy: 'name',
+    sortOrder: 'asc',
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const elements: Element[] = ["SURGE", "CODE", "METAL", "GLITCH", "NEUTRAL"];
+  const elements: Element[] = ['SURGE', 'CODE', 'METAL', 'GLITCH', 'NEUTRAL'];
 
   const updateFilters = (updates: Partial<FilterState>) => {
     const newFilters = { ...filters, ...updates };
@@ -72,21 +61,21 @@ export function UnitFilters({
 
   const clearFilters = () => {
     const defaultFilters: FilterState = {
-      search: "",
+      search: '',
       elements: [],
-      robotType: "all",
-      sortBy: "name",
-      sortOrder: "asc",
+      robotType: 'all',
+      sortBy: 'name',
+      sortOrder: 'asc',
     };
     setFilters(defaultFilters);
     onFiltersChange(defaultFilters);
-    gameSounds.play("cancel");
+    gameSounds.play('cancel');
   };
 
   const hasActiveFilters =
     filters.search ||
     filters.elements.length > 0 ||
-    filters.robotType !== "all" ||
+    filters.robotType !== 'all' ||
     filters.minHp ||
     filters.maxHp ||
     filters.minAttack ||
@@ -114,19 +103,14 @@ export function UnitFilters({
           variant="terminal"
           size="icon"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={showAdvanced ? "bg-green-500/20" : ""}
+          className={showAdvanced ? 'bg-green-500/20' : ''}
           title="Toggle filters"
         >
           <Filter className="w-4 h-4" />
         </Button>
 
         {hasActiveFilters && (
-          <Button
-            variant="terminal"
-            size="sm"
-            onClick={clearFilters}
-            className="gap-2"
-          >
+          <Button variant="terminal" size="sm" onClick={clearFilters} className="gap-2">
             <X className="w-4 h-4" />
             CLEAR
           </Button>
@@ -145,8 +129,8 @@ export function UnitFilters({
               onClick={() => toggleElement(element)}
               className={`transition-all ${
                 filters.elements.includes(element)
-                  ? "bg-green-500/20 border-green-500"
-                  : "opacity-60 hover:opacity-100"
+                  ? 'bg-green-500/20 border-green-500'
+                  : 'opacity-60 hover:opacity-100'
               }`}
               style={{
                 borderColor: filters.elements.includes(element)
@@ -157,9 +141,7 @@ export function UnitFilters({
                   : undefined,
               }}
             >
-              <span className="text-lg mr-1">
-                {TraitProcessorV3.getElementSymbol(element)}
-              </span>
+              <span className="text-lg mr-1">{TraitProcessorV3.getElementSymbol(element)}</span>
               <span className="hidden sm:inline">{element}</span>
             </Button>
           ))}
@@ -167,30 +149,22 @@ export function UnitFilters({
 
         {/* Robot Type Filter */}
         <div className="flex flex-wrap gap-2">
-          <span className="text-green-400 text-sm self-center mr-2 hidden md:inline">
-            TYPE:
-          </span>
+          <span className="text-green-400 text-sm self-center mr-2 hidden md:inline">TYPE:</span>
           {[
-            { value: "all", label: "ALL" },
-            { value: "roboto", label: "ROBOTO" },
-            { value: "robopet", label: "ROBOPET" },
-            { value: "helmeto", label: "HELMETO" },
-            { value: "mulleto", label: "MULLETO" },
-            { value: "cyborgo", label: "CYBORGO" },
-            { value: "computo", label: "COMPUTO" },
+            { value: 'all', label: 'ALL' },
+            { value: 'roboto', label: 'ROBOTO' },
+            { value: 'robopet', label: 'ROBOPET' },
+            { value: 'helmeto', label: 'HELMETO' },
+            { value: 'mulleto', label: 'MULLETO' },
+            { value: 'cyborgo', label: 'CYBORGO' },
+            { value: 'computo', label: 'COMPUTO' },
           ].map((type) => (
             <Button
               key={type.value}
               variant="terminal"
               size="sm"
-              onClick={() =>
-                updateFilters({ robotType: type.value as RobotType })
-              }
-              className={
-                filters.robotType === type.value
-                  ? "bg-green-500/20"
-                  : "opacity-60"
-              }
+              onClick={() => updateFilters({ robotType: type.value as RobotType })}
+              className={filters.robotType === type.value ? 'bg-green-500/20' : 'opacity-60'}
             >
               {type.label}
             </Button>
@@ -211,12 +185,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Min"
-                  value={filters.minHp || ""}
+                  value={filters.minHp || ''}
                   onChange={(e) =>
                     updateFilters({
-                      minHp: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      minHp: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -225,12 +197,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Max"
-                  value={filters.maxHp || ""}
+                  value={filters.maxHp || ''}
                   onChange={(e) =>
                     updateFilters({
-                      maxHp: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      maxHp: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -245,12 +215,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Min"
-                  value={filters.minAttack || ""}
+                  value={filters.minAttack || ''}
                   onChange={(e) =>
                     updateFilters({
-                      minAttack: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      minAttack: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -259,12 +227,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Max"
-                  value={filters.maxAttack || ""}
+                  value={filters.maxAttack || ''}
                   onChange={(e) =>
                     updateFilters({
-                      maxAttack: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      maxAttack: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -279,12 +245,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Min"
-                  value={filters.minDefense || ""}
+                  value={filters.minDefense || ''}
                   onChange={(e) =>
                     updateFilters({
-                      minDefense: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      minDefense: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -293,12 +257,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Max"
-                  value={filters.maxDefense || ""}
+                  value={filters.maxDefense || ''}
                   onChange={(e) =>
                     updateFilters({
-                      maxDefense: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      maxDefense: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -313,12 +275,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Min"
-                  value={filters.minSpeed || ""}
+                  value={filters.minSpeed || ''}
                   onChange={(e) =>
                     updateFilters({
-                      minSpeed: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      minSpeed: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -327,12 +287,10 @@ export function UnitFilters({
                 <Input
                   type="number"
                   placeholder="Max"
-                  value={filters.maxSpeed || ""}
+                  value={filters.maxSpeed || ''}
                   onChange={(e) =>
                     updateFilters({
-                      maxSpeed: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      maxSpeed: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   className="bg-black/60 border-green-500/30 text-green-500"
@@ -364,12 +322,12 @@ export function UnitFilters({
           size="sm"
           onClick={() =>
             updateFilters({
-              sortOrder: filters.sortOrder === "asc" ? "desc" : "asc",
+              sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc',
             })
           }
           className="opacity-60 hover:opacity-100"
         >
-          {filters.sortOrder === "asc" ? "↑" : "↓"}
+          {filters.sortOrder === 'asc' ? '↑' : '↓'}
         </Button>
 
         <span className="text-green-400/60 text-sm ml-auto">

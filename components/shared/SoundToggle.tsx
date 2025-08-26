@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Volume2, VolumeX, Volume1, Volume } from "lucide-react";
-import { Button } from "../ui/button";
-import { Slider } from "../ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import { useState, useEffect } from 'react';
+import { Volume2, VolumeX, Volume1, Volume } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Slider } from '../ui/slider';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 export function SoundToggle() {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -51,8 +51,7 @@ export function SoundToggle() {
   };
 
   const getVolumeIcon = () => {
-    const iconClass =
-      "w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors";
+    const iconClass = 'w-4 h-4 text-green-500/60 group-hover:text-green-400 transition-colors';
     if (!isEnabled || volume === 0) return <VolumeX className={iconClass} />;
     if (volume < 30) return <Volume className={iconClass} />;
     if (volume < 70) return <Volume1 className={iconClass} />;
@@ -75,7 +74,7 @@ export function SoundToggle() {
           }}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
-          title={isEnabled ? "Mute sounds" : "Enable sounds"}
+          title={isEnabled ? 'Mute sounds' : 'Enable sounds'}
         >
           {getVolumeIcon()}
         </Button>

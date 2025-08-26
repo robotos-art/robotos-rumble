@@ -2,96 +2,96 @@
 
 export type GameSoundType =
   // UI Sounds
-  | "hover"
-  | "click"
-  | "select"
-  | "deselect"
-  | "cancel"
-  | "confirm"
-  | "error"
-  | "success"
-  | "warning"
-  | "notification"
+  | 'hover'
+  | 'click'
+  | 'select'
+  | 'deselect'
+  | 'cancel'
+  | 'confirm'
+  | 'error'
+  | 'success'
+  | 'warning'
+  | 'notification'
   // Team Building
-  | "addUnit"
-  | "removeUnit"
-  | "teamComplete"
-  | "swapUnit"
+  | 'addUnit'
+  | 'removeUnit'
+  | 'teamComplete'
+  | 'swapUnit'
   // Battle Sounds
-  | "attack"
-  | "defend"
-  | "ability"
-  | "critical"
-  | "miss"
-  | "damage"
-  | "victory"
-  | "defeat"
-  | "roundStart"
-  | "turnStart"
-  | "turnEnd"
-  | "heal"
-  | "buff"
-  | "debuff"
-  | "statusEffect"
+  | 'attack'
+  | 'defend'
+  | 'ability'
+  | 'critical'
+  | 'miss'
+  | 'damage'
+  | 'victory'
+  | 'defeat'
+  | 'roundStart'
+  | 'turnStart'
+  | 'turnEnd'
+  | 'heal'
+  | 'buff'
+  | 'debuff'
+  | 'statusEffect'
   // Timing System
-  | "timingStart"
-  | "timingPerfect"
-  | "timingGood"
-  | "timingMiss"
-  | "timingLocked"
-  | "timingTick"
-  | "timingCountdown"
-  | "timingExpired"
+  | 'timingStart'
+  | 'timingPerfect'
+  | 'timingGood'
+  | 'timingMiss'
+  | 'timingLocked'
+  | 'timingTick'
+  | 'timingCountdown'
+  | 'timingExpired'
   // Timing Meters
-  | "chargeTap"
-  | "chargeBuilding"
-  | "chargeComplete"
-  | "spinnerActive"
-  | "spinnerStop"
+  | 'chargeTap'
+  | 'chargeBuilding'
+  | 'chargeComplete'
+  | 'spinnerActive'
+  | 'spinnerStop'
   // Menu
-  | "menuNavigate"
-  | "menuOpen"
-  | "menuClose"
-  | "tabSwitch"
+  | 'menuNavigate'
+  | 'menuOpen'
+  | 'menuClose'
+  | 'tabSwitch'
   // Elements
-  | "surge"
-  | "code"
-  | "metal"
-  | "glitch"
+  | 'surge'
+  | 'code'
+  | 'metal'
+  | 'glitch'
   // Combat Feedback
-  | "lowHealth"
-  | "unitDefeat"
-  | "unitSwitch"
-  | "charge"
-  | "targetSelect"
-  | "targetConfirm"
-  | "energyRestore"
-  | "explosion"
+  | 'lowHealth'
+  | 'unitDefeat'
+  | 'unitSwitch'
+  | 'charge'
+  | 'targetSelect'
+  | 'targetConfirm'
+  | 'energyRestore'
+  | 'explosion'
   // Attack Variations
-  | "attackWeak"
-  | "attackNormal"
-  | "attackStrong"
-  | "attackDevastating"
-  | "criticalSuper"
-  | "criticalCombo"
+  | 'attackWeak'
+  | 'attackNormal'
+  | 'attackStrong'
+  | 'attackDevastating'
+  | 'criticalSuper'
+  | 'criticalCombo'
   // Abilities
-  | "abilityReady"
-  | "abilityCooldown"
-  | "abilitySelect"
-  | "bladeSlash"
-  | "electricBurst"
-  | "airBurst"
-  | "crushImpact"
-  | "spinningSaw"
-  | "aerialStrike"
+  | 'abilityReady'
+  | 'abilityCooldown'
+  | 'abilitySelect'
+  | 'bladeSlash'
+  | 'electricBurst'
+  | 'airBurst'
+  | 'crushImpact'
+  | 'spinningSaw'
+  | 'aerialStrike'
   // Turn Sounds
-  | "playerTurn"
-  | "enemyTurn"
-  | "turnCountdown"
+  | 'playerTurn'
+  | 'enemyTurn'
+  | 'turnCountdown'
   // Element Combos
-  | "elementCombo"
-  | "trinityBonus"
-  | "elementAdvantage";
+  | 'elementCombo'
+  | 'trinityBonus'
+  | 'elementAdvantage';
 
 interface SoundConfig {
   notes: number[]; // MIDI note numbers
@@ -599,11 +599,11 @@ class GameSoundPlayer {
 
   constructor() {
     // Load settings from localStorage
-    if (typeof window !== "undefined") {
-      const savedEnabled = localStorage.getItem("roboto_rumble_sound");
-      const savedVolume = localStorage.getItem("roboto_rumble_volume");
+    if (typeof window !== 'undefined') {
+      const savedEnabled = localStorage.getItem('roboto_rumble_sound');
+      const savedVolume = localStorage.getItem('roboto_rumble_volume');
 
-      this.isEnabled = savedEnabled !== "false";
+      this.isEnabled = savedEnabled !== 'false';
       this.masterVolume = savedVolume ? parseFloat(savedVolume) : 0.5;
 
       this.initAudioContext();
@@ -611,22 +611,21 @@ class GameSoundPlayer {
   }
 
   private initAudioContext() {
-    if (!this.audioContext && typeof window !== "undefined") {
-      this.audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
+    if (!this.audioContext && typeof window !== 'undefined') {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
       // Resume on user interaction
       const resumeContext = () => {
-        if (this.audioContext?.state === "suspended") {
+        if (this.audioContext?.state === 'suspended') {
           this.audioContext.resume();
         }
         // Remove listeners after first interaction
-        document.removeEventListener("click", resumeContext);
-        document.removeEventListener("keydown", resumeContext);
+        document.removeEventListener('click', resumeContext);
+        document.removeEventListener('keydown', resumeContext);
       };
 
-      document.addEventListener("click", resumeContext);
-      document.addEventListener("keydown", resumeContext);
+      document.addEventListener('click', resumeContext);
+      document.addEventListener('keydown', resumeContext);
     }
   }
 
@@ -636,12 +635,12 @@ class GameSoundPlayer {
 
   public setEnabled(enabled: boolean) {
     this.isEnabled = enabled;
-    localStorage.setItem("roboto_rumble_sound", enabled.toString());
+    localStorage.setItem('roboto_rumble_sound', enabled.toString());
   }
 
   public setVolume(volume: number) {
     this.masterVolume = Math.max(0, Math.min(1, volume));
-    localStorage.setItem("roboto_rumble_volume", this.masterVolume.toString());
+    localStorage.setItem('roboto_rumble_volume', this.masterVolume.toString());
   }
 
   public getEnabled(): boolean {
@@ -657,7 +656,7 @@ class GameSoundPlayer {
 
     try {
       // Resume context if suspended
-      if (this.audioContext.state === "suspended") {
+      if (this.audioContext.state === 'suspended') {
         await this.audioContext.resume();
       }
 
@@ -670,11 +669,11 @@ class GameSoundPlayer {
           startTime + (index * config.duration) / 1000,
           config.duration / 1000,
           config.decay,
-          config.volume,
+          config.volume
         );
       });
     } catch (error) {
-      console.warn("Could not play sound:", error);
+      console.warn('Could not play sound:', error);
     }
   }
 
@@ -683,7 +682,7 @@ class GameSoundPlayer {
     startTime: number,
     duration: number,
     decay: number,
-    volumeOverride?: number,
+    volumeOverride?: number
   ) {
     if (!this.audioContext) return;
 
@@ -691,11 +690,8 @@ class GameSoundPlayer {
     const gainNode = this.audioContext.createGain();
 
     // Use square wave for retro feel
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(
-      this.midiToFrequency(midiNote),
-      startTime,
-    );
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(this.midiToFrequency(midiNote), startTime);
 
     // Calculate volume - ensure masterVolume is properly applied
     const baseVolume = volumeOverride || 0.1;
@@ -703,10 +699,7 @@ class GameSoundPlayer {
 
     // Create envelope with proper volume scaling
     gainNode.gain.setValueAtTime(finalVolume, startTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      startTime + duration * decay,
-    );
+    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration * decay);
 
     // Connect nodes
     oscillator.connect(gainNode);
@@ -719,23 +712,23 @@ class GameSoundPlayer {
 
   // Convenience methods for common patterns
   public playHover() {
-    this.play("hover");
+    this.play('hover');
   }
 
   public playClick() {
-    this.play("click");
+    this.play('click');
   }
 
   public playSelect() {
-    this.play("select");
+    this.play('select');
   }
 
   public playConfirm() {
-    this.play("confirm");
+    this.play('confirm');
   }
 
   public playCancel() {
-    this.play("cancel");
+    this.play('cancel');
   }
 
   public playElementSound(element: string) {
@@ -748,47 +741,47 @@ class GameSoundPlayer {
   public playAbilitySound(abilityAnimation?: string) {
     // Map ability animations to sounds
     const animationSoundMap: Record<string, GameSoundType> = {
-      blade_slash: "bladeSlash",
-      electric_burst: "electricBurst",
-      air_burst: "airBurst",
-      crush: "crushImpact",
-      spinning_saw: "spinningSaw",
-      aerial_strike: "aerialStrike",
-      electric_wave: "electricBurst",
-      heavy_blade: "bladeSlash",
-      spinning_blades: "spinningSaw",
+      blade_slash: 'bladeSlash',
+      electric_burst: 'electricBurst',
+      air_burst: 'airBurst',
+      crush: 'crushImpact',
+      spinning_saw: 'spinningSaw',
+      aerial_strike: 'aerialStrike',
+      electric_wave: 'electricBurst',
+      heavy_blade: 'bladeSlash',
+      spinning_blades: 'spinningSaw',
     };
 
     if (abilityAnimation && animationSoundMap[abilityAnimation]) {
       this.play(animationSoundMap[abilityAnimation]);
     } else {
-      this.play("ability"); // Default ability sound
+      this.play('ability'); // Default ability sound
     }
   }
 
   public playAttackSound(
     damage: number,
     isCritical: boolean = false,
-    isPerfectTiming: boolean = false,
+    isPerfectTiming: boolean = false
   ) {
     if (damage === 0) {
-      this.play("miss");
+      this.play('miss');
     } else if (isCritical) {
       if (damage >= 100) {
-        this.play("criticalSuper");
+        this.play('criticalSuper');
       } else if (isPerfectTiming) {
-        this.play("criticalCombo");
+        this.play('criticalCombo');
       } else {
-        this.play("critical");
+        this.play('critical');
       }
     } else if (damage < 30) {
-      this.play("attackWeak");
+      this.play('attackWeak');
     } else if (damage < 60) {
-      this.play("attackNormal");
+      this.play('attackNormal');
     } else if (damage < 100) {
-      this.play("attackStrong");
+      this.play('attackStrong');
     } else {
-      this.play("attackDevastating");
+      this.play('attackDevastating');
     }
   }
 }

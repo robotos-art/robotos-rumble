@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import { Client, Room } from "colyseus.js";
-import BattleArena from "../../../../components/battle/BattleArena";
-import { GameHeader } from "../../../../components/shared/GameHeader";
-import { PageLayout } from "../../../../components/shared/PageLayout";
-import { BattleUnitV3 } from "../../../../lib/game-engine/TraitProcessorV3";
-import { gameSounds } from "../../../../lib/sounds/gameSounds";
-import { BattleNotifications } from "../../../../lib/notifications/battleNotifications";
-import { ConfirmDialog } from "../../../../components/ui/confirm-dialog";
-import { Button } from "../../../../components/ui/button";
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
+import { Client, Room } from 'colyseus.js';
+import BattleArena from '../../../../components/battle/BattleArena';
+import { GameHeader } from '../../../../components/shared/GameHeader';
+import { PageLayout } from '../../../../components/shared/PageLayout';
+import { BattleUnitV3 } from '../../../../lib/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../../../lib/sounds/gameSounds';
+import { BattleNotifications } from '../../../../lib/notifications/battleNotifications';
+import { ConfirmDialog } from '../../../../components/ui/confirm-dialog';
+import { Button } from '../../../../components/ui/button';
 
 export default function PvPBattlePage() {
   const params = useParams();
@@ -32,7 +32,7 @@ export default function PvPBattlePage() {
 
   useEffect(() => {
     if (!roomId || !address) {
-      router.push("/battle/pvp");
+      router.push('/battle/pvp');
       return;
     }
 
@@ -47,21 +47,18 @@ export default function PvPBattlePage() {
 
   const connectToRoom = async () => {
     try {
-      const wsUrl =
-        process.env.NEXT_PUBLIC_COLYSEUS_URL || "ws://localhost:2567";
+      const wsUrl = process.env.NEXT_PUBLIC_COLYSEUS_URL || 'ws://localhost:2567';
       const client = new Client(wsUrl);
 
       // Load saved team
-      const savedSettings = localStorage.getItem("battle_settings");
-      const settings = savedSettings
-        ? JSON.parse(savedSettings)
-        : { teamSize: 5, speed: "speedy" };
+      const savedSettings = localStorage.getItem('battle_settings');
+      const settings = savedSettings ? JSON.parse(savedSettings) : { teamSize: 5, speed: 'speedy' };
       const teamKey = `roboto_rumble_team_${settings.teamSize}`;
       const savedTeam = localStorage.getItem(teamKey);
 
       if (!savedTeam) {
-        setError("No team found!");
-        setTimeout(() => router.push("/team-builder"), 1500);
+        setError('No team found!');
+        setTimeout(() => router.push('/team-builder'), 1500);
         return;
       }
 
@@ -76,12 +73,12 @@ export default function PvPBattlePage() {
       setRoom(joinedRoom);
 
       // Send ready signal
-      joinedRoom.send("ready");
+      joinedRoom.send('ready');
 
       // Set up room event listeners
       joinedRoom.onStateChange((state: any) => {
         // Update battle state based on Colyseus state
-        if (state.status === "battle" && !battleStarted) {
+        if (state.status === 'battle' && !battleStarted) {
           setBattleStarted(true);
           setupBattleTeams(state, joinedRoom.sessionId);
         }
@@ -94,23 +91,23 @@ export default function PvPBattlePage() {
         }
       });
 
-      joinedRoom.onMessage("battle-start", (message) => {
-        gameSounds.play("confirm");
+      joinedRoom.onMessage('battle-start', (message) => {
+        gameSounds.play('confirm');
       });
 
-      joinedRoom.onMessage("turn-start", (data) => {
+      joinedRoom.onMessage('turn-start', (data) => {
         // Pass turn event to BattleArena for server-driven phase transitions
         setServerTurnEvent({
           unitId: data.unitId,
           playerId: data.playerId,
-          timer: data.timer
+          timer: data.timer,
         });
-        
+
         if (data.playerId === joinedRoom.sessionId) {
           setIsPlayerTurn(true);
-          gameSounds.play("turnStart");
+          gameSounds.play('turnStart');
           // Show notification if tab is not visible
-          if (document.visibilityState !== "visible") {
+          if (document.visibilityState !== 'visible') {
             BattleNotifications.showYourTurn();
           }
         } else {
@@ -119,40 +116,38 @@ export default function PvPBattlePage() {
       });
 
       // Handle action results from server (unified message for both players)
-      joinedRoom.onMessage("action-result", (result) => {
+      joinedRoom.onMessage('action-result', (result) => {
         setServerBattleResult(result);
         // Don't set turn here - wait for turn-start message
       });
 
-      joinedRoom.onMessage("battle-end", (data) => {
+      joinedRoom.onMessage('battle-end', (data) => {
         const won = data.winner === joinedRoom.sessionId;
-        gameSounds.play(won ? "victory" : "defeat");
+        gameSounds.play(won ? 'victory' : 'defeat');
 
         // Redirect after showing result
         setTimeout(() => {
-          router.push("/battle");
+          router.push('/battle');
         }, 5000);
       });
 
-      joinedRoom.onMessage("error", (message) => {
+      joinedRoom.onMessage('error', (message) => {
         setError(message.message);
-        gameSounds.play("error");
+        gameSounds.play('error');
       });
 
       setLoading(false);
     } catch (err) {
-      console.error("Failed to connect to room:", err);
-      setError("Failed to connect to battle");
+      console.error('Failed to connect to room:', err);
+      setError('Failed to connect to battle');
       setLoading(false);
     }
   };
 
   const setupBattleTeams = (state: any, mySessionId: string) => {
     // Load saved team data to get abilities and stats
-    const savedSettings = localStorage.getItem("battle_settings");
-    const settings = savedSettings
-      ? JSON.parse(savedSettings)
-      : { teamSize: 5, speed: "speedy" };
+    const savedSettings = localStorage.getItem('battle_settings');
+    const settings = savedSettings ? JSON.parse(savedSettings) : { teamSize: 5, speed: 'speedy' };
     const teamKey = `roboto_rumble_team_${settings.teamSize}`;
     const savedTeam = localStorage.getItem(teamKey);
     const localTeamData = savedTeam ? JSON.parse(savedTeam) : [];
@@ -164,32 +159,35 @@ export default function PvPBattlePage() {
 
     units.forEach((unit: any) => {
       // Try to find matching unit in saved team data for abilities and stats
-      const savedUnit = localTeamData.find((saved: any) => 
-        unit.id.includes(saved.id) || 
-        unit.name === saved.name ||
-        unit.id.endsWith(`:${saved.id}`)
+      const savedUnit = localTeamData.find(
+        (saved: any) =>
+          unit.id.includes(saved.id) || unit.name === saved.name || unit.id.endsWith(`:${saved.id}`)
       );
 
       const battleUnit: BattleUnitV3 = {
         id: unit.id,
         name: unit.name,
         element: unit.element,
-        type: "roboto",
-        stats: savedUnit ? savedUnit.stats : {
-          hp: unit.maxHp,
-          attack: 50,
-          defense: 40,
-          speed: 45,
-          energy: unit.maxEnergy,
-          crit: 10,
-        },
+        type: 'roboto',
+        stats: savedUnit
+          ? savedUnit.stats
+          : {
+              hp: unit.maxHp,
+              attack: 50,
+              defense: 40,
+              speed: 45,
+              energy: unit.maxEnergy,
+              crit: 10,
+            },
         abilities: savedUnit ? savedUnit.abilities : [],
         traits: savedUnit ? savedUnit.traits : {},
-        imageUrl: unit.imageUrl || "",
-        elementModifiers: savedUnit ? savedUnit.elementModifiers : {
-          strongAgainst: [],
-          weakAgainst: [],
-        },
+        imageUrl: unit.imageUrl || '',
+        elementModifiers: savedUnit
+          ? savedUnit.elementModifiers
+          : {
+              strongAgainst: [],
+              weakAgainst: [],
+            },
       };
 
       if (unit.ownerId === mySessionId) {
@@ -207,7 +205,7 @@ export default function PvPBattlePage() {
     if (!room || !isPlayerTurn) return;
 
     // Send action to server
-    room.send("action", {
+    room.send('action', {
       type: action.type,
       sourceId: action.sourceId,
       targetId: action.targetId,
@@ -221,11 +219,11 @@ export default function PvPBattlePage() {
 
   const handleForfeit = () => {
     if (room) {
-      room.send("forfeit");
+      room.send('forfeit');
       room.leave();
     }
-    gameSounds.play("defeat");
-    router.push("/battle");
+    gameSounds.play('defeat');
+    router.push('/battle');
   };
 
   const handleExitAttempt = () => {
@@ -254,10 +252,7 @@ export default function PvPBattlePage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <p className="text-red-400 mb-4">{error}</p>
-            <Button
-              variant="terminal"
-              onClick={() => router.push("/battle/pvp")}
-            >
+            <Button variant="terminal" onClick={() => router.push('/battle/pvp')}>
               Back to Lobby
             </Button>
           </div>
@@ -273,9 +268,7 @@ export default function PvPBattlePage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-pulse">
-              <p className="text-2xl text-green-400 mb-2">
-                WAITING FOR OPPONENT
-              </p>
+              <p className="text-2xl text-green-400 mb-2">WAITING FOR OPPONENT</p>
               <p className="text-gray-400">Get ready for battle...</p>
             </div>
           </div>

@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { StorageService } from "@/lib/storage/storage-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { StorageService } from '@/lib/storage/storage-service';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 const storage = new StorageService();
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type =
-      (searchParams.get("type") as "global" | "weekly" | "monthly") || "global";
-    const element = searchParams.get("element");
+    const type = (searchParams.get('type') as 'global' | 'weekly' | 'monthly') || 'global';
+    const element = searchParams.get('element');
 
     // Get element-specific leaderboard if requested
     if (element) {
@@ -23,10 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(leaderboard);
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leaderboard" },
-      { status: 500 },
-    );
+    console.error('Error fetching leaderboard:', error);
+    return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
   }
 }

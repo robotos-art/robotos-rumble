@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { useAccount, useDisconnect, useEnsName } from "wagmi";
-import { useRobotoTokensContext } from "../../contexts/RobotoTokensContext";
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { useAccount, useDisconnect, useEnsName } from 'wagmi';
+import { useRobotoTokensContext } from '../../contexts/RobotoTokensContext';
 import {
   ChevronDown,
   ExternalLink,
@@ -13,9 +13,9 @@ import {
   HelpCircle,
   Trophy,
   User,
-} from "lucide-react";
-import { Button } from "../ui/button";
-import { TutorialDialog } from "./TutorialDialog";
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import { TutorialDialog } from './TutorialDialog';
 
 export function WalletMenu() {
   const { address } = useAccount();
@@ -38,8 +38,8 @@ export function WalletMenu() {
     setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Handle click outside to close dropdown (desktop only)
@@ -47,40 +47,37 @@ export function WalletMenu() {
     if (!showDropdown || isMobile) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     };
 
     // Small timeout to prevent immediate closing
     const timeoutId = setTimeout(() => {
-      document.addEventListener("click", handleClickOutside, true);
+      document.addEventListener('click', handleClickOutside, true);
     }, 0);
 
     return () => {
       clearTimeout(timeoutId);
-      document.removeEventListener("click", handleClickOutside, true);
+      document.removeEventListener('click', handleClickOutside, true);
     };
   }, [showDropdown, isMobile]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobile && showDropdown) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [isMobile, showDropdown]);
 
   if (!address || !mounted) return null;
 
-  const addressShortened = address.slice(0, 6) + "..." + address.slice(-4);
+  const addressShortened = address.slice(0, 6) + '...' + address.slice(-4);
   const displayName = ensName || addressShortened;
 
   return (
@@ -97,7 +94,7 @@ export function WalletMenu() {
           <span className="hidden sm:inline">{displayName}</span>
         </span>
         <ChevronDown
-          className={`w-3 h-3 sm:w-4 sm:h-4 text-green-500/60 group-hover:text-green-400 transition-all ${showDropdown ? "rotate-180" : ""}`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 text-green-500/60 group-hover:text-green-400 transition-all ${showDropdown ? 'rotate-180' : ''}`}
         />
       </Button>
 
@@ -128,9 +125,7 @@ export function WalletMenu() {
                     <>
                       <span className="text-green-300 text-lg">{ensName}</span>
                       <br />
-                      <span className="text-sm text-green-500/70">
-                        {addressShortened}
-                      </span>
+                      <span className="text-sm text-green-500/70">{addressShortened}</span>
                     </>
                   ) : (
                     address
@@ -157,9 +152,7 @@ export function WalletMenu() {
                     className="flex items-center justify-between hover:bg-green-500/10 -mx-3 px-3 py-2 rounded transition-colors"
                   >
                     <span className="text-base">Robotos</span>
-                    <span className="text-base font-mono text-green-400">
-                      {robotos.length}
-                    </span>
+                    <span className="text-base font-mono text-green-400">{robotos.length}</span>
                   </a>
                   <a
                     href="https://opensea.io/collection/robopets"
@@ -168,9 +161,7 @@ export function WalletMenu() {
                     className="flex items-center justify-between hover:bg-green-500/10 -mx-3 px-3 py-2 rounded transition-colors"
                   >
                     <span className="text-base">Robopets</span>
-                    <span className="text-base font-mono text-green-400">
-                      {robopets.length}
-                    </span>
+                    <span className="text-base font-mono text-green-400">{robopets.length}</span>
                   </a>
                 </div>
               </div>
@@ -235,9 +226,7 @@ export function WalletMenu() {
                   <>
                     <span className="text-green-300">{ensName}</span>
                     <br />
-                    <span className="text-xs text-green-500/70">
-                      {addressShortened}
-                    </span>
+                    <span className="text-xs text-green-500/70">{addressShortened}</span>
                   </>
                 ) : (
                   address
@@ -264,9 +253,7 @@ export function WalletMenu() {
                   className="flex items-center justify-between hover:bg-green-500/10 -mx-2 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-sm">Robotos</span>
-                  <span className="text-sm font-mono text-green-400">
-                    {robotos.length}
-                  </span>
+                  <span className="text-sm font-mono text-green-400">{robotos.length}</span>
                 </a>
                 <a
                   href="https://opensea.io/collection/robopets"
@@ -275,9 +262,7 @@ export function WalletMenu() {
                   className="flex items-center justify-between hover:bg-green-500/10 -mx-2 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-sm">Robopets</span>
-                  <span className="text-sm font-mono text-green-400">
-                    {robopets.length}
-                  </span>
+                  <span className="text-sm font-mono text-green-400">{robopets.length}</span>
                 </a>
               </div>
             </div>

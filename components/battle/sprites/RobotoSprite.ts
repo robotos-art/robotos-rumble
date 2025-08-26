@@ -1,9 +1,9 @@
-import * as Phaser from "phaser";
-import { BattleUnitV3 } from "../../../lib/game-engine/TraitProcessorV3";
+import * as Phaser from 'phaser';
+import { BattleUnitV3, TraitProcessorV3 } from '../../../lib/game-engine/TraitProcessorV3';
 
 export class RobotoSprite extends Phaser.GameObjects.Container {
   private unit: BattleUnitV3;
-  private team: "player" | "enemy";
+  private team: 'player' | 'enemy';
   private sprite: Phaser.GameObjects.Image;
   private hpBar: Phaser.GameObjects.Rectangle;
   private hpBarBg: Phaser.GameObjects.Rectangle;
@@ -18,7 +18,7 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
     x: number,
     y: number,
     unit: BattleUnitV3,
-    team: "player" | "enemy",
+    team: 'player' | 'enemy'
   ) {
     super(scene, x, y);
 
@@ -32,19 +32,19 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
       -this.SPRITE_SIZE / 2,
       -this.SPRITE_SIZE / 2,
       this.SPRITE_SIZE,
-      this.SPRITE_SIZE,
+      this.SPRITE_SIZE
     );
     this.add(background);
 
     // Create sprite with default image
-    this.sprite = scene.add.image(0, 0, "default-sprite");
+    this.sprite = scene.add.image(0, 0, 'default-sprite');
     this.sprite.setDisplaySize(this.SPRITE_SIZE, this.SPRITE_SIZE);
 
     // Load actual image
     this.loadUnitImage();
 
     // Flip enemy sprites
-    if (team === "enemy") {
+    if (team === 'enemy') {
       this.sprite.setFlipX(true);
     }
 
@@ -59,34 +59,28 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
     // Create name text
     this.nameText = scene.add
       .text(0, 65, unit.name.slice(0, 15), {
-        fontSize: "14px",
-        color: "#ffffff",
-        stroke: "#000000",
+        fontSize: '14px',
+        color: '#ffffff',
+        stroke: '#000000',
         strokeThickness: 2,
-        fontFamily: "monospace",
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 
     // Create element text with color
-    const elementColor = this.getElementColor(unit.element);
+    const elementColor = TraitProcessorV3.getElementColor(unit.element);
     this.elementText = scene.add
       .text(0, 80, unit.element, {
-        fontSize: "12px",
+        fontSize: '12px',
         color: elementColor,
-        stroke: "#000000",
+        stroke: '#000000',
         strokeThickness: 2,
-        fontFamily: "monospace",
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 
     // Add all to container
-    this.add([
-      this.sprite,
-      this.hpBarBg,
-      this.hpBar,
-      this.nameText,
-      this.elementText,
-    ]);
+    this.add([this.sprite, this.hpBarBg, this.hpBar, this.nameText, this.elementText]);
 
     // Add to scene
     scene.add.existing(this);
@@ -105,7 +99,7 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
     }
 
     loader.image(key, this.unit.imageUrl);
-    loader.once("complete", () => {
+    loader.once('complete', () => {
       this.sprite.setTexture(key);
       // CRITICAL: Force the display size to our fixed size
       this.sprite.setDisplaySize(this.SPRITE_SIZE, this.SPRITE_SIZE);
@@ -125,15 +119,6 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
     loader.start();
   }
 
-  private getElementColor(element: string): string {
-    const colors: Record<string, string> = {
-      SURGE: "#ffff00",
-      CODE: "#00ffff",
-      METAL: "#c0c0c0",
-      GLITCH: "#ff00ff",
-    };
-    return colors[element] || "#ffffff";
-  }
 
   updateHP(currentHP: number, maxHP: number) {
     const percentage = currentHP / maxHP;
@@ -154,7 +139,7 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
     return new Promise((resolve) => {
       this.scene.tweens.add({
         targets: this.sprite,
-        x: this.team === "player" ? 50 : -50,
+        x: this.team === 'player' ? 50 : -50,
         duration: 200,
         yoyo: true,
         onComplete: () => resolve(),
@@ -169,7 +154,7 @@ export class RobotoSprite extends Phaser.GameObjects.Container {
 
       this.scene.tweens.add({
         targets: this,
-        x: this.x + (this.team === "player" ? -10 : 10),
+        x: this.x + (this.team === 'player' ? -10 : 10),
         duration: 50,
         yoyo: true,
         repeat: 3,

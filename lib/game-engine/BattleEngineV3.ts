@@ -1,19 +1,15 @@
-import {
-  BattleUnitV3,
-  TraitProcessorV3,
-  AbilityInstance,
-} from "./TraitProcessorV3";
-import elements from "../data/elements.json";
-import abilitiesV2 from "../data/abilities-v2.json";
+import { BattleUnitV3, TraitProcessorV3, AbilityInstance } from './TraitProcessorV3';
+import elements from '../data/elements.json';
+import abilitiesV2 from '../data/abilities-v2.json';
 
 export interface BattleStateV3 {
   playerTeam: BattleUnitV3[];
   enemyTeam: BattleUnitV3[];
-  currentTurn: "player" | "enemy";
+  currentTurn: 'player' | 'enemy';
   turnOrder: string[]; // Unit IDs in order of action
   turnIndex: number;
   battleLog: BattleEvent[];
-  status: "preparing" | "active" | "victory" | "defeat";
+  status: 'preparing' | 'active' | 'victory' | 'defeat';
   unitStatuses: Map<string, UnitStatus>;
   fieldEffects: FieldEffect[];
   turn: number;
@@ -44,15 +40,7 @@ export interface FieldEffect {
 }
 
 export interface BattleEvent {
-  type:
-    | "damage"
-    | "heal"
-    | "buff"
-    | "debuff"
-    | "ability"
-    | "element"
-    | "ko"
-    | "miss";
+  type: 'damage' | 'heal' | 'buff' | 'debuff' | 'ability' | 'element' | 'ko' | 'miss';
   source?: string;
   target?: string;
   value?: number;
@@ -67,7 +55,7 @@ export interface ActionResult {
 }
 
 export interface BattleAction {
-  type: "attack" | "ability" | "switch";
+  type: 'attack' | 'ability' | 'switch';
   sourceId: string;
   targetId?: string;
   abilityId?: string;
@@ -82,11 +70,11 @@ export class BattleEngineV3 {
     this.state = {
       playerTeam: [],
       enemyTeam: [],
-      currentTurn: "player",
+      currentTurn: 'player',
       turnOrder: [],
       turnIndex: 0,
       battleLog: [],
-      status: "preparing",
+      status: 'preparing',
       unitStatuses: new Map(),
       fieldEffects: [],
       turn: 0,
@@ -96,11 +84,8 @@ export class BattleEngineV3 {
   initializeBattle(playerTeam: BattleUnitV3[], enemyTeam: BattleUnitV3[]) {
     // Validate teams
     if (!playerTeam?.length || !enemyTeam?.length) {
-      console.error("Invalid teams provided to battle", {
-        playerTeam,
-        enemyTeam,
-      });
-      this.state.status = "defeat";
+      // Invalid teams provided to battle
+      this.state.status = 'defeat';
       return;
     }
 
@@ -112,7 +97,7 @@ export class BattleEngineV3 {
     const allUnits = [...this.state.playerTeam, ...this.state.enemyTeam];
     allUnits.forEach((unit, index) => {
       if (!unit || !unit.id) {
-        console.error("Invalid unit at index", index, unit);
+        // Invalid unit at index
         return;
       }
       this.state.unitStatuses.set(unit.id, {
@@ -133,22 +118,20 @@ export class BattleEngineV3 {
 
     // Log battle start
     this.addBattleEvent({
-      type: "ability",
-      description: "=== BATTLE INITIALIZED ===",
+      type: 'ability',
+      description: '=== BATTLE INITIALIZED ===',
       timestamp: Date.now(),
     });
 
     // Log element advantages
     this.logElementAdvantages();
 
-    this.state.status = "active";
+    this.state.status = 'active';
   }
 
   private checkElementCombos() {
     // Check player team combos
-    const playerElements = this.state.playerTeam.map((u) =>
-      u.element.toLowerCase(),
-    );
+    const playerElements = this.state.playerTeam.map((u) => u.element.toLowerCase());
     const uniquePlayerElements = Array.from(new Set(playerElements));
 
     // Check for dual element combos
@@ -161,9 +144,9 @@ export class BattleEngineV3 {
       if (count >= 2) {
         const comboKey = `${element}_${element}`;
         const combo = (elements.elementCombos.dual as any)[comboKey];
-        if (combo && typeof combo === "object" && "name" in combo) {
+        if (combo && typeof combo === 'object' && 'name' in combo) {
           this.addBattleEvent({
-            type: "element",
+            type: 'element',
             description: `ELEMENT COMBO: ${combo.name} - ${combo.effect}`,
             element: element.toUpperCase(),
             timestamp: Date.now(),
@@ -176,7 +159,7 @@ export class BattleEngineV3 {
     if (uniquePlayerElements.length >= 3) {
       const trinity = elements.elementCombos.trinity;
       this.addBattleEvent({
-        type: "element",
+        type: 'element',
         description: `${trinity.name}: ${trinity.effect}`,
         timestamp: Date.now(),
       });
@@ -187,15 +170,13 @@ export class BattleEngineV3 {
     // Log notable element advantages
     this.state.playerTeam.forEach((unit) => {
       const advantages = this.state.enemyTeam.filter((enemy) =>
-        unit.elementModifiers.strongAgainst.includes(
-          enemy.element.toLowerCase(),
-        ),
+        unit.elementModifiers.strongAgainst.includes(enemy.element.toLowerCase())
       );
 
       if (advantages.length > 0) {
         this.addBattleEvent({
-          type: "element",
-          description: `${unit.name} (${unit.element}) has advantage vs ${advantages.map((a) => a.element).join(", ")}!`,
+          type: 'element',
+          description: `${unit.name} (${unit.element}) has advantage vs ${advantages.map((a) => a.element).join(', ')}!`,
           element: unit.element,
           timestamp: Date.now(),
         });
@@ -225,9 +206,7 @@ export class BattleEngineV3 {
     }
 
     const unitId = this.state.turnOrder[this.state.turnIndex];
-    const unit = [...this.state.playerTeam, ...this.state.enemyTeam].find(
-      (u) => u.id === unitId,
-    );
+    const unit = [...this.state.playerTeam, ...this.state.enemyTeam].find((u) => u.id === unitId);
 
     return unit || null;
   }
@@ -268,21 +247,14 @@ export class BattleEngineV3 {
     if (ability.stats.energyCost > unitStatus.currentEnergy) return false;
 
     // Check if it's a once per battle ability
-    if (
-      ability.stats.cooldown === "once_per_battle" &&
-      unitStatus.cooldowns.has(abilityId)
-    ) {
+    if (ability.stats.cooldown === 'once_per_battle' && unitStatus.cooldowns.has(abilityId)) {
       return false;
     }
 
     return true;
   }
 
-  executeAbility(
-    sourceId: string,
-    targetId: string | string[],
-    abilityId: string,
-  ) {
+  executeAbility(sourceId: string, targetId: string | string[], abilityId: string) {
     const source = this.findUnit(sourceId);
     const ability = TraitProcessorV3.getAbilityData(abilityId);
 
@@ -294,7 +266,7 @@ export class BattleEngineV3 {
     // Check if ability can be used
     if (!this.canUseAbility(sourceId, abilityId)) {
       this.addBattleEvent({
-        type: "ability",
+        type: 'ability',
         source: sourceId,
         description: `${source.name} cannot use ${ability.name}!`,
         timestamp: Date.now(),
@@ -306,7 +278,7 @@ export class BattleEngineV3 {
     sourceStatus.currentEnergy -= ability.stats.energyCost;
 
     // Set cooldown
-    if (ability.stats.cooldown === "once_per_battle") {
+    if (ability.stats.cooldown === 'once_per_battle') {
       sourceStatus.cooldowns.set(abilityId, 999);
     } else if (ability.stats.cooldown > 0) {
       sourceStatus.cooldowns.set(abilityId, ability.stats.cooldown);
@@ -314,7 +286,7 @@ export class BattleEngineV3 {
 
     // Log ability use
     this.addBattleEvent({
-      type: "ability",
+      type: 'ability',
       source: sourceId,
       element: ability.element,
       description: `${source.name} uses ${ability.name}!`,
@@ -323,23 +295,23 @@ export class BattleEngineV3 {
 
     // Execute based on ability type
     switch (ability.type) {
-      case "damage":
+      case 'damage':
         this.executeDamageAbility(source, targetId, ability);
         break;
-      case "heal":
+      case 'heal':
         this.executeHealAbility(source, targetId, ability);
         break;
-      case "buff":
-      case "defensive":
+      case 'buff':
+      case 'defensive':
         this.executeBuffAbility(source, targetId, ability);
         break;
-      case "debuff":
+      case 'debuff':
         this.executeDebuffAbility(source, targetId, ability);
         break;
-      case "field":
+      case 'field':
         this.executeFieldAbility(source, ability);
         break;
-      case "utility":
+      case 'utility':
         this.executeUtilityAbility(source, targetId, ability);
         break;
     }
@@ -348,11 +320,7 @@ export class BattleEngineV3 {
     this.nextTurn();
   }
 
-  private executeDamageAbility(
-    source: BattleUnitV3,
-    targetId: string | string[],
-    ability: any,
-  ) {
+  private executeDamageAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     const targets = this.resolveTargets(source, targetId, ability.targeting);
 
     targets.forEach((target) => {
@@ -360,7 +328,7 @@ export class BattleEngineV3 {
 
       if (damage === 0) {
         this.addBattleEvent({
-          type: "miss",
+          type: 'miss',
           source: source.id,
           target: target.id,
           description: `${source.name}'s attack missed!`,
@@ -375,14 +343,14 @@ export class BattleEngineV3 {
       // Show element effectiveness
       const multiplier = this.getElementMultiplier(
         ability.element || source.element,
-        target.element,
+        target.element
       );
-      let effectiveness = "";
-      if (multiplier > 1) effectiveness = " [SUPER EFFECTIVE!]";
-      else if (multiplier < 1) effectiveness = " [NOT VERY EFFECTIVE]";
+      let effectiveness = '';
+      if (multiplier > 1) effectiveness = ' [SUPER EFFECTIVE!]';
+      else if (multiplier < 1) effectiveness = ' [NOT VERY EFFECTIVE]';
 
       this.addBattleEvent({
-        type: "damage",
+        type: 'damage',
         source: source.id,
         target: target.id,
         value: damage,
@@ -402,7 +370,7 @@ export class BattleEngineV3 {
         targetStatus.isAlive = false;
 
         this.addBattleEvent({
-          type: "ko",
+          type: 'ko',
           target: target.id,
           description: `${target.name} SYSTEM FAILURE!`,
           timestamp: Date.now(),
@@ -413,25 +381,18 @@ export class BattleEngineV3 {
     });
   }
 
-  private executeHealAbility(
-    source: BattleUnitV3,
-    targetId: string | string[],
-    ability: any,
-  ) {
+  private executeHealAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     const targets = this.resolveTargets(source, targetId, ability.targeting);
 
     targets.forEach((target) => {
       const targetStatus = this.state.unitStatuses.get(target.id)!;
       const healAmount = ability.stats.healPower || 50;
-      const actualHeal = Math.min(
-        healAmount,
-        target.stats.hp - targetStatus.currentHp,
-      );
+      const actualHeal = Math.min(healAmount, target.stats.hp - targetStatus.currentHp);
 
       targetStatus.currentHp += actualHeal;
 
       this.addBattleEvent({
-        type: "heal",
+        type: 'heal',
         source: source.id,
         target: target.id,
         value: actualHeal,
@@ -441,11 +402,7 @@ export class BattleEngineV3 {
     });
   }
 
-  private executeBuffAbility(
-    source: BattleUnitV3,
-    targetId: string | string[],
-    ability: any,
-  ) {
+  private executeBuffAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     const targets = this.resolveTargets(source, targetId, ability.targeting);
 
     targets.forEach((target) => {
@@ -463,7 +420,7 @@ export class BattleEngineV3 {
       targetStatus.statusEffects.push(statusEffect);
 
       this.addBattleEvent({
-        type: "buff",
+        type: 'buff',
         source: source.id,
         target: target.id,
         element: ability.element,
@@ -473,11 +430,7 @@ export class BattleEngineV3 {
     });
   }
 
-  private executeDebuffAbility(
-    source: BattleUnitV3,
-    targetId: string | string[],
-    ability: any,
-  ) {
+  private executeDebuffAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     const targets = this.resolveTargets(source, targetId, ability.targeting);
 
     targets.forEach((target) => {
@@ -485,12 +438,12 @@ export class BattleEngineV3 {
 
       // Check for debuff immunity
       const hasImmunity = targetStatus.statusEffects.some(
-        (e) => e.effect.debuff_immunity || e.effect.encrypted,
+        (e) => e.effect.debuff_immunity || e.effect.encrypted
       );
 
       if (hasImmunity) {
         this.addBattleEvent({
-          type: "debuff",
+          type: 'debuff',
           source: source.id,
           target: target.id,
           description: `${target.name} is protected from debuffs!`,
@@ -511,7 +464,7 @@ export class BattleEngineV3 {
       targetStatus.statusEffects.push(statusEffect);
 
       this.addBattleEvent({
-        type: "debuff",
+        type: 'debuff',
         source: source.id,
         target: target.id,
         element: ability.element,
@@ -532,7 +485,7 @@ export class BattleEngineV3 {
     this.state.fieldEffects.push(fieldEffect);
 
     this.addBattleEvent({
-      type: "ability",
+      type: 'ability',
       source: source.id,
       element: ability.element,
       description: `${source.name} creates ${ability.name}!`,
@@ -540,22 +493,16 @@ export class BattleEngineV3 {
     });
   }
 
-  private executeUtilityAbility(
-    source: BattleUnitV3,
-    targetId: string | string[],
-    ability: any,
-  ) {
+  private executeUtilityAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     // Handle various utility effects
-    if (ability.effects.includes("cleanse")) {
+    if (ability.effects.includes('cleanse')) {
       const targets = this.resolveTargets(source, targetId, ability.targeting);
       targets.forEach((target) => {
         const targetStatus = this.state.unitStatuses.get(target.id)!;
-        targetStatus.statusEffects = targetStatus.statusEffects.filter(
-          (e) => e.effect.positive,
-        );
+        targetStatus.statusEffects = targetStatus.statusEffects.filter((e) => e.effect.positive);
 
         this.addBattleEvent({
-          type: "ability",
+          type: 'ability',
           source: source.id,
           target: target.id,
           description: `${target.name}'s systems cleaned!`,
@@ -568,31 +515,27 @@ export class BattleEngineV3 {
   private resolveTargets(
     source: BattleUnitV3,
     targetId: string | string[],
-    targeting: string,
+    targeting: string
   ): BattleUnitV3[] {
     const isPlayerUnit = this.state.playerTeam.some((u) => u.id === source.id);
 
     switch (targeting) {
-      case "single":
+      case 'single':
         const target = this.findUnit(targetId as string);
         return target ? [target] : [];
 
-      case "all_enemies":
+      case 'all_enemies':
         return isPlayerUnit ? this.state.enemyTeam : this.state.playerTeam;
 
-      case "all_allies":
+      case 'all_allies':
         return isPlayerUnit ? this.state.playerTeam : this.state.enemyTeam;
 
-      case "self":
+      case 'self':
         return [source];
 
-      case "random":
-        const enemies = isPlayerUnit
-          ? this.state.enemyTeam
-          : this.state.playerTeam;
-        const aliveEnemies = enemies.filter(
-          (e) => this.state.unitStatuses.get(e.id)?.isAlive,
-        );
+      case 'random':
+        const enemies = isPlayerUnit ? this.state.enemyTeam : this.state.playerTeam;
+        const aliveEnemies = enemies.filter((e) => this.state.unitStatuses.get(e.id)?.isAlive);
         return aliveEnemies.length > 0
           ? [aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)]]
           : [];
@@ -602,35 +545,30 @@ export class BattleEngineV3 {
     }
   }
 
-  private applyAbilityEffects(
-    source: BattleUnitV3,
-    target: BattleUnitV3,
-    effects: any[],
-  ) {
+  private applyAbilityEffects(source: BattleUnitV3, target: BattleUnitV3, effects: any[]) {
     const targetStatus = this.state.unitStatuses.get(target.id)!;
 
     effects.forEach((effect) => {
       // Apply element-specific status effects
-      const elementData =
-        source.element !== "NEUTRAL" ? elements.elements[source.element] : null;
+      const elementData = source.element !== 'NEUTRAL' ? elements.elements[source.element] : null;
 
-      if (effect === "shocked" && source.element === "SURGE") {
+      if (effect === 'shocked' && source.element === 'SURGE') {
         const shockedEffect = elements.elements.SURGE.statusEffects.shocked;
         targetStatus.statusEffects.push({
-          id: "shocked",
-          name: "Shocked",
-          element: "SURGE",
+          id: 'shocked',
+          name: 'Shocked',
+          element: 'SURGE',
           duration: shockedEffect.duration,
           effect: shockedEffect,
         });
       }
 
-      if (effect === "hacked" && source.element === "CODE") {
+      if (effect === 'hacked' && source.element === 'CODE') {
         const hackedEffect = elements.elements.CODE.statusEffects.hacked;
         targetStatus.statusEffects.push({
-          id: "hacked",
-          name: "Hacked",
-          element: "CODE",
+          id: 'hacked',
+          name: 'Hacked',
+          element: 'CODE',
           duration: hackedEffect.duration,
           effect: hackedEffect,
         });
@@ -638,12 +576,8 @@ export class BattleEngineV3 {
     });
   }
 
-  private getElementMultiplier(
-    attackElement: string,
-    defenseElement: string,
-  ): number {
-    const attackKey =
-      attackElement.toLowerCase() as keyof typeof elements.typeChart;
+  private getElementMultiplier(attackElement: string, defenseElement: string): number {
+    const attackKey = attackElement.toLowerCase() as keyof typeof elements.typeChart;
     const defenseKey = defenseElement.toLowerCase();
 
     const typeChart = elements.typeChart[attackKey];
@@ -667,10 +601,7 @@ export class BattleEngineV3 {
     if (currentUnit) {
       const status = this.state.unitStatuses.get(currentUnit.id)!;
       const energyRegen = 20;
-      status.currentEnergy = Math.min(
-        status.currentEnergy + energyRegen,
-        currentUnit.stats.energy,
-      );
+      status.currentEnergy = Math.min(status.currentEnergy + energyRegen, currentUnit.stats.energy);
     }
 
     // Move to next unit
@@ -682,7 +613,7 @@ export class BattleEngineV3 {
       this.calculateTurnOrder();
 
       this.addBattleEvent({
-        type: "ability",
+        type: 'ability',
         description: `=== TURN ${this.state.turn} ===`,
         timestamp: Date.now(),
       });
@@ -700,7 +631,7 @@ export class BattleEngineV3 {
           status.currentHp -= effect.effect.damagePerTurn;
 
           this.addBattleEvent({
-            type: "damage",
+            type: 'damage',
             target: unitId,
             value: effect.effect.damagePerTurn,
             description: `${unit.name} takes ${effect.effect.damagePerTurn} damage from ${effect.name}!`,
@@ -712,7 +643,7 @@ export class BattleEngineV3 {
             status.isAlive = false;
 
             this.addBattleEvent({
-              type: "ko",
+              type: 'ko',
               target: unitId,
               description: `${unit.name} destroyed by ${effect.name}!`,
               timestamp: Date.now(),
@@ -721,12 +652,9 @@ export class BattleEngineV3 {
         }
 
         // Skip turn chance (for shocked)
-        if (
-          effect.effect.skipTurnChance &&
-          Math.random() < effect.effect.skipTurnChance
-        ) {
+        if (effect.effect.skipTurnChance && Math.random() < effect.effect.skipTurnChance) {
           this.addBattleEvent({
-            type: "debuff",
+            type: 'debuff',
             target: unitId,
             description: `${unit.name} is paralyzed and skips turn!`,
             timestamp: Date.now(),
@@ -781,8 +709,8 @@ export class BattleEngineV3 {
     team.forEach((unit1) => {
       team.forEach((unit2) => {
         // Extract the base token ID (without type prefix)
-        const id1 = unit1.id.replace(/^(roboto|robopet)-/, "");
-        const id2 = unit2.id.replace(/^(roboto|robopet)-/, "");
+        const id1 = unit1.id.replace(/^(roboto|robopet)-/, '');
+        const id2 = unit2.id.replace(/^(roboto|robopet)-/, '');
         if (id1 === id2 && unit1.type !== unit2.type) {
           matchingIds.add(id1);
           companionPairs.set(unit1.id, unit1.id); // Track which units get bonus
@@ -809,7 +737,7 @@ export class BattleEngineV3 {
 
         // Log the companion bonus
         this.addBattleEvent({
-          type: "buff",
+          type: 'buff',
           description: `${unit.name} gains COMPANION BONUS (+2% all stats)!`,
           timestamp: Date.now(),
         });
@@ -823,25 +751,25 @@ export class BattleEngineV3 {
 
   private checkBattleEnd() {
     const alivePlayerUnits = this.state.playerTeam.filter(
-      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive,
+      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive
     );
 
     const aliveEnemyUnits = this.state.enemyTeam.filter(
-      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive,
+      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive
     );
 
     if (alivePlayerUnits.length === 0) {
-      this.state.status = "defeat";
+      this.state.status = 'defeat';
       this.addBattleEvent({
-        type: "ability",
-        description: "=== SYSTEM FAILURE - DEFEAT ===",
+        type: 'ability',
+        description: '=== SYSTEM FAILURE - DEFEAT ===',
         timestamp: Date.now(),
       });
     } else if (aliveEnemyUnits.length === 0) {
-      this.state.status = "victory";
+      this.state.status = 'victory';
       this.addBattleEvent({
-        type: "ability",
-        description: "=== VICTORY ACHIEVED ===",
+        type: 'ability',
+        description: '=== VICTORY ACHIEVED ===',
         timestamp: Date.now(),
       });
     }
@@ -863,21 +791,19 @@ export class BattleEngineV3 {
     const currentUnit = this.getCurrentUnit();
     if (!currentUnit) return;
 
-    const isEnemyUnit = this.state.enemyTeam.some(
-      (u) => u.id === currentUnit.id,
-    );
+    const isEnemyUnit = this.state.enemyTeam.some((u) => u.id === currentUnit.id);
     if (!isEnemyUnit) return;
 
     const alivePlayerUnits = this.state.playerTeam.filter(
-      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive,
+      (unit) => this.state.unitStatuses.get(unit.id)?.isAlive
     );
 
     if (alivePlayerUnits.length === 0) return;
 
     // Get available abilities
-    const availableAbilities = this.getAvailableAbilities(
-      currentUnit.id,
-    ).filter((a) => this.canUseAbility(currentUnit.id, a.id));
+    const availableAbilities = this.getAvailableAbilities(currentUnit.id).filter((a) =>
+      this.canUseAbility(currentUnit.id, a.id)
+    );
 
     // 35% chance to use ability if available
     const useAbility = availableAbilities.length > 0 && Math.random() < 0.35;
@@ -896,7 +822,7 @@ export class BattleEngineV3 {
         const hasAdvantage = alivePlayerUnits.some((player) => {
           const multiplier = this.getElementMultiplier(
             ability.ability.element || currentUnit.element,
-            player.element,
+            player.element
           );
           return multiplier > 1;
         });
@@ -915,13 +841,13 @@ export class BattleEngineV3 {
 
       // Pick target based on ability type
       let target: string;
-      if (chosenAbility.ability.targeting === "single") {
+      if (chosenAbility.ability.targeting === 'single') {
         // Target weakest enemy or one with element disadvantage
         const targetOptions = alivePlayerUnits.map((player) => {
           const status = this.state.unitStatuses.get(player.id)!;
           const multiplier = this.getElementMultiplier(
             chosenAbility.ability.element || currentUnit.element,
-            player.element,
+            player.element
           );
 
           return {
@@ -938,7 +864,7 @@ export class BattleEngineV3 {
 
       // Log ability use with name
       this.addBattleEvent({
-        type: "ability",
+        type: 'ability',
         source: currentUnit.id,
         description: `${currentUnit.name} uses ${chosenAbility.ability.name}!`,
         timestamp: Date.now(),
@@ -950,10 +876,7 @@ export class BattleEngineV3 {
       // Smart target selection for basic attacks
       const targetOptions = alivePlayerUnits.map((player) => {
         const status = this.state.unitStatuses.get(player.id)!;
-        const multiplier = this.getElementMultiplier(
-          currentUnit.element,
-          player.element,
-        );
+        const multiplier = this.getElementMultiplier(currentUnit.element, player.element);
 
         return {
           unit: player,
@@ -965,11 +888,12 @@ export class BattleEngineV3 {
       const target = targetOptions[0].unit;
 
       // Generate attack name based on element
-      const attackName = this.getElementAttackName(currentUnit.element);
+      const attackNames = TraitProcessorV3.getElementAttackNames(currentUnit.element);
+      const attackName = attackNames[Math.floor(Math.random() * attackNames.length)];
 
       // Log the attack with name
       this.addBattleEvent({
-        type: "ability",
+        type: 'ability',
         source: currentUnit.id,
         description: `${currentUnit.name} uses ${attackName}!`,
         timestamp: Date.now(),
@@ -978,7 +902,7 @@ export class BattleEngineV3 {
       // Execute basic attack with timing variation
       const timingBonus = 0.8 + Math.random() * 0.5; // 0.8x to 1.3x
       const result = this.executeAction({
-        type: "attack",
+        type: 'attack',
         sourceId: currentUnit.id,
         targetId: target.id,
         timingBonus: timingBonus,
@@ -989,35 +913,6 @@ export class BattleEngineV3 {
     }
   }
 
-  private getElementAttackName(element: string): string {
-    const attackNames: Record<string, string[]> = {
-      SURGE: [
-        "Lightning Strike",
-        "Thunder Bolt",
-        "Electric Surge",
-        "Volt Tackle",
-      ],
-      CODE: ["Data Breach", "System Crash", "Binary Blast", "Firewall Break"],
-      METAL: ["Iron Bash", "Steel Strike", "Metal Claw", "Titanium Punch"],
-      GLITCH: [
-        "Chaos Strike",
-        "Corruption Wave",
-        "Error Cascade",
-        "System Glitch",
-      ],
-      BOND: [
-        "Unity Strike",
-        "Harmony Blast",
-        "Friendship Power",
-        "Loyalty Attack",
-      ],
-      WILD: ["Primal Strike", "Feral Claw", "Nature's Wrath", "Savage Bite"],
-      NEUTRAL: ["Basic Strike", "Quick Attack", "Standard Blow", "Normal Hit"],
-    };
-
-    const names = attackNames[element.toUpperCase()] || attackNames["NEUTRAL"];
-    return names[Math.floor(Math.random() * names.length)];
-  }
 
   // Add methods for Phaser integration
   executeAction(action: BattleAction): ActionResult {
@@ -1025,11 +920,11 @@ export class BattleEngineV3 {
     const stateChanges: any[] = [];
 
     switch (action.type) {
-      case "attack":
+      case 'attack':
         return this.executeBasicAttack(action);
-      case "ability":
+      case 'ability':
         return this.executeAbilityAction(action);
-      case "switch":
+      case 'switch':
         return this.executeSwitch(action);
       default:
         return { events, stateChanges };
@@ -1049,17 +944,11 @@ export class BattleEngineV3 {
     const targetStatus = this.state.unitStatuses.get(target.id)!;
 
     // Calculate base damage - make it more substantial
-    const baseDamage = Math.max(
-      5,
-      attacker.stats.attack * 2 - target.stats.defense,
-    );
+    const baseDamage = Math.max(5, attacker.stats.attack * 2 - target.stats.defense);
     let damage = baseDamage;
 
     // Apply element advantage
-    const elementMultiplier = this.getElementMultiplier(
-      attacker.element,
-      target.element,
-    );
+    const elementMultiplier = this.getElementMultiplier(attacker.element, target.element);
     damage = Math.floor(damage * elementMultiplier);
 
     // Track damage at each step for debugging
@@ -1097,8 +986,8 @@ export class BattleEngineV3 {
     if (critRoll < attacker.stats.crit) {
       damage *= 2;
       events.push({
-        type: "buff",
-        description: "Critical hit!",
+        type: 'buff',
+        description: 'Critical hit!',
         timestamp: Date.now(),
       });
     }
@@ -1107,7 +996,7 @@ export class BattleEngineV3 {
     targetStatus.currentHp = Math.max(0, targetStatus.currentHp - damage);
 
     events.push({
-      type: "damage",
+      type: 'damage',
       source: attacker.id,
       target: target.id,
       value: damage,
@@ -1125,7 +1014,7 @@ export class BattleEngineV3 {
     if (targetStatus.currentHp <= 0) {
       targetStatus.isAlive = false;
       events.push({
-        type: "ko",
+        type: 'ko',
         target: target.id,
         description: `${target.name} was defeated!`,
         timestamp: Date.now(),
@@ -1155,8 +1044,8 @@ export class BattleEngineV3 {
   private executeSwitch(action: BattleAction): ActionResult {
     const events: BattleEvent[] = [];
     events.push({
-      type: "buff",
-      description: "Switched Roboto!",
+      type: 'buff',
+      description: 'Switched Roboto!',
       timestamp: Date.now(),
     });
     this.addBattleEvent(events[0]);

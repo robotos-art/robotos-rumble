@@ -7,10 +7,10 @@
     "ipfs_base": "QmcVBQAbPMzEstPyaBoZ3J1dnE3t1horoX9WebLcCCYLR9",
     "image_cdn": "https://d2w8sp0plvpr8a.cloudfront.net/{tokenId}/body-transparent.png"
   },
-  
+
   "trait_categories": [
     "Body",
-    "Backpack", 
+    "Backpack",
     "Eyes",
     "Head",
     "Face",
@@ -20,7 +20,7 @@
     "Background Color",
     "Matching Traits"
   ],
-  
+
   "robopet_types": {
     "description": "All unique Robopet Type values found in the collection",
     "types": [
@@ -112,7 +112,7 @@
       }
     }
   },
-  
+
   "sample_traits": {
     "description": "Example trait values from sampled Robopets",
     "Body": ["Tractor Wheel", "Basic"],

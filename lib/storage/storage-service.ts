@@ -1,17 +1,12 @@
-import { put, list, del, head } from "@vercel/blob";
-import { getEnsNameForAddress } from "../utils/ens";
-import type {
-  PlayerProfile,
-  BattleRecord,
-  LeaderboardEntry,
-  GlobalStats,
-} from "./types";
+import { put, list, del, head } from '@vercel/blob';
+import { getEnsNameForAddress } from '../utils/ens';
+import type { PlayerProfile, BattleRecord, LeaderboardEntry, GlobalStats } from './types';
 
 export class StorageService {
   private blobToken: string;
 
   constructor() {
-    this.blobToken = process.env.BLOB_READ_WRITE_TOKEN || "";
+    this.blobToken = process.env.BLOB_READ_WRITE_TOKEN || '';
   }
 
   // === PLAYER PROFILE OPERATIONS ===
@@ -41,7 +36,7 @@ export class StorageService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error('Error fetching profile:', error);
       return null;
     }
   }
@@ -58,7 +53,7 @@ export class StorageService {
       // Validate against stat decreases to prevent data loss
       const existing = await this.getProfile(profile.walletAddress);
       if (existing && existing.stats.wins > profile.stats.wins) {
-        console.error("WARNING: Rejected profile update - wins decreased!", {
+        console.error('WARNING: Rejected profile update - wins decreased!', {
           address: profile.walletAddress,
           oldWins: existing.stats.wins,
           newWins: profile.stats.wins,
@@ -67,7 +62,7 @@ export class StorageService {
           timestamp: new Date().toISOString(),
         });
         throw new Error(
-          `Cannot decrease win count from ${existing.stats.wins} to ${profile.stats.wins}`,
+          `Cannot decrease win count from ${existing.stats.wins} to ${profile.stats.wins}`
         );
       }
 
@@ -76,9 +71,9 @@ export class StorageService {
         if (existing && existing.stats.totalBattles > 0) {
           const backupName = `players/${normalizedAddress}/backups/${Date.now()}.json`;
           await put(backupName, JSON.stringify(existing, null, 2), {
-            access: "public",
+            access: 'public',
             allowOverwrite: true, // Allow overwriting backups
-            contentType: "application/json",
+            contentType: 'application/json',
             token: this.blobToken,
           });
 
@@ -90,21 +85,19 @@ export class StorageService {
 
           if (blobs && blobs.length > 5) {
             // Sort by name (timestamp) and delete oldest
-            const sortedBlobs = blobs.sort((a, b) =>
-              a.pathname.localeCompare(b.pathname),
-            );
+            const sortedBlobs = blobs.sort((a, b) => a.pathname.localeCompare(b.pathname));
             const toDelete = sortedBlobs.slice(0, blobs.length - 5);
             for (const blob of toDelete) {
               try {
                 await del(blob.url, { token: this.blobToken });
               } catch (e) {
-                console.error("Error deleting old backup:", e);
+                console.error('Error deleting old backup:', e);
               }
             }
           }
         }
       } catch (e) {
-        console.error("Error creating backup:", e);
+        console.error('Error creating backup:', e);
         // Continue with save even if backup fails
       }
 
@@ -113,14 +106,14 @@ export class StorageService {
 
       // Save profile - Vercel Blob will overwrite if it exists
       await put(blobName, JSON.stringify(profile, null, 2), {
-        access: "public",
+        access: 'public',
         addRandomSuffix: false, // Important: keep the same filename
         allowOverwrite: true, // Required to update existing profiles
-        contentType: "application/json",
+        contentType: 'application/json',
         token: this.blobToken,
       });
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error('Error saving profile:', error);
       throw error;
     }
   }
@@ -134,11 +127,11 @@ export class StorageService {
       const blobName = `battles/${normalizedAddress}/${timestamp}.json`;
 
       await put(blobName, JSON.stringify(battle, null, 2), {
-        access: "public",
+        access: 'public',
         token: this.blobToken,
       });
     } catch (error) {
-      console.error("Error saving battle:", error);
+      console.error('Error saving battle:', error);
       throw error;
     }
   }
@@ -164,21 +157,18 @@ export class StorageService {
             const response = await fetch(blob.url);
             return await response.json();
           } catch (error) {
-            console.error("Error fetching battle:", blob.pathname, error);
+            console.error('Error fetching battle:', blob.pathname, error);
             return null;
           }
-        }),
+        })
       );
 
       // Filter out any failed fetches and sort by timestamp
       return battles
         .filter((battle): battle is BattleRecord => battle !== null)
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-        );
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } catch (error) {
-      console.error("Error fetching battle history:", error);
+      console.error('Error fetching battle history:', error);
       return [];
     }
   }
@@ -186,13 +176,13 @@ export class StorageService {
   // === LEADERBOARD OPERATIONS ===
 
   async getLeaderboard(
-    type: "global" | "weekly" | "monthly" = "global",
+    type: 'global' | 'weekly' | 'monthly' = 'global'
   ): Promise<LeaderboardEntry[]> {
     try {
       // For now, fetch all player profiles and sort them
       // In production, this would be cached or use a proper database
       const { blobs } = await list({
-        prefix: "players/",
+        prefix: 'players/',
         limit: 100,
         token: this.blobToken,
       });
@@ -203,22 +193,20 @@ export class StorageService {
 
       const profiles = await Promise.all(
         blobs
-          .filter((blob) => blob.pathname.endsWith("/profile.json"))
+          .filter((blob) => blob.pathname.endsWith('/profile.json'))
           .map(async (blob) => {
             try {
               const response = await fetch(blob.url);
               return (await response.json()) as PlayerProfile;
             } catch (e) {
-              console.error("Error fetching profile from blob:", e);
+              console.error('Error fetching profile from blob:', e);
               return null;
             }
-          }),
+          })
       );
 
       // Filter out nulls and sort by wins
-      const validProfiles = profiles.filter(
-        (p) => p !== null,
-      ) as PlayerProfile[];
+      const validProfiles = profiles.filter((p) => p !== null) as PlayerProfile[];
 
       const sorted = validProfiles
         .filter((p) => p.stats.totalBattles > 0)
@@ -242,9 +230,7 @@ export class StorageService {
           losses: profile.stats.losses,
           winRate:
             profile.stats.totalBattles > 0
-              ? Math.round(
-                  (profile.stats.wins / profile.stats.totalBattles) * 100,
-                )
+              ? Math.round((profile.stats.wins / profile.stats.totalBattles) * 100)
               : 0,
           winStreak: profile.stats.winStreak,
           favoriteElement: profile.stats.favoriteElement,
@@ -253,7 +239,7 @@ export class StorageService {
 
       return sorted;
     } catch (error) {
-      console.error("Error fetching leaderboard:", error);
+      console.error('Error fetching leaderboard:', error);
       return [];
     }
   }

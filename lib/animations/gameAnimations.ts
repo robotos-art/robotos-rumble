@@ -1,4 +1,4 @@
-import gsap from "gsap";
+import gsap from 'gsap';
 
 // Page transition animations
 export const pageTransition = {
@@ -6,7 +6,7 @@ export const pageTransition = {
     gsap.fromTo(
       element,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+      { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
     );
   },
   out: (element: HTMLElement) => {
@@ -14,7 +14,7 @@ export const pageTransition = {
       opacity: 0,
       y: -20,
       duration: 0.4,
-      ease: "power2.in",
+      ease: 'power2.in',
     });
   },
 };
@@ -25,14 +25,14 @@ export const cardAnimations = {
     gsap.to(element, {
       scale: 1.02,
       duration: 0.2,
-      ease: "power2.out",
+      ease: 'power2.out',
     });
   },
   unhover: (element: HTMLElement) => {
     gsap.to(element, {
       scale: 1,
       duration: 0.2,
-      ease: "power2.out",
+      ease: 'power2.out',
     });
   },
   selected: (element: HTMLElement) => {
@@ -41,7 +41,7 @@ export const cardAnimations = {
       duration: 0.1,
       yoyo: true,
       repeat: 1,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
     });
   },
   appear: (element: HTMLElement, index: number = 0) => {
@@ -53,8 +53,8 @@ export const cardAnimations = {
         scale: 1,
         duration: 0.4,
         delay: index * 0.05,
-        ease: "back.out(1.7)",
-      },
+        ease: 'back.out(1.7)',
+      }
     );
   },
 };
@@ -67,7 +67,7 @@ export const buttonAnimations = {
       duration: 0.1,
       yoyo: true,
       repeat: 1,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
     });
   },
   pulse: (element: HTMLElement) => {
@@ -76,7 +76,7 @@ export const buttonAnimations = {
       duration: 0.5,
       repeat: -1,
       yoyo: true,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
     });
   },
 };
@@ -84,8 +84,8 @@ export const buttonAnimations = {
 // Text animations
 export const textAnimations = {
   typewriter: (element: HTMLElement, onComplete?: () => void) => {
-    const text = element.textContent || "";
-    element.textContent = "";
+    const text = element.textContent || '';
+    element.textContent = '';
 
     let index = 0;
     const interval = setInterval(() => {
@@ -105,17 +105,17 @@ export const textAnimations = {
     tl.to(element, {
       skewX: 5,
       duration: 0.05,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
     })
       .to(element, {
         skewX: -5,
         duration: 0.05,
-        ease: "power2.inOut",
+        ease: 'power2.inOut',
       })
       .to(element, {
         skewX: 0,
         duration: 0.05,
-        ease: "power2.inOut",
+        ease: 'power2.inOut',
       });
 
     return tl;
@@ -125,7 +125,7 @@ export const textAnimations = {
     gsap.fromTo(
       element,
       { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.5, delay, ease: "power2.out" },
+      { opacity: 1, y: 0, duration: 0.5, delay, ease: 'power2.out' }
     );
   },
 };
@@ -135,15 +135,11 @@ export const modalAnimations = {
   open: (overlay: HTMLElement, content: HTMLElement) => {
     const tl = gsap.timeline();
 
-    tl.fromTo(
-      overlay,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.3, ease: "power2.out" },
-    ).fromTo(
+    tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }).fromTo(
       content,
       { opacity: 0, scale: 0.9, y: 20 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(1.7)" },
-      "-=0.1",
+      { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out(1.7)' },
+      '-=0.1'
     );
 
     return tl;
@@ -157,8 +153,8 @@ export const modalAnimations = {
       scale: 0.9,
       y: 20,
       duration: 0.2,
-      ease: "power2.in",
-    }).to(overlay, { opacity: 0, duration: 0.2, ease: "power2.in" }, "-=0.1");
+      ease: 'power2.in',
+    }).to(overlay, { opacity: 0, duration: 0.2, ease: 'power2.in' }, '-=0.1');
 
     return tl;
   },
@@ -167,7 +163,7 @@ export const modalAnimations = {
 // Loading animations
 export const loadingAnimations = {
   dots: (element: HTMLElement) => {
-    const dots = element.querySelectorAll(".loading-dot");
+    const dots = element.querySelectorAll('.loading-dot');
 
     gsap.to(dots, {
       y: -10,
@@ -175,7 +171,7 @@ export const loadingAnimations = {
       stagger: 0.1,
       repeat: -1,
       yoyo: true,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
     });
   },
 
@@ -183,7 +179,7 @@ export const loadingAnimations = {
     gsap.to(element, {
       scaleX: progress,
       duration: 0.3,
-      ease: "power2.out",
+      ease: 'power2.out',
     });
   },
 };
@@ -199,9 +195,9 @@ export const battleAnimations = {
         scale: 1.5,
         y: -50,
         duration: 1,
-        ease: "power2.out",
+        ease: 'power2.out',
         onComplete: () => element.remove(),
-      },
+      }
     );
   },
 
@@ -209,7 +205,7 @@ export const battleAnimations = {
     gsap.to(element, {
       scaleX: percentage,
       duration: 0.5,
-      ease: "power2.out",
+      ease: 'power2.out',
     });
   },
 
@@ -219,7 +215,7 @@ export const battleAnimations = {
       duration: 0.05,
       repeat: 5,
       yoyo: true,
-      ease: "power2.inOut",
+      ease: 'power2.inOut',
       onComplete: () => {
         gsap.set(element, { x: 0 });
       },

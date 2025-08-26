@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { cn } from "../../lib/utils";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '../../lib/utils';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface TimingMeterChargeProps {
   active: boolean;
@@ -79,7 +79,7 @@ export default function TimingMeterCharge({
     setLastPressTime(now);
 
     // Play tap sound
-    gameSounds.play("chargeTap");
+    gameSounds.play('chargeTap');
 
     // Each press adds charge based on resistance (4-6% base, modified by resistance)
     const baseCharge = 4 + Math.random() * 2;
@@ -89,17 +89,9 @@ export default function TimingMeterCharge({
 
     // Play complete sound when reaching max
     if (newCharge >= 100 && chargeLevel < 100) {
-      gameSounds.play("chargeComplete");
+      gameSounds.play('chargeComplete');
     }
-  }, [
-    hasInput,
-    active,
-    disabled,
-    lastPressTime,
-    isKeyDown,
-    resistanceMultiplier,
-    chargeLevel,
-  ]);
+  }, [hasInput, active, disabled, lastPressTime, isKeyDown, resistanceMultiplier, chargeLevel]);
 
   // Decay charge slowly if not pressing (only when active and not locked)
   useEffect(() => {
@@ -118,7 +110,7 @@ export default function TimingMeterCharge({
       const finalScore = calculateScore(chargeLevel);
       setScore(finalScore);
       setHasInput(true);
-      gameSounds.play("timingLocked");
+      gameSounds.play('timingLocked');
       onInput(finalScore);
     }
   }, [active, countdown, hasInput, chargeLevel, calculateScore, onInput]);
@@ -126,12 +118,7 @@ export default function TimingMeterCharge({
   // Keyboard input with key holding prevention
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.key === " " || e.key === "Enter") &&
-        active &&
-        !hasInput &&
-        !disabled
-      ) {
+      if ((e.key === ' ' || e.key === 'Enter') && active && !hasInput && !disabled) {
         e.preventDefault();
         // Only process if key wasn't already down (prevents repeat events)
         if (!isKeyDown) {
@@ -142,34 +129,34 @@ export default function TimingMeterCharge({
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "Enter") {
+      if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         setIsKeyDown(false);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [active, hasInput, disabled, handleCharge, isKeyDown]);
 
   // Get zone color based on charge level
   const getZoneColor = (level: number) => {
-    if (level >= 85) return "bg-green-500";
-    if (level >= 65) return "bg-yellow-500";
-    if (level >= 35) return "bg-orange-500";
-    return "bg-red-500";
+    if (level >= 85) return 'bg-green-500';
+    if (level >= 65) return 'bg-yellow-500';
+    if (level >= 35) return 'bg-orange-500';
+    return 'bg-red-500';
   };
 
   // Get score text
   const getScoreText = (s: number) => {
-    if (s >= 1.5) return "PERFECT!";
-    if (s >= 1.25) return "GOOD!";
-    if (s >= 1.0) return "OK";
-    return "WEAK";
+    if (s >= 1.5) return 'PERFECT!';
+    if (s >= 1.25) return 'GOOD!';
+    if (s >= 1.0) return 'OK';
+    return 'WEAK';
   };
 
   // Hide completely if not active and not keeping visible
@@ -179,7 +166,7 @@ export default function TimingMeterCharge({
 
   return (
     <motion.div
-      className={cn("space-y-2", className)}
+      className={cn('space-y-2', className)}
       animate={{ opacity: hasInput && keepVisibleAfterInput ? 0.6 : 1 }}
       transition={{ duration: 0.3 }}
     >
@@ -222,8 +209,8 @@ export default function TimingMeterCharge({
           {/* Charge fill */}
           <motion.div
             className={cn(
-              "absolute bottom-0 left-0 right-0 transition-all",
-              getZoneColor(chargeLevel),
+              'absolute bottom-0 left-0 right-0 transition-all',
+              getZoneColor(chargeLevel)
             )}
             animate={{
               height: `${chargeLevel}%`,
@@ -254,7 +241,7 @@ export default function TimingMeterCharge({
             className="text-center"
           >
             <div className="text-sm text-gray-400">
-              Tap <span className="text-white font-bold">SPACE</span> or{" "}
+              Tap <span className="text-white font-bold">SPACE</span> or{' '}
               <span className="text-white font-bold">ENTER</span> rapidly!
             </div>
             <div className="text-xs text-gray-500 mt-1">Taps: {pressCount}</div>
@@ -264,17 +251,15 @@ export default function TimingMeterCharge({
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className={cn(
-              "text-lg font-bold text-center",
-              score >= 1.5 && "text-green-400",
-              score >= 1.25 && score < 1.5 && "text-yellow-400",
-              score >= 1.0 && score < 1.25 && "text-orange-400",
-              score < 1.0 && "text-red-400",
+              'text-lg font-bold text-center',
+              score >= 1.5 && 'text-green-400',
+              score >= 1.25 && score < 1.5 && 'text-yellow-400',
+              score >= 1.0 && score < 1.25 && 'text-orange-400',
+              score < 1.0 && 'text-red-400'
             )}
           >
             <div>{getScoreText(score)}</div>
-            <div className="text-sm mt-1">
-              {`${(score * 100).toFixed(0)}% power`}
-            </div>
+            <div className="text-sm mt-1">{`${(score * 100).toFixed(0)}% power`}</div>
           </motion.div>
         )}
       </div>

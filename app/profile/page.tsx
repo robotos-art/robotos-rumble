@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useAccount } from 'wagmi';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isConnected || !address) {
-      router.push("/");
+      router.push('/');
       return;
     }
 

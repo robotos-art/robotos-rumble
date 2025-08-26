@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "../ui/button";
-import { ArrowLeft, Zap, Swords } from "lucide-react";
-import { gameSounds } from "../../lib/sounds/gameSounds";
-import { SoundToggle } from "./SoundToggle";
-import { WalletConnect } from "./WalletConnect";
-import { BackgroundSelector } from "./BackgroundSelector";
-import { cn } from "../../lib/utils";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Button } from '../ui/button';
+import { ArrowLeft, Zap, Swords } from 'lucide-react';
+import { gameSounds } from '../../lib/sounds/gameSounds';
+import { SoundToggle } from './SoundToggle';
+import { WalletConnect } from './WalletConnect';
+import { BackgroundSelector } from './BackgroundSelector';
+import { cn } from '../../lib/utils';
 
 interface GameHeaderProps {
   title?: string;
@@ -24,7 +24,7 @@ interface GameHeaderProps {
 
 export function GameHeader({
   title,
-  backHref = "/",
+  backHref = '/',
   showBackButton = false,
   showSoundToggle = true,
   showWallet = true,
@@ -34,17 +34,17 @@ export function GameHeader({
   rightContent,
 }: GameHeaderProps) {
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
-  const isBattlePage = pathname?.startsWith("/battle");
-  const isTeamBuilderPage = pathname === "/team-builder";
+  const isHomePage = pathname === '/';
+  const isBattlePage = pathname?.startsWith('/battle');
+  const isTeamBuilderPage = pathname === '/team-builder';
 
   return (
     <header
       className={cn(
-        "flex items-center justify-between",
-        "px-2 sm:px-4 md:px-8",
-        "py-2 sm:py-4 md:py-6",
-        className,
+        'flex items-center justify-between',
+        'px-2 sm:px-4 md:px-8',
+        'py-2 sm:py-4 md:py-6',
+        className
       )}
     >
       {/* Left section */}
@@ -65,7 +65,7 @@ export function GameHeader({
         )}
 
         {/* Back button - only show if not going back to home */}
-        {showBackButton && backHref && backHref !== "/" && (
+        {showBackButton && backHref && backHref !== '/' && (
           <Link href={backHref}>
             <Button
               variant="terminal"

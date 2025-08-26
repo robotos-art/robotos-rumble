@@ -7,18 +7,18 @@ const nextConfig = {
       'robotos.mypinata.cloud',
       'nftstorage.link',
       'cf-ipfs.com',
-      'd2lp2vbc3umjmr.cloudfront.net'
+      'd2lp2vbc3umjmr.cloudfront.net',
     ],
   },
   webpack: (config) => {
-    config.resolve.fallback = { 
-      fs: false, 
-      net: false, 
+    config.resolve.fallback = {
+      fs: false,
+      net: false,
       tls: false,
-      electron: false 
-    }
-    return config
+      electron: false,
+    };
+    return config;
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

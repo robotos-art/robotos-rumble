@@ -1,5 +1,5 @@
-import { gameSounds } from "../sounds/gameSounds";
-import { BATTLE_CONSTANTS } from "./battleConstants";
+import { gameSounds } from '../sounds/gameSounds';
+import { BATTLE_CONSTANTS } from './battleConstants';
 
 export interface BattleEvent {
   type?: string;
@@ -14,31 +14,31 @@ export function playDamageSound(
 ): void {
   // Handle miss
   if (damage === 0) {
-    gameSounds.play("miss");
+    gameSounds.play('miss');
     return;
   }
-  
+
   // Handle critical hits with special sounds
   if (isCritical) {
     if (damage >= BATTLE_CONSTANTS.DAMAGE_THRESHOLDS.STRONG) {
-      gameSounds.play("criticalSuper");
+      gameSounds.play('criticalSuper');
     } else if (timingScore >= BATTLE_CONSTANTS.TIMING_BONUS.PERFECT) {
-      gameSounds.play("criticalCombo"); // Perfect timing + critical
+      gameSounds.play('criticalCombo'); // Perfect timing + critical
     } else {
-      gameSounds.play("critical");
+      gameSounds.play('critical');
     }
     return;
   }
-  
+
   // Regular damage sounds
   if (damage < BATTLE_CONSTANTS.DAMAGE_THRESHOLDS.WEAK) {
-    gameSounds.play("attackWeak");
+    gameSounds.play('attackWeak');
   } else if (damage < BATTLE_CONSTANTS.DAMAGE_THRESHOLDS.NORMAL) {
-    gameSounds.play("attackNormal");
+    gameSounds.play('attackNormal');
   } else if (damage < BATTLE_CONSTANTS.DAMAGE_THRESHOLDS.STRONG) {
-    gameSounds.play("attackStrong");
+    gameSounds.play('attackStrong');
   } else {
-    gameSounds.play("attackDevastating");
+    gameSounds.play('attackDevastating');
   }
 }
 
@@ -46,35 +46,29 @@ export function playDamageSound(
 export function determineDamageType(
   damage: number,
   events?: BattleEvent[]
-): "normal" | "critical" | "effective" | "weak" | "miss" {
+): 'normal' | 'critical' | 'effective' | 'weak' | 'miss' {
   if (damage === 0) {
-    return "miss";
+    return 'miss';
   }
-  
+
   if (events) {
     // Check for critical hit
-    const critEvent = events.find((e) =>
-      e.description?.includes("Critical")
-    );
+    const critEvent = events.find((e) => e.description?.includes('Critical'));
     if (critEvent) {
-      return "critical";
+      return 'critical';
     }
-    
+
     // Check for element effectiveness
-    const effectiveEvent = events.find((e) =>
-      e.description?.includes("SUPER EFFECTIVE")
-    );
+    const effectiveEvent = events.find((e) => e.description?.includes('SUPER EFFECTIVE'));
     if (effectiveEvent) {
-      return "effective";
+      return 'effective';
     }
-    
-    const weakEvent = events.find((e) =>
-      e.description?.includes("NOT VERY EFFECTIVE")
-    );
+
+    const weakEvent = events.find((e) => e.description?.includes('NOT VERY EFFECTIVE'));
     if (weakEvent) {
-      return "weak";
+      return 'weak';
     }
   }
-  
-  return "normal";
+
+  return 'normal';
 }

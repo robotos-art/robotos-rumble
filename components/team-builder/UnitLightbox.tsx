@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import {
   X,
   ChevronLeft,
@@ -12,13 +12,10 @@ import {
   Gauge,
   Sparkles,
   Plus,
-} from "lucide-react";
-import { Button } from "../ui/button";
-import {
-  BattleUnitV3,
-  TraitProcessorV3,
-} from "../../lib/game-engine/TraitProcessorV3";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface UnitLightboxProps {
   units: BattleUnitV3[];
@@ -59,17 +56,17 @@ export function UnitLightbox({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
-        case "Escape":
+        case 'Escape':
           onClose();
           break;
-        case "ArrowLeft":
+        case 'ArrowLeft':
           navigatePrev();
           break;
-        case "ArrowRight":
+        case 'ArrowRight':
           navigateNext();
           break;
-        case "Enter":
-        case " ":
+        case 'Enter':
+        case ' ':
           if (onSelect && canSelect) {
             onSelect(currentUnit);
           }
@@ -77,8 +74,8 @@ export function UnitLightbox({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     currentIndex,
     currentUnit,
@@ -95,10 +92,7 @@ export function UnitLightbox({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div
-        className="relative max-w-4xl w-full mx-2 sm:mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="relative max-w-4xl w-full mx-2 sm:mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Navigation buttons */}
         <Button
           variant="terminal"
@@ -145,19 +139,14 @@ export function UnitLightbox({
             <div className="p-4 sm:p-8">
               {/* Header */}
               <div className="mb-4 sm:mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                  {currentUnit.name}
-                </h2>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2">{currentUnit.name}</h2>
                 <div
                   className="text-lg sm:text-xl"
                   style={{
-                    color: TraitProcessorV3.getElementColor(
-                      currentUnit.element,
-                    ),
+                    color: TraitProcessorV3.getElementColor(currentUnit.element),
                   }}
                 >
-                  {TraitProcessorV3.getElementSymbol(currentUnit.element)}{" "}
-                  {currentUnit.element}
+                  {TraitProcessorV3.getElementSymbol(currentUnit.element)} {currentUnit.element}
                 </div>
               </div>
 
@@ -168,9 +157,7 @@ export function UnitLightbox({
                     <Heart className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">HEALTH</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.hp}
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.hp}</div>
                 </div>
 
                 <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
@@ -178,9 +165,7 @@ export function UnitLightbox({
                     <Swords className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">ATTACK</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.attack}
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.attack}</div>
                 </div>
 
                 <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
@@ -188,9 +173,7 @@ export function UnitLightbox({
                     <Shield className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">DEFENSE</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.defense}
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.defense}</div>
                 </div>
 
                 <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
@@ -198,9 +181,7 @@ export function UnitLightbox({
                     <Zap className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">SPEED</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.speed}
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.speed}</div>
                 </div>
 
                 <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
@@ -208,9 +189,7 @@ export function UnitLightbox({
                     <Gauge className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">ENERGY</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.energy}
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.energy}</div>
                 </div>
 
                 <div className="bg-black/50 border border-green-500/30 rounded p-2 sm:p-4">
@@ -218,9 +197,7 @@ export function UnitLightbox({
                     <Sparkles className="w-4 sm:w-5 h-4 sm:h-5" />
                     <span className="text-xs sm:text-sm">CRITICAL</span>
                   </div>
-                  <div className="text-lg sm:text-2xl font-mono">
-                    {currentUnit.stats.crit}%
-                  </div>
+                  <div className="text-lg sm:text-2xl font-mono">{currentUnit.stats.crit}%</div>
                 </div>
               </div>
 
@@ -237,18 +214,12 @@ export function UnitLightbox({
                         key={abilityId}
                         className="p-3 bg-black/50 border border-green-500/30 rounded"
                         style={{
-                          borderColor:
-                            TraitProcessorV3.getElementColor(ability.element) +
-                            "40",
-                          backgroundColor:
-                            TraitProcessorV3.getElementColor(ability.element) +
-                            "0A",
+                          borderColor: TraitProcessorV3.getElementColor(ability.element) + '40',
+                          backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A',
                         }}
                       >
                         <div className="font-semibold mb-1">{ability.name}</div>
-                        <div className="text-sm text-green-400/80">
-                          {ability.description}
-                        </div>
+                        <div className="text-sm text-green-400/80">{ability.description}</div>
                       </div>
                     ) : null;
                   })}
@@ -265,9 +236,9 @@ export function UnitLightbox({
                   disabled={!canSelect}
                 >
                   {isSelected ? (
-                    "[ALREADY SELECTED]"
+                    '[ALREADY SELECTED]'
                   ) : selectedTeam.length >= maxTeamSize ? (
-                    "[TEAM FULL]"
+                    '[TEAM FULL]'
                   ) : (
                     <>
                       <Plus className="w-5 h-5 mr-2" />
@@ -279,8 +250,7 @@ export function UnitLightbox({
 
               {/* Navigation info */}
               <div className="mt-4 text-center text-green-400/60 text-sm">
-                {currentIndex + 1} of {units.length} • Use arrow keys to
-                navigate
+                {currentIndex + 1} of {units.length} • Use arrow keys to navigate
               </div>
             </div>
           </div>

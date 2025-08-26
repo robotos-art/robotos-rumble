@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { cn } from "../../lib/utils";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '../../lib/utils';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface TimingMeterProps {
   active: boolean;
   onInput: (score: number) => void;
-  type?: "attack" | "defense";
+  type?: 'attack' | 'defense';
   showCountdown?: boolean;
   countdown?: number;
   disabled?: boolean;
@@ -19,7 +19,7 @@ interface TimingMeterProps {
 export default function TimingMeter({
   active,
   onInput,
-  type = "attack",
+  type = 'attack',
   showCountdown = false,
   countdown = 5,
   disabled = false,
@@ -101,13 +101,13 @@ export default function TimingMeter({
 
     // Play timing feedback sound
     if (finalScore >= 1.5) {
-      gameSounds.play("timingPerfect");
+      gameSounds.play('timingPerfect');
     } else if (finalScore >= 1.25) {
-      gameSounds.play("timingGood");
+      gameSounds.play('timingGood');
     } else if (finalScore >= 1.0) {
-      gameSounds.play("timingLocked");
+      gameSounds.play('timingLocked');
     } else {
-      gameSounds.play("timingMiss");
+      gameSounds.play('timingMiss');
     }
 
     onInput(finalScore);
@@ -116,19 +116,14 @@ export default function TimingMeter({
   // Keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.key === " " || e.key === "Enter") &&
-        active &&
-        !hasInput &&
-        !disabled
-      ) {
+      if ((e.key === ' ' || e.key === 'Enter') && active && !hasInput && !disabled) {
         e.preventDefault();
         handleInput();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [active, hasInput, disabled, handleInput]);
 
   // Handle click/tap for mobile
@@ -141,18 +136,18 @@ export default function TimingMeter({
   // Get zone color based on position
   const getZoneColor = (pos: number) => {
     const distance = Math.abs(pos - 50);
-    if (distance <= 5) return "bg-green-500";
-    if (distance <= 15) return "bg-yellow-500";
-    if (distance <= 30) return "bg-orange-500";
-    return "bg-red-500";
+    if (distance <= 5) return 'bg-green-500';
+    if (distance <= 15) return 'bg-yellow-500';
+    if (distance <= 30) return 'bg-orange-500';
+    return 'bg-red-500';
   };
 
   // Get score text
   const getScoreText = (s: number) => {
-    if (s >= 1.5) return "PERFECT!";
-    if (s >= 1.25) return "GOOD!";
-    if (s >= 1.0) return "OK";
-    return "WEAK";
+    if (s >= 1.5) return 'PERFECT!';
+    if (s >= 1.25) return 'GOOD!';
+    if (s >= 1.0) return 'OK';
+    return 'WEAK';
   };
 
   // Hide completely if not active and not keeping visible
@@ -162,14 +157,14 @@ export default function TimingMeter({
 
   return (
     <motion.div
-      className={cn("space-y-2", className)}
+      className={cn('space-y-2', className)}
       animate={{ opacity: hasInput && keepVisibleAfterInput ? 0.6 : 1 }}
       transition={{ duration: 0.3 }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="text-sm font-bold text-green-400">
-          {type === "attack" ? "ATTACK TIMING" : "DEFENSE TIMING"}
+          {type === 'attack' ? 'ATTACK TIMING' : 'DEFENSE TIMING'}
           {hasInput && keepVisibleAfterInput && (
             <span className="ml-2 text-xs text-yellow-400">(LOCKED)</span>
           )}
@@ -199,11 +194,11 @@ export default function TimingMeter({
         {/* Moving indicator */}
         <motion.div
           className={cn(
-            "absolute top-1 bottom-1 w-2 rounded",
-            hasInput ? getZoneColor(position) : "bg-white",
-            hasInput && "animate-pulse",
+            'absolute top-1 bottom-1 w-2 rounded',
+            hasInput ? getZoneColor(position) : 'bg-white',
+            hasInput && 'animate-pulse'
           )}
-          style={{ left: `${position}%`, transform: "translateX(-50%)" }}
+          style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
           animate={hasInput ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
         />
@@ -227,40 +222,37 @@ export default function TimingMeter({
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className={cn(
-              "text-lg font-bold",
-              score >= 1.5 && "text-green-400",
-              score >= 1.25 && score < 1.5 && "text-yellow-400",
-              score >= 1.0 && score < 1.25 && "text-orange-400",
-              score < 1.0 && "text-red-400",
+              'text-lg font-bold',
+              score >= 1.5 && 'text-green-400',
+              score >= 1.25 && score < 1.5 && 'text-yellow-400',
+              score >= 1.0 && score < 1.25 && 'text-orange-400',
+              score < 1.0 && 'text-red-400'
             )}
           >
             {getScoreText(score)}
-            {type === "attack" && (
-              <span className="text-sm">
-                {" "}
-                {`${(score * 100).toFixed(0)}% power`}
-              </span>
+            {type === 'attack' && (
+              <span className="text-sm"> {`${(score * 100).toFixed(0)}% power`}</span>
             )}
           </motion.div>
         ) : (
           <>
             {/* Desktop instructions */}
             <div className="hidden sm:block text-sm text-gray-400">
-              Press <span className="text-white font-bold">SPACE</span> to{" "}
-              {type === "attack" ? "attack" : "defend"}!
+              Press <span className="text-white font-bold">SPACE</span> to{' '}
+              {type === 'attack' ? 'attack' : 'defend'}!
             </div>
             {/* Mobile tap button */}
             <button
               onClick={handleTapInput}
               disabled={!active || hasInput || disabled}
               className={cn(
-                "sm:hidden w-full py-4 px-6 rounded-lg font-bold text-lg transition-all",
-                "bg-green-900/50 border-2 border-green-500",
-                "active:scale-95 active:bg-green-800/50",
-                disabled && "opacity-50 cursor-not-allowed",
+                'sm:hidden w-full py-4 px-6 rounded-lg font-bold text-lg transition-all',
+                'bg-green-900/50 border-2 border-green-500',
+                'active:scale-95 active:bg-green-800/50',
+                disabled && 'opacity-50 cursor-not-allowed'
               )}
             >
-              TAP TO {type === "attack" ? "ATTACK" : "DEFEND"}!
+              TAP TO {type === 'attack' ? 'ATTACK' : 'DEFEND'}!
             </button>
             {/* Mobile instructions */}
             <div className="sm:hidden text-xs text-gray-500 mt-1">

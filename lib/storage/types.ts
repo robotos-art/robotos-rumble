@@ -3,7 +3,7 @@ export interface PlayerProfile {
   displayName?: string | null;
   ensName?: string | null;
   avatar?: {
-    type: "roboto" | "robopet";
+    type: 'roboto' | 'robopet';
     tokenId: string;
     imageUrl?: string;
   } | null;
@@ -33,19 +33,19 @@ export interface BattleRecord {
   id: string;
   playerAddress: string;
   timestamp: string;
-  result: "victory" | "defeat";
+  result: 'victory' | 'defeat';
   duration: number;
   teamUsed: {
     id: string;
     name: string;
     element: string;
-    type: "roboto" | "robopet";
+    type: 'roboto' | 'robopet';
   }[];
   enemyTeam: {
     id: string;
     name: string;
     element: string;
-    type: "roboto" | "robopet";
+    type: 'roboto' | 'robopet';
   }[];
   damageDealt: number;
   damageReceived: number;
@@ -54,7 +54,7 @@ export interface BattleRecord {
 
 export interface Badge {
   id: string;
-  tier: "bronze" | "silver" | "gold" | "platinum";
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
   earnedAt: string;
 }
 
@@ -63,7 +63,7 @@ export interface LeaderboardEntry {
   displayName?: string | null;
   ensName?: string | null;
   avatar?: {
-    type: "roboto" | "robopet";
+    type: 'roboto' | 'robopet';
     tokenId: string;
     imageUrl?: string;
   } | null;

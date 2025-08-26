@@ -1,9 +1,6 @@
-import * as Phaser from "phaser";
-import {
-  BattleUnitV3,
-  TraitProcessorV3,
-} from "../../../lib/game-engine/TraitProcessorV3";
-import { gameSounds } from "../../../lib/sounds/gameSounds";
+import * as Phaser from 'phaser';
+import { BattleUnitV3, TraitProcessorV3 } from '../../../lib/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../../lib/sounds/gameSounds';
 
 interface ActionCallbacks {
   onAttack: () => void;
@@ -35,14 +32,7 @@ export class BattleUI {
     const logHeight = 80;
     const logMargin = 20;
     const logY = height - logHeight / 2 - logMargin;
-    const logBg = this.scene.add.rectangle(
-      width / 2,
-      logY,
-      width * 0.8,
-      logHeight,
-      0x000000,
-      0.9,
-    );
+    const logBg = this.scene.add.rectangle(width / 2, logY, width * 0.8, logHeight, 0x000000, 0.9);
     logBg.setStrokeStyle(2, 0x00ff00);
 
     // Add depth to ensure UI is on top
@@ -50,10 +40,10 @@ export class BattleUI {
 
     // Create log text objects with better spacing
     for (let i = 0; i < 3; i++) {
-      const text = this.scene.add.text(width * 0.12, logY - 25 + i * 18, "", {
-        fontSize: "14px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+      const text = this.scene.add.text(width * 0.12, logY - 25 + i * 18, '', {
+        fontSize: '14px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       });
       text.setDepth(101);
       this.logTexts.push(text);
@@ -71,7 +61,7 @@ export class BattleUI {
     this.menuOptions = [];
 
     // Play menu open sound
-    gameSounds.play("menuOpen");
+    gameSounds.play('menuOpen');
 
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
@@ -90,38 +80,36 @@ export class BattleUI {
 
     // Title
     const title = this.scene.add
-      .text(0, -80, "SELECT ACTION", {
-        fontSize: "20px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+      .text(0, -80, 'SELECT ACTION', {
+        fontSize: '20px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 
     // Attack button
-    const attackBtn = this.createButton(0, -30, "ATTACK", () => {
-      gameSounds.play("select");
+    const attackBtn = this.createButton(0, -30, 'ATTACK', () => {
+      gameSounds.play('select');
       callbacks.onAttack();
     });
     this.menuOptions.push(attackBtn);
 
     // Ability button (with cooldown indicator)
     const abilityText =
-      unit.abilities.length > 0
-        ? `ABILITY (${unit.abilities.length})`
-        : "NO ABILITIES";
+      unit.abilities.length > 0 ? `ABILITY (${unit.abilities.length})` : 'NO ABILITIES';
     const abilityBtn = this.createButton(0, 10, abilityText, () => {
       if (unit.abilities.length > 0) {
-        gameSounds.play("select");
+        gameSounds.play('select');
         this.showAbilityMenu(unit, callbacks.onAbility);
       } else {
-        gameSounds.play("error");
+        gameSounds.play('error');
       }
     });
     this.menuOptions.push(abilityBtn);
 
     // Switch button
-    const switchBtn = this.createButton(0, 50, "SWITCH", () => {
-      gameSounds.play("select");
+    const switchBtn = this.createButton(0, 50, 'SWITCH', () => {
+      gameSounds.play('select');
       callbacks.onSwitch();
     });
     this.menuOptions.push(switchBtn);
@@ -138,7 +126,7 @@ export class BattleUI {
 
   hideActionMenu() {
     if (this.actionMenu) {
-      gameSounds.play("menuClose");
+      gameSounds.play('menuClose');
       this.actionMenu.destroy(true);
       this.actionMenu = undefined;
       this.menuOptions = [];
@@ -154,16 +142,16 @@ export class BattleUI {
       if (!this.actionMenu) return;
 
       switch (event.key) {
-        case "ArrowUp":
+        case 'ArrowUp':
           event.preventDefault();
           this.navigateMenu(-1);
           break;
-        case "ArrowDown":
+        case 'ArrowDown':
           event.preventDefault();
           this.navigateMenu(1);
           break;
-        case "Enter":
-        case " ":
+        case 'Enter':
+        case ' ':
           event.preventDefault();
           this.selectMenuOption();
           break;
@@ -171,12 +159,12 @@ export class BattleUI {
     };
 
     // Add keyboard listener
-    this.scene.input.keyboard?.on("keydown", this.keyDownHandler);
+    this.scene.input.keyboard?.on('keydown', this.keyDownHandler);
   }
 
   private removeKeyboardNavigation() {
     if (this.keyDownHandler) {
-      this.scene.input.keyboard?.off("keydown", this.keyDownHandler);
+      this.scene.input.keyboard?.off('keydown', this.keyDownHandler);
       this.keyDownHandler = undefined;
     }
   }
@@ -194,20 +182,17 @@ export class BattleUI {
 
     // Only play sound if index changed
     if (prevIndex !== this.selectedMenuIndex) {
-      gameSounds.play("menuNavigate");
+      gameSounds.play('menuNavigate');
       this.updateMenuSelection();
     }
   }
 
   private selectMenuOption() {
-    if (
-      this.selectedMenuIndex >= 0 &&
-      this.selectedMenuIndex < this.menuOptions.length
-    ) {
+    if (this.selectedMenuIndex >= 0 && this.selectedMenuIndex < this.menuOptions.length) {
       const selectedButton = this.menuOptions[this.selectedMenuIndex];
       // Trigger the button's click handler
       const bg = selectedButton.getAt(0) as Phaser.GameObjects.Rectangle;
-      bg.emit("pointerdown");
+      bg.emit('pointerdown');
     }
   }
 
@@ -221,12 +206,12 @@ export class BattleUI {
         // Highlight selected
         bg.setFillStyle(0x005500);
         bg.setStrokeStyle(3, 0xffff00);
-        label.setColor("#ffff00");
+        label.setColor('#ffff00');
       } else {
         // Normal state
         bg.setFillStyle(0x003300, 0.8);
         bg.setStrokeStyle(1, 0x00ff00);
-        label.setColor("#00ff00");
+        label.setColor('#00ff00');
       }
     });
   }
@@ -243,10 +228,10 @@ export class BattleUI {
 
     // Title
     const title = this.scene.add
-      .text(0, -100, "SELECT ABILITY", {
-        fontSize: "18px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+      .text(0, -100, 'SELECT ABILITY', {
+        fontSize: '18px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
     menu.add(title);
@@ -258,13 +243,13 @@ export class BattleUI {
 
       const y = -50 + index * 40;
       const btn = this.createButton(0, y, ability.name.toUpperCase(), () => {
-        gameSounds.play("abilitySelect");
+        gameSounds.play('abilitySelect');
         menu.destroy();
         onSelect(index);
       });
 
       // Add element color
-      const elementColor = this.getElementColor(ability.element);
+      const elementColor = TraitProcessorV3.getElementColor(ability.element);
       const textObject = btn.getAt(1) as Phaser.GameObjects.Text;
       textObject.setColor(elementColor);
 
@@ -272,8 +257,8 @@ export class BattleUI {
     });
 
     // Back button
-    const backBtn = this.createButton(0, 80, "BACK", () => {
-      gameSounds.play("cancel");
+    const backBtn = this.createButton(0, 80, 'BACK', () => {
+      gameSounds.play('cancel');
       menu.destroy();
       // Show action menu again
     });
@@ -282,11 +267,7 @@ export class BattleUI {
     this.scene.add.existing(menu);
   }
 
-  showSwitchMenu(
-    team: BattleUnitV3[],
-    currentIndex: number,
-    onSelect: (index: number) => void,
-  ) {
+  showSwitchMenu(team: BattleUnitV3[], currentIndex: number, onSelect: (index: number) => void) {
     this.hideActionMenu();
 
     const menu = this.scene.add.container(512, 300);
@@ -298,10 +279,10 @@ export class BattleUI {
 
     // Title
     const title = this.scene.add
-      .text(0, -150, "SELECT ROBOTO", {
-        fontSize: "20px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+      .text(0, -150, 'SELECT ROBOTO', {
+        fontSize: '20px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
     menu.add(title);
@@ -321,7 +302,7 @@ export class BattleUI {
         90,
         120,
         index === currentIndex ? 0x005500 : 0x003300,
-        0.8,
+        0.8
       );
       cardBg.setStrokeStyle(1, index === currentIndex ? 0xffff00 : 0x00ff00);
 
@@ -331,18 +312,18 @@ export class BattleUI {
       // Name
       const name = this.scene.add
         .text(0, 40, unit.name.slice(0, 8), {
-          fontSize: "10px",
-          color: "#ffffff",
-          fontFamily: "monospace",
+          fontSize: '10px',
+          color: '#ffffff',
+          fontFamily: 'monospace',
         })
         .setOrigin(0.5);
 
       // HP indicator
       const hpText = this.scene.add
-        .text(0, 55, "HP: 100%", {
-          fontSize: "10px",
-          color: "#00ff00",
-          fontFamily: "monospace",
+        .text(0, 55, 'HP: 100%', {
+          fontSize: '10px',
+          color: '#00ff00',
+          fontFamily: 'monospace',
         })
         .setOrigin(0.5);
 
@@ -351,9 +332,9 @@ export class BattleUI {
       // Make clickable if not current
       if (index !== currentIndex) {
         cardBg.setInteractive();
-        cardBg.on("pointerover", () => cardBg.setFillStyle(0x005500));
-        cardBg.on("pointerout", () => cardBg.setFillStyle(0x003300));
-        cardBg.on("pointerdown", () => {
+        cardBg.on('pointerover', () => cardBg.setFillStyle(0x005500));
+        cardBg.on('pointerout', () => cardBg.setFillStyle(0x003300));
+        cardBg.on('pointerdown', () => {
           menu.destroy();
           onSelect(index);
         });
@@ -363,8 +344,8 @@ export class BattleUI {
     });
 
     // Cancel button
-    const cancelBtn = this.createButton(0, 130, "CANCEL", () => {
-      gameSounds.play("cancel");
+    const cancelBtn = this.createButton(0, 130, 'CANCEL', () => {
+      gameSounds.play('cancel');
       menu.destroy();
       // Show action menu again
     });
@@ -375,16 +356,16 @@ export class BattleUI {
 
   updateBattleLog(events: any[]) {
     events.forEach((event) => {
-      let message = "";
+      let message = '';
 
       switch (event.type) {
-        case "damage":
+        case 'damage':
           message = `${event.description}`;
           break;
-        case "ability":
+        case 'ability':
           message = `${event.description}`;
           break;
-        case "ko":
+        case 'ko':
           message = `${event.description} was defeated!`;
           break;
         default:
@@ -412,11 +393,11 @@ export class BattleUI {
   showDamageNumber(x: number, y: number, damage: number) {
     const text = this.scene.add
       .text(x, y - 50, `-${damage}`, {
-        fontSize: "32px",
-        color: "#ff0000",
-        stroke: "#000000",
+        fontSize: '32px',
+        color: '#ff0000',
+        stroke: '#000000',
         strokeThickness: 4,
-        fontFamily: "monospace",
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 
@@ -426,7 +407,7 @@ export class BattleUI {
       y: y - 100,
       alpha: 0,
       duration: 1000,
-      ease: "Power2",
+      ease: 'Power2',
       onComplete: () => text.destroy(),
     });
   }
@@ -436,23 +417,16 @@ export class BattleUI {
     const height = this.scene.scale.height;
 
     // Set high depth to ensure overlay appears above everything
-    const overlay = this.scene.add.rectangle(
-      width / 2,
-      height / 2,
-      width,
-      height,
-      0x000000,
-      0.8,
-    );
+    const overlay = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
     overlay.setDepth(1000);
 
     const victoryText = this.scene.add
-      .text(width / 2, height / 2, "VICTORY!", {
-        fontSize: "64px",
-        color: "#00ff00",
-        stroke: "#000000",
+      .text(width / 2, height / 2, 'VICTORY!', {
+        fontSize: '64px',
+        color: '#00ff00',
+        stroke: '#000000',
         strokeThickness: 6,
-        fontFamily: "monospace",
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
     victoryText.setDepth(1001);
@@ -472,23 +446,16 @@ export class BattleUI {
     const height = this.scene.scale.height;
 
     // Set high depth to ensure overlay appears above everything
-    const overlay = this.scene.add.rectangle(
-      width / 2,
-      height / 2,
-      width,
-      height,
-      0x000000,
-      0.8,
-    );
+    const overlay = this.scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
     overlay.setDepth(1000);
 
     const defeatText = this.scene.add
-      .text(width / 2, height / 2, "DEFEAT", {
-        fontSize: "64px",
-        color: "#ff0000",
-        stroke: "#000000",
+      .text(width / 2, height / 2, 'DEFEAT', {
+        fontSize: '64px',
+        color: '#ff0000',
+        stroke: '#000000',
         strokeThickness: 6,
-        fontFamily: "monospace",
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
     defeatText.setDepth(1001);
@@ -508,7 +475,7 @@ export class BattleUI {
     x: number,
     y: number,
     text: string,
-    onClick: () => void,
+    onClick: () => void
   ): Phaser.GameObjects.Container {
     const button = this.scene.add.container(x, y);
 
@@ -518,40 +485,31 @@ export class BattleUI {
 
     const label = this.scene.add
       .text(0, 0, text, {
-        fontSize: "16px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+        fontSize: '16px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 
     button.add([bg, label]);
 
     // Hover effects
-    bg.on("pointerover", () => {
+    bg.on('pointerover', () => {
       bg.setFillStyle(0x005500);
-      label.setColor("#ffffff");
-      gameSounds.play("hover");
+      label.setColor('#ffffff');
+      gameSounds.play('hover');
     });
 
-    bg.on("pointerout", () => {
+    bg.on('pointerout', () => {
       bg.setFillStyle(0x003300);
-      label.setColor("#00ff00");
+      label.setColor('#00ff00');
     });
 
-    bg.on("pointerdown", onClick);
+    bg.on('pointerdown', onClick);
 
     return button;
   }
 
-  private getElementColor(element: string): string {
-    const colors: Record<string, string> = {
-      SURGE: "#ffff00",
-      CODE: "#00ffff",
-      METAL: "#c0c0c0",
-      GLITCH: "#ff00ff",
-    };
-    return colors[element] || "#ffffff";
-  }
 
   showTargetingHint() {
     if (this.targetingHint) {
@@ -567,10 +525,10 @@ export class BattleUI {
     bg.setStrokeStyle(2, 0x00ff00);
 
     const text = this.scene.add
-      .text(0, 0, "SELECT TARGET: ↑↓ Navigate | SPACE Confirm | ESC Cancel", {
-        fontSize: "16px",
-        color: "#00ff00",
-        fontFamily: "monospace",
+      .text(0, 0, 'SELECT TARGET: ↑↓ Navigate | SPACE Confirm | ESC Cancel', {
+        fontSize: '16px',
+        color: '#00ff00',
+        fontFamily: 'monospace',
       })
       .setOrigin(0.5);
 

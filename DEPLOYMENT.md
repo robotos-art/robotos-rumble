@@ -3,6 +3,7 @@
 ## Overview
 
 The PvP feature requires deploying two components:
+
 1. **Main Game App** (Next.js) - Already on Vercel
 2. **PvP Server** (Colyseus) - Needs separate deployment
 
@@ -11,6 +12,7 @@ The PvP feature requires deploying two components:
 ### Using Railway (Recommended - Free tier available)
 
 1. **Prepare the server code**:
+
    ```bash
    cd robotos-rumble-server
    git init
@@ -49,12 +51,14 @@ The PvP feature requires deploying two components:
 ## Step 3: Test the Deployment
 
 ### Basic Connection Test
+
 1. Open the game at https://rumble.robotos.art
 2. Navigate to Battle → VS PLAYER
 3. Check browser console for any WebSocket errors
 4. Try to find a match
 
 ### Full Flow Test
+
 1. Open two browser windows (use incognito for one)
 2. Connect different wallets in each
 3. Both select VS PLAYER mode
@@ -64,14 +68,17 @@ The PvP feature requires deploying two components:
 ## Monitoring
 
 ### Server Health Check
+
 - Visit: `https://your-server.railway.app/health`
 - Should return: `{ "status": "ok" }`
 
 ### Railway Logs
+
 - In Railway dashboard → Logs tab
 - Monitor for connection errors or crashes
 
 ### Client-Side Errors
+
 - Check browser console for WebSocket errors
 - Common issues:
   - CORS errors → Check `CORS_ORIGIN` setting
@@ -81,17 +88,20 @@ The PvP feature requires deploying two components:
 ## Troubleshooting
 
 ### "Connection Failed" Error
+
 1. Check if server is running (health endpoint)
 2. Verify `NEXT_PUBLIC_COLYSEUS_URL` is correct
 3. Ensure it uses `wss://` for HTTPS sites
 4. Check CORS settings match your domain
 
 ### Players Can't Find Each Other
+
 1. Verify both players have same settings (3v3 vs 5v5)
 2. Check server logs for room creation
 3. Ensure WebSocket connection is stable
 
 ### Battle Gets Stuck
+
 1. Check browser console for errors
 2. Monitor server logs for state sync issues
 3. Verify both players have stable internet
@@ -99,6 +109,7 @@ The PvP feature requires deploying two components:
 ## Rollback Plan
 
 If PvP needs to be disabled:
+
 1. Remove the "VS PLAYER" button by setting a feature flag
 2. Or display a maintenance message in the PvP lobby
 3. Server can be stopped without affecting main game

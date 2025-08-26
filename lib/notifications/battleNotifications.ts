@@ -1,22 +1,22 @@
 export class BattleNotifications {
-  private static permission: NotificationPermission = "default";
+  private static permission: NotificationPermission = 'default';
 
   // Request permission for notifications
   static async requestPermission(): Promise<boolean> {
-    if (!("Notification" in window)) {
-      console.log("This browser does not support notifications");
+    if (!('Notification' in window)) {
+      console.log('This browser does not support notifications');
       return false;
     }
 
-    if (Notification.permission === "granted") {
-      this.permission = "granted";
+    if (Notification.permission === 'granted') {
+      this.permission = 'granted';
       return true;
     }
 
-    if (Notification.permission !== "denied") {
+    if (Notification.permission !== 'denied') {
       const permission = await Notification.requestPermission();
       this.permission = permission;
-      return permission === "granted";
+      return permission === 'granted';
     }
 
     return false;
@@ -24,21 +24,21 @@ export class BattleNotifications {
 
   // Check if notifications are enabled
   static isEnabled(): boolean {
-    return "Notification" in window && Notification.permission === "granted";
+    return 'Notification' in window && Notification.permission === 'granted';
   }
 
   // Show match found notification
   static showMatchFound(opponentName?: string) {
     if (!this.isEnabled()) return;
 
-    const title = "⚔️ Match Found!";
+    const title = '⚔️ Match Found!';
     const options: NotificationOptions & { vibrate?: number[] } = {
       body: opponentName
         ? `${opponentName} is ready to battle!`
-        : "An opponent has been found! Join the battle now.",
-      icon: "/robotos-icon.png", // You'll need to add this icon
-      badge: "/robotos-badge.png",
-      tag: "match-found",
+        : 'An opponent has been found! Join the battle now.',
+      icon: '/robotos-icon.png', // You'll need to add this icon
+      badge: '/robotos-badge.png',
+      tag: 'match-found',
       requireInteraction: true,
       vibrate: [200, 100, 200],
       // Note: actions are only supported in service worker notifications
@@ -50,8 +50,8 @@ export class BattleNotifications {
       window.focus();
       notification.close();
       // Navigate to battle if not already there
-      if (!window.location.pathname.includes("/battle/pvp")) {
-        window.location.href = "/battle/pvp";
+      if (!window.location.pathname.includes('/battle/pvp')) {
+        window.location.href = '/battle/pvp';
       }
     };
 
@@ -65,14 +65,14 @@ export class BattleNotifications {
   static showPlayerWaiting(settings?: { teamSize: number; speed: string }) {
     if (!this.isEnabled()) return;
 
-    const title = "🎮 Player Looking for Match";
+    const title = '🎮 Player Looking for Match';
     const options: NotificationOptions & { vibrate?: number[] } = {
       body: settings
         ? `Someone wants to play ${settings.teamSize}v${settings.teamSize} ${settings.speed} mode!`
-        : "A player is looking for an opponent. Join now!",
-      icon: "/robotos-icon.png",
-      badge: "/robotos-badge.png",
-      tag: "player-waiting",
+        : 'A player is looking for an opponent. Join now!',
+      icon: '/robotos-icon.png',
+      badge: '/robotos-badge.png',
+      tag: 'player-waiting',
       requireInteraction: false,
       vibrate: [100],
       // Note: actions are only supported in service worker notifications
@@ -83,7 +83,7 @@ export class BattleNotifications {
     notification.onclick = () => {
       window.focus();
       notification.close();
-      window.location.href = "/battle/pvp";
+      window.location.href = '/battle/pvp';
     };
 
     // Auto-close after 60 seconds
@@ -96,12 +96,12 @@ export class BattleNotifications {
   static showBattleStarting(secondsLeft: number = 5) {
     if (!this.isEnabled()) return;
 
-    const title = "🚀 Battle Starting!";
+    const title = '🚀 Battle Starting!';
     const options: NotificationOptions & { vibrate?: number[] } = {
       body: `Your battle begins in ${secondsLeft} seconds...`,
-      icon: "/robotos-icon.png",
-      badge: "/robotos-badge.png",
-      tag: "battle-starting",
+      icon: '/robotos-icon.png',
+      badge: '/robotos-badge.png',
+      tag: 'battle-starting',
       requireInteraction: false,
       silent: false,
       vibrate: [100, 50, 100],
@@ -125,16 +125,14 @@ export class BattleNotifications {
     if (!this.isEnabled()) return;
 
     // Only show if tab is not visible
-    if (document.visibilityState === "visible") return;
+    if (document.visibilityState === 'visible') return;
 
-    const title = "⏰ Your Turn!";
+    const title = '⏰ Your Turn!';
     const options: NotificationOptions & { vibrate?: number[] } = {
-      body: unitName
-        ? `It's ${unitName}'s turn to attack!`
-        : "It's your turn to make a move!",
-      icon: "/robotos-icon.png",
-      badge: "/robotos-badge.png",
-      tag: "your-turn",
+      body: unitName ? `It's ${unitName}'s turn to attack!` : "It's your turn to make a move!",
+      icon: '/robotos-icon.png',
+      badge: '/robotos-badge.png',
+      tag: 'your-turn',
       requireInteraction: false,
       vibrate: [200],
       silent: false,

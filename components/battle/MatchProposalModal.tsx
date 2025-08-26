@@ -1,8 +1,8 @@
-import React from "react";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { X, Users, Clock, AlertCircle } from "lucide-react";
-import { gameSounds } from "../../lib/sounds/gameSounds";
+import React from 'react';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import { X, Users, Clock, AlertCircle } from 'lucide-react';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface MatchProposalModalProps {
   isOpen: boolean;
@@ -33,7 +33,7 @@ export function MatchProposalModal({
 
   const teamSizeMismatch = yourSettings.teamSize !== opponentSettings.teamSize;
   const speedMismatch = yourSettings.speed !== opponentSettings.speed;
-  
+
   // Determine which is the smaller team size
   const smallerTeamSize = Math.min(yourSettings.teamSize, opponentSettings.teamSize);
   const canUseYourTeam = currentTeamSize >= yourSettings.teamSize;
@@ -47,9 +47,7 @@ export function MatchProposalModal({
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-xl font-bold text-yellow-400 mb-2">
-                MATCH SETTINGS MISMATCH!
-              </h2>
+              <h2 className="text-xl font-bold text-yellow-400 mb-2">MATCH SETTINGS MISMATCH!</h2>
               <p className="text-green-400 text-sm">
                 Your opponent has different battle preferences
               </p>
@@ -58,7 +56,7 @@ export function MatchProposalModal({
               variant="ghost"
               size="icon"
               onClick={() => {
-                gameSounds.play("cancel");
+                gameSounds.play('cancel');
                 onClose();
               }}
               className="text-red-500 hover:text-red-400"
@@ -104,13 +102,14 @@ export function MatchProposalModal({
                   <div>
                     <span className="text-green-400">You want:</span>
                     <span className="ml-2 text-white font-bold uppercase">
-                      {yourSettings.speed} ({yourSettings.speed === "speedy" ? "5s" : "10s"})
+                      {yourSettings.speed} ({yourSettings.speed === 'speedy' ? '5s' : '10s'})
                     </span>
                   </div>
                   <div>
                     <span className="text-yellow-400">Opponent wants:</span>
                     <span className="ml-2 text-white font-bold uppercase">
-                      {opponentSettings.speed} ({opponentSettings.speed === "speedy" ? "5s" : "10s"})
+                      {opponentSettings.speed} ({opponentSettings.speed === 'speedy' ? '5s' : '10s'}
+                      )
                     </span>
                   </div>
                 </div>
@@ -126,7 +125,7 @@ export function MatchProposalModal({
                 <div className="text-xs text-yellow-400">
                   <p className="font-bold mb-1">TEAM SIZE WARNING</p>
                   <p>
-                    You only have {currentTeamSize} units selected. 
+                    You only have {currentTeamSize} units selected.
                     {currentTeamSize < smallerTeamSize && (
                       <span> You need at least {smallerTeamSize} units to play.</span>
                     )}
@@ -144,7 +143,7 @@ export function MatchProposalModal({
                 variant="terminal"
                 className="w-full bg-yellow-600 hover:bg-yellow-700 text-black"
                 onClick={() => {
-                  gameSounds.play("confirm");
+                  gameSounds.play('confirm');
                   onAccept(opponentSettings);
                 }}
               >
@@ -161,7 +160,7 @@ export function MatchProposalModal({
                 variant="terminal"
                 className="w-full bg-green-600 hover:bg-green-700"
                 onClick={() => {
-                  gameSounds.play("menuNavigate");
+                  gameSounds.play('menuNavigate');
                   onPropose(yourSettings);
                 }}
               >
@@ -178,18 +177,16 @@ export function MatchProposalModal({
                 variant="terminal"
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 onClick={() => {
-                  gameSounds.play("confirm");
+                  gameSounds.play('confirm');
                   // Use smaller team size but keep speed preference
                   onAccept({
                     teamSize: smallerTeamSize,
-                    speed: speedMismatch ? opponentSettings.speed : yourSettings.speed
+                    speed: speedMismatch ? opponentSettings.speed : yourSettings.speed,
                   });
                 }}
               >
                 COMPROMISE: USE {smallerTeamSize}v{smallerTeamSize}
-                <span className="ml-2 text-xs opacity-80">
-                  (Both use smaller team)
-                </span>
+                <span className="ml-2 text-xs opacity-80">(Both use smaller team)</span>
               </Button>
             )}
 
@@ -199,8 +196,8 @@ export function MatchProposalModal({
                 variant="terminal"
                 className="w-full bg-purple-600 hover:bg-purple-700"
                 onClick={() => {
-                  gameSounds.play("menuNavigate");
-                  window.location.href = "/team-builder";
+                  gameSounds.play('menuNavigate');
+                  window.location.href = '/team-builder';
                 }}
               >
                 GO TO TEAM BUILDER
@@ -215,7 +212,7 @@ export function MatchProposalModal({
               variant="outline"
               className="w-full"
               onClick={() => {
-                gameSounds.play("cancel");
+                gameSounds.play('cancel');
                 onClose();
               }}
             >

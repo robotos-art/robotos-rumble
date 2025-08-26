@@ -36,7 +36,7 @@
         "description": "Electrified speed burst that damages on contact",
         "rarity": "common"
       },
-      
+
       {
         "id": "hack_protocol",
         "name": "Hack Protocol",
@@ -70,7 +70,7 @@
         "description": "Create protective digital barriers",
         "rarity": "common"
       },
-      
+
       {
         "id": "fortress_mode",
         "name": "Fortress Mode",
@@ -104,7 +104,7 @@
         "description": "Spinning blade attack hitting all enemies",
         "rarity": "rare"
       },
-      
+
       {
         "id": "system_crash",
         "name": "System Crash",
@@ -138,7 +138,7 @@
         "description": "Teleport through corrupted space",
         "rarity": "rare"
       },
-      
+
       {
         "id": "genesis_protocol",
         "name": "Genesis Protocol",
@@ -163,7 +163,7 @@
         "rarity": "legendary"
       }
     ],
-    
+
     "basic_abilities": {
       "description": "Every Roboto gets one basic ability based on their dominant element",
       "SURGE": {
@@ -192,10 +192,10 @@
         "description": "Basic balanced attack"
       }
     },
-    
+
     "robopet_abilities": {
       "description": "Robopets provide unique abilities based on their Type trait with rarity tiers",
-      
+
       "Puppyboto": {
         "element": "METAL",
         "abilities": ["loyal_guard"],
@@ -214,7 +214,7 @@
         "rarity": "rare",
         "power_tier": 3
       },
-      
+
       "Kittyboto": {
         "element": "SURGE",
         "abilities": ["quick_reflexes"],
@@ -233,49 +233,49 @@
         "rarity": "epic",
         "power_tier": 4
       },
-      
+
       "Lionboto": {
         "element": "WILD",
         "abilities": ["primal_fury", "nature_call", "pounce_strike"],
         "rarity": "legendary",
         "power_tier": 5
       },
-      
+
       "Piggyboto": {
         "element": "BOND",
         "abilities": ["harmony_pulse"],
         "rarity": "common",
         "power_tier": 1
       },
-      
+
       "Koalaboto": {
         "element": "BOND",
         "abilities": ["companion_shield", "harmony_pulse"],
         "rarity": "uncommon",
         "power_tier": 2
       },
-      
+
       "Frogboto": {
         "element": "CODE",
         "abilities": ["data_link", "aerial_recon"],
         "rarity": "uncommon",
         "power_tier": 2
       },
-      
+
       "Bunnyboto": {
         "element": "WILD",
         "abilities": ["quick_reflexes", "pounce_strike"],
         "rarity": "uncommon",
         "power_tier": 2
       },
-      
+
       "Cyborgee": {
         "element": "CODE",
         "abilities": ["data_link", "aerial_recon", "harmony_pulse"],
         "rarity": "epic",
         "power_tier": 4
       },
-      
+
       "default": {
         "element": "BOND",
         "abilities": ["companion_shield"],
@@ -284,7 +284,7 @@
       }
     }
   },
-  
+
   "element_determination": {
     "description": "How to determine a Roboto's primary element based on traits",
     "trait_weights": {

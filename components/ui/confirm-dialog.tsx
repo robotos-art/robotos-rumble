@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./dialog";
-import { Button } from "./button";
+} from './dialog';
+import { Button } from './button';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -18,7 +18,7 @@ interface ConfirmDialogProps {
   cancelText?: string;
   onConfirm: () => void;
   onCancel?: () => void;
-  variant?: "default" | "warning" | "danger";
+  variant?: 'default' | 'warning' | 'danger';
 }
 
 export function ConfirmDialog({
@@ -26,11 +26,11 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  variant = "default",
+  variant = 'default',
 }: ConfirmDialogProps) {
   const handleCancel = () => {
     onCancel?.();
@@ -47,14 +47,12 @@ export function ConfirmDialog({
       <DialogContent className="sm:max-w-md bg-black/95 border-2 border-green-500">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-green-400">
-            {variant === "warning" || variant === "danger" ? (
+            {variant === 'warning' || variant === 'danger' ? (
               <AlertTriangle className="w-5 h-5 text-yellow-500" />
             ) : null}
             {title}
           </DialogTitle>
-          <DialogDescription className="text-green-400/80">
-            {description}
-          </DialogDescription>
+          <DialogDescription className="text-green-400/80">{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
           <Button
@@ -68,11 +66,11 @@ export function ConfirmDialog({
             variant="default"
             onClick={handleConfirm}
             className={
-              variant === "danger"
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : variant === "warning"
-                  ? "bg-yellow-600 hover:bg-yellow-700 text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
+              variant === 'danger'
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : variant === 'warning'
+                  ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
             }
           >
             {confirmText}

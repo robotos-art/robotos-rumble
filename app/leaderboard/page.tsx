@@ -1,16 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card } from "../../components/ui/card";
-import { GameHeader } from "../../components/shared/GameHeader";
-import { PageLayout } from "../../components/shared/PageLayout";
-import { LeaderboardRow } from "../../components/leaderboard/LeaderboardRow";
-import type { LeaderboardEntry } from "../../lib/storage/types";
+import { useState, useEffect } from 'react';
+import { Card } from '../../components/ui/card';
+import { GameHeader } from '../../components/shared/GameHeader';
+import { PageLayout } from '../../components/shared/PageLayout';
+import { LeaderboardRow } from '../../components/leaderboard/LeaderboardRow';
+import type { LeaderboardEntry } from '../../lib/storage/types';
 
 export default function Leaderboard() {
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
-    [],
-  );
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,13 +18,13 @@ export default function Leaderboard() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/leaderboard?type=global");
+      const response = await fetch('/api/leaderboard?type=global');
       const data = await response.json();
 
       // Always use real data from Vercel Blob
       setLeaderboardData(data || []);
     } catch (error) {
-      console.error("Failed to fetch leaderboard:", error);
+      console.error('Failed to fetch leaderboard:', error);
       setLeaderboardData([]);
     } finally {
       setLoading(false);
@@ -56,31 +54,20 @@ export default function Leaderboard() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td
-                        colSpan={6}
-                        className="p-8 text-center text-green-400"
-                      >
+                      <td colSpan={6} className="p-8 text-center text-green-400">
                         Loading leaderboard data...
                         {/* Tabs */}
                       </td>
                     </tr>
                   ) : leaderboardData.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={6}
-                        className="p-8 text-center text-green-400/60"
-                      >
-                        No battles recorded yet. Be the first to claim the top
-                        spot!
+                      <td colSpan={6} className="p-8 text-center text-green-400/60">
+                        No battles recorded yet. Be the first to claim the top spot!
                       </td>
                     </tr>
                   ) : (
                     leaderboardData.map((entry, index) => (
-                      <LeaderboardRow
-                        key={entry.address}
-                        entry={entry}
-                        index={index}
-                      />
+                      <LeaderboardRow key={entry.address} entry={entry} index={index} />
                     ))
                   )}
                 </tbody>
@@ -90,9 +77,7 @@ export default function Leaderboard() {
 
           {/* Live Data Notice */}
           <div className="mt-8 text-center p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-            <p className="text-green-500">
-              🎮 LIVE RANKINGS - Battle to climb the leaderboard!
-            </p>
+            <p className="text-green-500">🎮 LIVE RANKINGS - Battle to climb the leaderboard!</p>
           </div>
         </div>
       </div>

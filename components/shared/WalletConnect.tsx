@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAccount, useConnect } from "wagmi";
-import { Button } from "../ui/button";
-import { Wallet } from "lucide-react";
-import { WalletMenu } from "./WalletMenu";
+import { useEffect, useState } from 'react';
+import { useAccount, useConnect } from 'wagmi';
+import { Button } from '../ui/button';
+import { Wallet } from 'lucide-react';
+import { WalletMenu } from './WalletMenu';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();

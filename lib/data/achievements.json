@@ -7,7 +7,7 @@
     "icon": "🩸",
     "tier": "bronze"
   },
-  
+
   "winning_streak_3": {
     "id": "winning_streak_3",
     "name": "Hat Trick",
@@ -56,7 +56,7 @@
     "icon": "👑",
     "tier": "diamond"
   },
-  
+
   "total_wins_5": {
     "id": "total_wins_5",
     "name": "Warrior I",
@@ -113,7 +113,7 @@
     "icon": "👑",
     "tier": "diamond"
   },
-  
+
   "battle_veteran_10": {
     "id": "battle_veteran_10",
     "name": "Recruit",
@@ -146,7 +146,7 @@
     "icon": "⭐",
     "tier": "platinum"
   },
-  
+
   "damage_dealer_500": {
     "id": "damage_dealer_500",
     "name": "Heavy Hitter I",
@@ -203,7 +203,7 @@
     "icon": "💀",
     "tier": "platinum"
   },
-  
+
   "perfect_victory": {
     "id": "perfect_victory",
     "name": "Flawless Victory",
@@ -220,7 +220,7 @@
     "icon": "🛡️",
     "tier": "gold"
   },
-  
+
   "speed_demon_60": {
     "id": "speed_demon_60",
     "name": "Speed Demon I",
@@ -245,7 +245,7 @@
     "icon": "⚡",
     "tier": "gold"
   },
-  
+
   "element_master_surge": {
     "id": "element_master_surge",
     "name": "Surge Master",
@@ -286,7 +286,7 @@
     "icon": "🌈",
     "tier": "silver"
   },
-  
+
   "comeback_kid": {
     "id": "comeback_kid",
     "name": "Comeback Kid",
@@ -319,7 +319,7 @@
     "icon": "🎉",
     "tier": "bronze"
   },
-  
+
   "companion_synergy": {
     "id": "companion_synergy",
     "name": "Best Friends Forever",
@@ -344,7 +344,7 @@
     "icon": "💪",
     "tier": "gold"
   },
-  
+
   "critical_striker": {
     "id": "critical_striker",
     "name": "Critical Striker",
@@ -369,7 +369,7 @@
     "icon": "💨",
     "tier": "silver"
   },
-  
+
   "paired_victory": {
     "id": "paired_victory",
     "name": "Perfect Pair",

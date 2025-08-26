@@ -1,15 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAccount } from "wagmi";
-import {
-  getRobotoContract,
-  getRobopetContract,
-  getIPFSUrl,
-} from "../contracts";
+import { useState, useEffect, useCallback } from 'react';
+import { useAccount } from 'wagmi';
+import { getRobotoContract, getRobopetContract, getIPFSUrl } from '../contracts';
 
 export interface TokenWithMetadata {
   tokenId: string;
   metadata: any;
-  type: "roboto" | "robopet";
+  type: 'roboto' | 'robopet';
 }
 
 export function useRobotoTokens() {
@@ -28,20 +24,16 @@ export function useRobotoTokens() {
     try {
       // Fetch Robotos
       const robotoContract = getRobotoContract();
-      const robotoBalance = await robotoContract.methods
-        .balanceOf(address)
-        .call();
+      const robotoBalance = await robotoContract.methods.balanceOf(address).call();
       const robotoTokens: TokenWithMetadata[] = [];
 
       for (let i = 0; i < robotoBalance; i++) {
         try {
-          const tokenId = await robotoContract.methods
-            .tokenOfOwnerByIndex(address, i)
-            .call();
+          const tokenId = await robotoContract.methods.tokenOfOwnerByIndex(address, i).call();
 
           // Fetch metadata from IPFS using the known IPFS hash
           const metadataResponse = await fetch(
-            `https://ipfs.io/ipfs/QmQh36CsceXZoqS7v9YQLUyxXdRmWd8YWTBUz7WCXsiVty/${tokenId}`,
+            `https://ipfs.io/ipfs/QmQh36CsceXZoqS7v9YQLUyxXdRmWd8YWTBUz7WCXsiVty/${tokenId}`
           );
           const ipfsMetadata = await metadataResponse.json();
 
@@ -55,13 +47,11 @@ export function useRobotoTokens() {
           robotoTokens.push({
             tokenId: tokenId.toString(),
             metadata,
-            type: "roboto",
+            type: 'roboto',
           });
         } catch (err) {
           // Add placeholder if metadata fetch fails
-          const tokenId = await robotoContract.methods
-            .tokenOfOwnerByIndex(address, i)
-            .call();
+          const tokenId = await robotoContract.methods.tokenOfOwnerByIndex(address, i).call();
           robotoTokens.push({
             tokenId: tokenId.toString(),
             metadata: {
@@ -70,7 +60,7 @@ export function useRobotoTokens() {
               image: `https://d2lp2vbc3umjmr.cloudfront.net/${tokenId}/roboto-transparent.png`,
               attributes: [],
             },
-            type: "roboto",
+            type: 'roboto',
           });
         }
       }
@@ -79,20 +69,16 @@ export function useRobotoTokens() {
 
       // Fetch Robopets
       const robopetContract = getRobopetContract();
-      const robopetBalance = await robopetContract.methods
-        .balanceOf(address)
-        .call();
+      const robopetBalance = await robopetContract.methods.balanceOf(address).call();
       const robopetTokens: TokenWithMetadata[] = [];
 
       for (let i = 0; i < robopetBalance; i++) {
         try {
-          const tokenId = await robopetContract.methods
-            .tokenOfOwnerByIndex(address, i)
-            .call();
+          const tokenId = await robopetContract.methods.tokenOfOwnerByIndex(address, i).call();
 
           // Fetch metadata from IPFS using the known IPFS hash
           const metadataResponse = await fetch(
-            `https://ipfs.io/ipfs/QmcVBQAbPMzEstPyaBoZ3J1dnE3t1horoX9WebLcCCYLR9/${tokenId}`,
+            `https://ipfs.io/ipfs/QmcVBQAbPMzEstPyaBoZ3J1dnE3t1horoX9WebLcCCYLR9/${tokenId}`
           );
           const ipfsMetadata = await metadataResponse.json();
 
@@ -106,13 +92,11 @@ export function useRobotoTokens() {
           robopetTokens.push({
             tokenId: tokenId.toString(),
             metadata,
-            type: "robopet",
+            type: 'robopet',
           });
         } catch (err) {
           // Add placeholder if metadata fetch fails
-          const tokenId = await robopetContract.methods
-            .tokenOfOwnerByIndex(address, i)
-            .call();
+          const tokenId = await robopetContract.methods.tokenOfOwnerByIndex(address, i).call();
           robopetTokens.push({
             tokenId: tokenId.toString(),
             metadata: {
@@ -121,14 +105,14 @@ export function useRobotoTokens() {
               image: `https://d2w8sp0plvpr8a.cloudfront.net/${tokenId}/body-transparent.png`,
               attributes: [],
             },
-            type: "robopet",
+            type: 'robopet',
           });
         }
       }
 
       setRobopets(robopetTokens);
     } catch (err) {
-      setError("Failed to load your Robotos and Robopets");
+      setError('Failed to load your Robotos and Robopets');
     } finally {
       setLoading(false);
     }

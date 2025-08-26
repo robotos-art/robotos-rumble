@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Trophy, User } from "lucide-react";
-import { useEnsName } from "wagmi";
-import { formatAddress } from "../../lib/utils/address";
-import { gameSounds } from "../../lib/sounds/gameSounds";
-import type { LeaderboardEntry } from "../../lib/storage/types";
+import Link from 'next/link';
+import { Trophy, User } from 'lucide-react';
+import { useEnsName } from 'wagmi';
+import { formatAddress } from '../../lib/utils/address';
+import { gameSounds } from '../../lib/sounds/gameSounds';
+import type { LeaderboardEntry } from '../../lib/storage/types';
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntry;
@@ -21,10 +21,7 @@ export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
 
   // Use the fetched ENS name, fallback to stored ENS, then display name, then address
   const displayName =
-    ensName ||
-    entry.ensName ||
-    entry.displayName ||
-    formatAddress(entry.address, "medium");
+    ensName || entry.ensName || entry.displayName || formatAddress(entry.address, 'medium');
 
   return (
     <tr
@@ -50,23 +47,23 @@ export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
             {entry.avatar ? (
               <img
                 src={
-                  entry.avatar.type === "roboto"
+                  entry.avatar.type === 'roboto'
                     ? `https://d2lp2vbc3umjmr.cloudfront.net/${entry.avatar.tokenId}/roboto-transparent.png`
-                    : entry.avatar.imageUrl || ""
+                    : entry.avatar.imageUrl || ''
                 }
                 alt="Avatar"
                 className="w-10 h-10 rounded border border-green-500/30"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
+                  target.style.display = 'none';
                   const fallback = target.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = "flex";
+                  if (fallback) fallback.style.display = 'flex';
                 }}
               />
             ) : null}
             <div
               className="w-10 h-10 rounded border border-green-500/30 bg-green-500/10 items-center justify-center"
-              style={{ display: entry.avatar ? "none" : "flex" }}
+              style={{ display: entry.avatar ? 'none' : 'flex' }}
             >
               <User className="w-5 h-5 text-green-500/50" />
             </div>
@@ -74,9 +71,7 @@ export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
           {/* Name */}
           <div className="flex flex-col">
             <span className="text-green-400">{displayName}</span>
-            <span className="text-xs text-gray-500">
-              {formatAddress(entry.address, "short")}
-            </span>
+            <span className="text-xs text-gray-500">{formatAddress(entry.address, 'short')}</span>
           </div>
         </Link>
       </td>
@@ -85,9 +80,7 @@ export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       <td className="p-4 text-center font-mono">{entry.winRate.toFixed(1)}%</td>
       <td className="p-4 text-center">
         {entry.favoriteElement && (
-          <span className="font-mono text-green-400">
-            {entry.favoriteElement}
-          </span>
+          <span className="font-mono text-green-400">{entry.favoriteElement}</span>
         )}
       </td>
     </tr>
