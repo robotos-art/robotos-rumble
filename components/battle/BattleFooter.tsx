@@ -1,47 +1,63 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card } from '../ui/card'
-import { Button } from '../ui/button'
-import { Progress } from '../ui/progress'
-import { cn } from '../../lib/utils'
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
-import { ChevronLeft, Shield, Zap, Heart, Clock, Target } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import Image from 'next/image'
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card } from '../ui/card';
+import { Button } from '../ui/button';
+import { Progress } from '../ui/progress';
+import { cn } from '../../lib/utils';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
+import { ChevronLeft, Shield, Zap, Heart, Clock, Target } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Image from 'next/image';
 
 interface BattleFooterProps {
   // Current battle state
-  currentUnit: BattleUnitV3 | null
-  targetUnit: BattleUnitV3 | null
-  playerTeam: BattleUnitV3[]
-  enemyTeam: BattleUnitV3[]
-  isPlayerTurn: boolean
-  
+  currentUnit: BattleUnitV3 | null;
+  targetUnit: BattleUnitV3 | null;
+  playerTeam: BattleUnitV3[];
+  enemyTeam: BattleUnitV3[];
+  isPlayerTurn: boolean;
+
   // Battle phase
-  phase: 'waiting' | 'selecting-action' | 'selecting-target' | 'attack-timing' | 'defending' | 'executing'
-  
+  phase:
+    | 'waiting'
+    | 'selecting-action'
+    | 'selecting-target'
+    | 'attack-timing'
+    | 'defending'
+    | 'executing';
+
   // Actions
-  onAttack: () => void
-  onAbility: (index: number) => void
-  onTargetSelect: (unitId: string, autoConfirm?: boolean) => void
-  onTargetConfirm: () => void
-  onCancel: () => void
-  
+  onAttack: () => void;
+  onAbility: (index: number) => void;
+  onTargetSelect: (unitId: string, autoConfirm?: boolean) => void;
+  onTargetConfirm: () => void;
+  onCancel: () => void;
+
   // Countdowns
-  actionCountdown?: number
-  targetCountdown?: number
-  
+  actionCountdown?: number;
+  targetCountdown?: number;
+
   // Messages
-  message?: string
-  
+  message?: string;
+
   // Unit statuses - matches BattleEngineV3's UnitStatus interface
-  unitStatuses: Map<string, { isAlive: boolean; currentHp: number; currentEnergy: number; statusEffects: any[]; cooldowns: Map<string, number>; position?: number }>
-  
+  unitStatuses: Map<
+    string,
+    {
+      isAlive: boolean;
+      currentHp: number;
+      currentEnergy: number;
+      statusEffects: any[];
+      cooldowns: Map<string, number>;
+      position?: number;
+    }
+  >;
+
   // UI focus state
-  focusedActionIndex?: number
-  setFocusedActionIndex?: React.Dispatch<React.SetStateAction<number>>
+  focusedActionIndex?: number;
+  setFocusedActionIndex?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function BattleFooter({
@@ -61,119 +77,137 @@ export default function BattleFooter({
   message,
   unitStatuses,
   focusedActionIndex = 0,
-  setFocusedActionIndex
+  setFocusedActionIndex,
 }: BattleFooterProps) {
-  const [selectedAction, setSelectedAction] = useState<'attack' | 'ability' | null>(null)
-  const [selectedAbilityIndex, setSelectedAbilityIndex] = useState(0)
-  const [localFocusedIndex, setLocalFocusedIndex] = useState(0)
-  
+  const [selectedAction, setSelectedAction] = useState<'attack' | 'ability' | null>(null);
+  const [selectedAbilityIndex, setSelectedAbilityIndex] = useState(0);
+  const [localFocusedIndex, setLocalFocusedIndex] = useState(0);
+
   // Use prop if provided, otherwise use local state
-  const focusIndex = setFocusedActionIndex ? focusedActionIndex : localFocusedIndex
-  const setFocusIndex = setFocusedActionIndex || setLocalFocusedIndex
-  
+  const focusIndex = setFocusedActionIndex ? focusedActionIndex : localFocusedIndex;
+  const setFocusIndex = setFocusedActionIndex || setLocalFocusedIndex;
+
   // Handler functions
   const handleAttack = useCallback(() => {
-    setSelectedAction('attack')
-    onAttack()
-  }, [onAttack])
-  
-  const handleAbility = useCallback((index: number) => {
-    setSelectedAction('ability')
-    setSelectedAbilityIndex(index)
-    onAbility(index)
-  }, [onAbility])
-  
+    console.log('[BattleFooter] Attack button clicked, phase:', phase);
+    setSelectedAction('attack');
+    onAttack();
+  }, [onAttack, phase]);
+
+  const handleAbility = useCallback(
+    (index: number) => {
+      setSelectedAction('ability');
+      setSelectedAbilityIndex(index);
+      onAbility(index);
+    },
+    [onAbility]
+  );
+
   // Remove timing-related handlers - no longer needed
-  
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onCancel()
-        return
+        onCancel();
+        return;
       }
-      
+
       if (phase === 'selecting-action' && isPlayerTurn) {
-        const totalActions = 1 + (currentUnit?.abilities?.length || 0)
-        
+        const totalActions = 1 + (currentUnit?.abilities?.length || 0);
+
         switch (e.key) {
           case 'ArrowLeft':
           case 'ArrowUp':
             if (typeof setFocusIndex === 'function') {
-              setFocusIndex((prev) => (prev - 1 + totalActions) % totalActions)
+              setFocusIndex((prev) => (prev - 1 + totalActions) % totalActions);
             }
-            break
+            break;
           case 'ArrowRight':
           case 'ArrowDown':
             if (typeof setFocusIndex === 'function') {
-              setFocusIndex((prev) => (prev + 1) % totalActions)
+              setFocusIndex((prev) => (prev + 1) % totalActions);
             }
-            break
+            break;
           case 'Enter':
           case ' ':
             if (focusIndex === 0) {
-              handleAttack()
+              handleAttack();
             } else if (currentUnit?.abilities[focusIndex - 1]) {
-              handleAbility(focusIndex - 1)
+              handleAbility(focusIndex - 1);
             }
-            break
+            break;
           case '1':
           case 'a':
             if (typeof setFocusIndex === 'function') {
-              setFocusIndex(0)
+              setFocusIndex(0);
             }
-            handleAttack()
-            break
+            handleAttack();
+            break;
           case '2':
           case 's':
             if (currentUnit?.abilities[0]) {
               if (typeof setFocusIndex === 'function') {
-                setFocusIndex(1)
+                setFocusIndex(1);
               }
-              handleAbility(0)
+              handleAbility(0);
             }
-            break
+            break;
           case '3':
           case 'd':
             if (currentUnit?.abilities[1]) {
               if (typeof setFocusIndex === 'function') {
-                setFocusIndex(2)
+                setFocusIndex(2);
               }
-              handleAbility(1)
+              handleAbility(1);
             }
-            break
+            break;
         }
       }
-      
+
       if (phase === 'selecting-target') {
         if (e.key === 'Enter' || e.key === ' ') {
-          onTargetConfirm()
+          onTargetConfirm();
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
           // Handle target navigation
-          const targets = enemyTeam.filter(unit => {
-            const status = unitStatuses.get(unit.id)
-            return status?.isAlive
-          })
+          const targets = enemyTeam.filter((unit) => {
+            const status = unitStatuses.get(unit.id);
+            return status?.isAlive;
+          });
           if (targets.length > 1) {
-            const currentIndex = targets.findIndex(t => t.id === targetUnit?.id)
-            let newIndex = currentIndex
+            const currentIndex = targets.findIndex((t) => t.id === targetUnit?.id);
+            let newIndex = currentIndex;
             if (e.key === 'ArrowLeft') {
-              newIndex = currentIndex > 0 ? currentIndex - 1 : targets.length - 1
+              newIndex = currentIndex > 0 ? currentIndex - 1 : targets.length - 1;
             } else {
-              newIndex = currentIndex < targets.length - 1 ? currentIndex + 1 : 0
+              newIndex = currentIndex < targets.length - 1 ? currentIndex + 1 : 0;
             }
-            onTargetSelect(targets[newIndex].id)
+            onTargetSelect(targets[newIndex].id);
           }
         }
       }
-    }
-    
-    window.addEventListener('keydown', handleKeyDown)
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [phase, isPlayerTurn, currentUnit, onCancel, onTargetConfirm, focusIndex, setFocusIndex, handleAttack, handleAbility, enemyTeam, targetUnit, onTargetSelect, unitStatuses])
-  
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [
+    phase,
+    isPlayerTurn,
+    currentUnit,
+    onCancel,
+    onTargetConfirm,
+    focusIndex,
+    setFocusIndex,
+    handleAttack,
+    handleAbility,
+    enemyTeam,
+    targetUnit,
+    onTargetSelect,
+    unitStatuses,
+  ]);
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black/90 border-t-2 border-green-800 z-50">
       <div className="container mx-auto px-4">
@@ -208,7 +242,7 @@ export default function BattleFooter({
               )}
             </div>
           </div>
-          
+
           {/* Action Area */}
           <AnimatePresence mode="wait">
             {/* Action Selection */}
@@ -223,21 +257,21 @@ export default function BattleFooter({
                 <Button
                   onClick={handleAttack}
                   className={cn(
-                    "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto",
-                    focusIndex === 0 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black"
+                    'flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto',
+                    focusIndex === 0 && 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-black'
                   )}
-                  variant={focusIndex === 0 ? "default" : "outline"}
+                  variant={focusIndex === 0 ? 'default' : 'outline'}
                 >
                   <Zap className="w-4 h-4" />
                   <span className="sm:hidden">Attack</span>
                   <span className="hidden sm:inline">Attack (A)</span>
                 </Button>
-                
+
                 {currentUnit?.abilities.map((ability, index) => {
-                  const unitStatus = currentUnit && unitStatuses.get(currentUnit.id)
-                  const cooldown = unitStatus?.cooldowns.get(ability) || 0
-                  const isOnCooldown = cooldown > 0
-                  
+                  const unitStatus = currentUnit && unitStatuses.get(currentUnit.id);
+                  const cooldown = unitStatus?.cooldowns.get(ability) || 0;
+                  const isOnCooldown = cooldown > 0;
+
                   return (
                     <TooltipProvider key={ability}>
                       <Tooltip>
@@ -246,16 +280,19 @@ export default function BattleFooter({
                             <Button
                               onClick={() => !isOnCooldown && handleAbility(index)}
                               className={cn(
-                                "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto",
-                                focusIndex === index + 1 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black",
-                                isOnCooldown && "opacity-50 cursor-not-allowed"
+                                'flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto',
+                                focusIndex === index + 1 &&
+                                  'ring-2 ring-yellow-400 ring-offset-2 ring-offset-black',
+                                isOnCooldown && 'opacity-50 cursor-not-allowed'
                               )}
-                              variant={focusIndex === index + 1 ? "default" : "outline"}
+                              variant={focusIndex === index + 1 ? 'default' : 'outline'}
                               disabled={isOnCooldown}
                             >
                               <Target className="w-4 h-4" />
                               <span className="sm:hidden">{ability}</span>
-                              <span className="hidden sm:inline">{ability} ({index === 0 ? 'S' : 'D'})</span>
+                              <span className="hidden sm:inline">
+                                {ability} ({index === 0 ? 'S' : 'D'})
+                              </span>
                             </Button>
                             {isOnCooldown && (
                               <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
@@ -267,23 +304,24 @@ export default function BattleFooter({
                         {isOnCooldown && (
                           <TooltipContent>
                             <p className="text-red-400">
-                              {cooldown === 999 
-                                ? 'Once per battle - Already used!' 
+                              {cooldown === 999
+                                ? 'Once per battle - Already used!'
                                 : `Cooldown: ${cooldown} turn${cooldown > 1 ? 's' : ''} remaining`}
                             </p>
                           </TooltipContent>
                         )}
                       </Tooltip>
                     </TooltipProvider>
-                  )
+                  );
                 })}
-                
+
                 <div className="hidden lg:block ml-auto text-sm text-gray-400">
-                  Use ←→ or ↑↓ to navigate • <kbd className="text-xs">ENTER</kbd>/<kbd className="text-xs">SPACE</kbd> to select • Number keys for quick select
+                  Use ←→ or ↑↓ to navigate • <kbd className="text-xs">ENTER</kbd>/
+                  <kbd className="text-xs">SPACE</kbd> to select • Number keys for quick select
                 </div>
               </motion.div>
             )}
-            
+
             {/* Target Selection */}
             {phase === 'selecting-target' && (
               <motion.div
@@ -298,12 +336,7 @@ export default function BattleFooter({
                     {!targetUnit ? 'CHOOSE YOUR TARGET!' : 'TARGET SELECTED'}
                   </span>
                   <div className="flex items-center gap-2">
-                    <Button
-                      onClick={onCancel}
-                      size="sm"
-                      variant="ghost"
-                      className="text-gray-400"
-                    >
+                    <Button onClick={onCancel} size="sm" variant="ghost" className="text-gray-400">
                       <ChevronLeft className="w-4 h-4 mr-1" />
                       Cancel <kbd className="text-xs ml-1">ESC</kbd>
                     </Button>
@@ -317,13 +350,13 @@ export default function BattleFooter({
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
-                  {enemyTeam.map(unit => {
-                    const status = unitStatuses.get(unit.id)
-                    const isAlive = status?.isAlive ?? true
-                    const isSelected = targetUnit?.id === unit.id
-                    
+                  {enemyTeam.map((unit) => {
+                    const status = unitStatuses.get(unit.id);
+                    const isAlive = status?.isAlive ?? true;
+                    const isSelected = targetUnit?.id === unit.id;
+
                     return (
                       <motion.button
                         key={unit.id}
@@ -332,9 +365,11 @@ export default function BattleFooter({
                         whileHover={isAlive ? { scale: 1.05 } : {}}
                         whileTap={isAlive ? { scale: 0.95 } : {}}
                         className={cn(
-                          "p-2 rounded-lg border-2 transition-all flex items-center gap-2",
-                          isAlive ? "cursor-pointer" : "cursor-not-allowed opacity-50",
-                          isSelected ? "border-yellow-400 bg-yellow-400/20" : "border-green-800 hover:border-green-600"
+                          'p-2 rounded-lg border-2 transition-all flex items-center gap-2',
+                          isAlive ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                          isSelected
+                            ? 'border-yellow-400 bg-yellow-400/20'
+                            : 'border-green-800 hover:border-green-600'
                         )}
                       >
                         {/* Roboto thumbnail */}
@@ -362,57 +397,57 @@ export default function BattleFooter({
                           </div>
                         </div>
                       </motion.button>
-                    )
+                    );
                   })}
                 </div>
               </motion.div>
             )}
-            
+
             {/* Remove timing and defense UI - no longer needed */}
           </AnimatePresence>
-          
+
           {/* Team Status Bar */}
           <div className="flex items-center justify-between pt-2 border-t border-green-800/50">
             <div className="flex gap-1">
               {playerTeam.map((unit, index) => {
-                const status = unitStatuses.get(unit.id)
-                const isAlive = status?.isAlive ?? true
-                const isCurrent = currentUnit?.id === unit.id
-                
+                const status = unitStatuses.get(unit.id);
+                const isAlive = status?.isAlive ?? true;
+                const isCurrent = currentUnit?.id === unit.id;
+
                 return (
                   <div
                     key={unit.id}
                     className={cn(
-                      "w-12 h-3 rounded-lg transition-all",
-                      isAlive ? "bg-green-600" : "bg-gray-600",
-                      isCurrent && "ring-2 ring-yellow-400"
+                      'w-12 h-3 rounded-lg transition-all',
+                      isAlive ? 'bg-green-600' : 'bg-gray-600',
+                      isCurrent && 'ring-2 ring-yellow-400'
                     )}
                   />
-                )
+                );
               })}
             </div>
-            
+
             <div className="flex gap-1">
               {enemyTeam.map((unit, index) => {
-                const status = unitStatuses.get(unit.id)
-                const isAlive = status?.isAlive ?? true
-                const isCurrent = currentUnit?.id === unit.id
-                
+                const status = unitStatuses.get(unit.id);
+                const isAlive = status?.isAlive ?? true;
+                const isCurrent = currentUnit?.id === unit.id;
+
                 return (
                   <div
                     key={unit.id}
                     className={cn(
-                      "w-12 h-3 rounded-lg transition-all",
-                      isAlive ? "bg-red-600" : "bg-gray-600",
-                      isCurrent && "ring-2 ring-yellow-400"
+                      'w-12 h-3 rounded-lg transition-all',
+                      isAlive ? 'bg-red-600' : 'bg-gray-600',
+                      isCurrent && 'ring-2 ring-yellow-400'
                     )}
                   />
-                )
+                );
               })}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

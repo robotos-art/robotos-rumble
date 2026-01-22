@@ -1,48 +1,43 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card } from '../../components/ui/card'
-import { GameHeader } from '../../components/shared/GameHeader'
-import { PageLayout } from '../../components/shared/PageLayout'
-import { LeaderboardRow } from '../../components/leaderboard/LeaderboardRow'
-import type { LeaderboardEntry } from '../../lib/storage/types'
+import { useState, useEffect } from 'react';
+import { Card } from '../../components/ui/card';
+import { GameHeader } from '../../components/shared/GameHeader';
+import { PageLayout } from '../../components/shared/PageLayout';
+import { LeaderboardRow } from '../../components/leaderboard/LeaderboardRow';
+import type { LeaderboardEntry } from '../../lib/storage/types';
 
 export default function Leaderboard() {
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetchLeaderboard()
-  }, [])
-  
+    fetchLeaderboard();
+  }, []);
+
   const fetchLeaderboard = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/leaderboard?type=global')
-      const data = await response.json()
-      
+      setLoading(true);
+      const response = await fetch('/api/leaderboard?type=global');
+      const data = await response.json();
+
       // Always use real data from Vercel Blob
-      setLeaderboardData(data || [])
+      setLeaderboardData(data || []);
     } catch (error) {
-      console.error('Failed to fetch leaderboard:', error)
-      setLeaderboardData([])
+      console.error('Failed to fetch leaderboard:', error);
+      setLeaderboardData([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-  
+  };
+
   return (
     <PageLayout>
-      <GameHeader 
-        title="LEADERBOARD"
-        showBackButton
-        backHref="/"
-      />
-      
+      <GameHeader title="LEADERBOARD" showBackButton backHref="/" />
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-        
-        {/* Global Rankings */}
+          {/* Global Rankings */}
           <Card className="bg-black/80 border-2 border-green-500 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -61,7 +56,7 @@ export default function Leaderboard() {
                     <tr>
                       <td colSpan={6} className="p-8 text-center text-green-400">
                         Loading leaderboard data...
-        {/* Tabs */}
+                        {/* Tabs */}
                       </td>
                     </tr>
                   ) : leaderboardData.length === 0 ? (
@@ -79,15 +74,13 @@ export default function Leaderboard() {
               </table>
             </div>
           </Card>
-        
-        {/* Live Data Notice */}
-        <div className="mt-8 text-center p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-          <p className="text-green-500">
-            🎮 LIVE RANKINGS - Battle to climb the leaderboard!
-          </p>
-        </div>
+
+          {/* Live Data Notice */}
+          <div className="mt-8 text-center p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <p className="text-green-500">🎮 LIVE RANKINGS - Battle to climb the leaderboard!</p>
+          </div>
         </div>
       </div>
     </PageLayout>
-  )
+  );
 }

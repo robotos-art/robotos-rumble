@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Card } from '../ui/card'
-import { gameSounds } from '../../lib/sounds/gameSounds'
+import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Card } from '../ui/card';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface TargetSelectorProps {
-  onConfirm: () => void
-  onCancel: () => void
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export default function TargetSelector({ onConfirm, onCancel }: TargetSelectorProps) {
@@ -16,20 +16,20 @@ export default function TargetSelector({ onConfirm, onCancel }: TargetSelectorPr
       switch (e.key) {
         case 'Enter':
         case ' ':
-          e.preventDefault()
-          onConfirm()
-          break
+          e.preventDefault();
+          onConfirm();
+          break;
         case 'Escape':
-          e.preventDefault()
-          onCancel()
-          break
+          e.preventDefault();
+          onCancel();
+          break;
       }
-    }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onConfirm, onCancel])
-  
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onConfirm, onCancel]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -47,5 +47,5 @@ export default function TargetSelector({ onConfirm, onCancel }: TargetSelectorPr
         </motion.p>
       </Card>
     </motion.div>
-  )
+  );
 }

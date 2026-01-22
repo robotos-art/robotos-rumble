@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get the file path from the environment variable
+FILE_PATH="${CLAUDE_EDIT_FILE_PATH}"
+
+# Check if the file exists and has a .ts or .tsx extension
+if [ -f "$FILE_PATH" ] && [[ "$FILE_PATH" =~ \.(ts|tsx)$ ]]; then
+    # Run prettier on the file
+    npx prettier --write "$FILE_PATH" 2>/dev/null
+fi

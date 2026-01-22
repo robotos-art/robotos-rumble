@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Get the file path and content from environment variables
+FILE_PATH="${CLAUDE_EDIT_FILE_PATH}"
+OLD_STR="${CLAUDE_EDIT_OLD_STR}"
+NEW_STR="${CLAUDE_EDIT_NEW_STR}"
+
+# Helper function to print reminders
+print_reminder() {
+    echo "📝 REMINDER: $1"
+}
+
+# Check for API route modifications
+if [[ "$FILE_PATH" =~ app/api/battles/ ]]; then
+    print_reminder "Battle saves use Vercel Blob storage (@vercel/blob)"
+    print_reminder "Keep blob key format: battles/{walletAddress}/{timestamp}.json"
+fi
+
+# Check for multiplayer-related files
+if [[ "$FILE_PATH" =~ (pvp|PvP|multiplayer|colyseus) ]]; then
+    print_reminder "Multiplayer uses Colyseus framework"
+    print_reminder "Server: /robotos-rumble-server/, Client: /app/battle/pvp/"
+fi
+
+# Check for battle engine modifications
+if [[ "$FILE_PATH" =~ (BattleEngine|TraitProcessor) ]]; then
+    print_reminder "Core damage formula: (attack * multiplier) - (defense * 0.5)"
+    print_reminder "Don't change elemental advantages or status effect durations"
+fi
+
+# Check for Phaser/animation files
+if [[ "$FILE_PATH" =~ (BattleScene|BattleArena|phaser) ]]; then
+    print_reminder "BattleArena.tsx is the active version (uses Phaser)"
+    print_reminder "V2 and V3 are legacy versions - don't use them"
+fi
+
+# Check if removing critical imports
+if [[ "$NEW_STR" != *"@vercel/blob"* ]] && [[ "$OLD_STR" == *"@vercel/blob"* ]]; then
+    echo "⚠️ WARNING: Removing Vercel Blob import - are you sure?"
+    print_reminder "Storage must use Vercel Blob, not filesystem"
+fi
+
+if [[ "$NEW_STR" != *"colyseus"* ]] && [[ "$OLD_STR" == *"colyseus"* ]]; then
+    echo "⚠️ WARNING: Removing Colyseus import - are you sure?"
+    print_reminder "Multiplayer must use Colyseus, not Socket.io"
+fi
+
+# Always allow edits but provide context
+exit 0

@@ -1,78 +1,98 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { X, ChevronLeft, ChevronRight, Heart, Swords, Shield, Zap, Gauge, Sparkles, Plus } from 'lucide-react'
-import { Button } from '../ui/button'
-import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3'
-import { gameSounds } from '../../lib/sounds/gameSounds'
+import { useState, useEffect, useCallback } from 'react';
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Swords,
+  Shield,
+  Zap,
+  Gauge,
+  Sparkles,
+  Plus,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import { BattleUnitV3, TraitProcessorV3 } from '../../shared/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../lib/sounds/gameSounds';
 
 interface UnitLightboxProps {
-  units: BattleUnitV3[]
-  initialIndex: number
-  onClose: () => void
-  onSelect?: (unit: BattleUnitV3) => void
-  selectedTeam?: BattleUnitV3[]
-  maxTeamSize?: number
+  units: BattleUnitV3[];
+  initialIndex: number;
+  onClose: () => void;
+  onSelect?: (unit: BattleUnitV3) => void;
+  selectedTeam?: BattleUnitV3[];
+  maxTeamSize?: number;
 }
 
-export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedTeam = [], maxTeamSize = 5 }: UnitLightboxProps) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex)
-  const currentUnit = units[currentIndex]
-  const isSelected = selectedTeam.find(u => u.id === currentUnit.id)
-  const canSelect = !isSelected && selectedTeam.length < maxTeamSize
+export function UnitLightbox({
+  units,
+  initialIndex,
+  onClose,
+  onSelect,
+  selectedTeam = [],
+  maxTeamSize = 5,
+}: UnitLightboxProps) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const currentUnit = units[currentIndex];
+  const isSelected = selectedTeam.find((u) => u.id === currentUnit.id);
+  const canSelect = !isSelected && selectedTeam.length < maxTeamSize;
 
   const navigatePrev = useCallback(() => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
-      gameSounds.playClick()
+      setCurrentIndex(currentIndex - 1);
+      gameSounds.playClick();
     }
-  }, [currentIndex])
+  }, [currentIndex]);
 
   const navigateNext = useCallback(() => {
     if (currentIndex < units.length - 1) {
-      setCurrentIndex(currentIndex + 1)
-      gameSounds.playClick()
+      setCurrentIndex(currentIndex + 1);
+      gameSounds.playClick();
     }
-  }, [currentIndex, units.length])
+  }, [currentIndex, units.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case 'Escape':
-          onClose()
-          break
+          onClose();
+          break;
         case 'ArrowLeft':
-          navigatePrev()
-          break
+          navigatePrev();
+          break;
         case 'ArrowRight':
-          navigateNext()
-          break
+          navigateNext();
+          break;
         case 'Enter':
         case ' ':
           if (onSelect && canSelect) {
-            onSelect(currentUnit)
+            onSelect(currentUnit);
           }
-          break
+          break;
       }
-    }
+    };
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentIndex, currentUnit, canSelect, onClose, onSelect, units.length, navigatePrev, navigateNext])
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    currentIndex,
+    currentUnit,
+    canSelect,
+    onClose,
+    onSelect,
+    units.length,
+    navigatePrev,
+    navigateNext,
+  ]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div className="relative max-w-4xl w-full mx-2 sm:mx-4" onClick={(e) => e.stopPropagation()}>
-        {/* Close button */}
-        <Button
-          variant="terminal"
-          size="icon"
-          className="absolute -top-10 sm:-top-12 right-0 z-10"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5" />
-        </Button>
-
         {/* Navigation buttons */}
         <Button
           variant="terminal"
@@ -95,12 +115,21 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         </Button>
 
         {/* Main content */}
-        <div className="bg-black/95 border-2 border-green-500 rounded-lg overflow-hidden">
+        <div className="bg-black/95 border-2 border-green-500 rounded-lg overflow-hidden relative">
+          {/* Close button - inside the dialog */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 z-10 hover:bg-green-500/20 text-green-400"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </Button>
           <div className="grid md:grid-cols-2 gap-0">
             {/* Left side - Image */}
             <div className="bg-black/50 md:border-r border-b md:border-b-0 border-green-500/20 p-4 sm:p-8 flex items-center justify-center">
-              <img 
-                src={currentUnit.imageUrl} 
+              <img
+                src={currentUnit.imageUrl}
                 alt={currentUnit.name}
                 className="w-full max-w-xs sm:max-w-sm h-auto pixelated"
               />
@@ -111,7 +140,12 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
               {/* Header */}
               <div className="mb-4 sm:mb-6">
                 <h2 className="text-2xl sm:text-3xl font-bold mb-2">{currentUnit.name}</h2>
-                <div className="text-lg sm:text-xl" style={{ color: TraitProcessorV3.getElementColor(currentUnit.element) }}>
+                <div
+                  className="text-lg sm:text-xl"
+                  style={{
+                    color: TraitProcessorV3.getElementColor(currentUnit.element),
+                  }}
+                >
                   {TraitProcessorV3.getElementSymbol(currentUnit.element)} {currentUnit.element}
                 </div>
               </div>
@@ -169,23 +203,25 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
 
               {/* Abilities */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-bold text-green-400 mb-2 sm:mb-3">ABILITIES</h3>
+                <h3 className="text-base sm:text-lg font-bold text-green-400 mb-2 sm:mb-3">
+                  ABILITIES
+                </h3>
                 <div className="space-y-2">
-                  {currentUnit.abilities.map(abilityId => {
-                    const ability = TraitProcessorV3.getAbilityData(abilityId)
+                  {currentUnit.abilities.map((abilityId) => {
+                    const ability = TraitProcessorV3.getAbilityData(abilityId);
                     return ability ? (
-                      <div 
+                      <div
                         key={abilityId}
                         className="p-3 bg-black/50 border border-green-500/30 rounded"
-                        style={{ 
+                        style={{
                           borderColor: TraitProcessorV3.getElementColor(ability.element) + '40',
-                          backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A'
+                          backgroundColor: TraitProcessorV3.getElementColor(ability.element) + '0A',
                         }}
                       >
                         <div className="font-semibold mb-1">{ability.name}</div>
                         <div className="text-sm text-green-400/80">{ability.description}</div>
                       </div>
-                    ) : null
+                    ) : null;
                   })}
                 </div>
               </div>
@@ -221,5 +257,5 @@ export function UnitLightbox({ units, initialIndex, onClose, onSelect, selectedT
         </div>
       </div>
     </div>
-  )
+  );
 }

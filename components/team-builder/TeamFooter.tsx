@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Settings, X } from 'lucide-react'
-import { Button } from '../ui/button'
+import { useState } from 'react';
+import { Settings, X } from 'lucide-react';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,36 +11,36 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu'
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
-import { gameSounds } from '../../lib/sounds/gameSounds'
-import type { BattleSettings } from '../../app/battle/page'
+} from '../ui/dropdown-menu';
+import { BattleUnitV3 } from '../../shared/game-engine/TraitProcessorV3';
+import { gameSounds } from '../../lib/sounds/gameSounds';
+import type { BattleSettings } from '../../app/battle/page';
 
 interface TeamFooterProps {
-  selectedTeam: BattleUnitV3[]
-  settings: BattleSettings
-  onUpdateSetting: <K extends keyof BattleSettings>(key: K, value: BattleSettings[K]) => void
-  onRemoveUnit: (unit: BattleUnitV3) => void
-  onStartBattle: () => void
+  selectedTeam: BattleUnitV3[];
+  settings: BattleSettings;
+  onUpdateSetting: <K extends keyof BattleSettings>(key: K, value: BattleSettings[K]) => void;
+  onRemoveUnit: (unit: BattleUnitV3) => void;
+  onStartBattle: () => void;
 }
 
-export function TeamFooter({ 
-  selectedTeam, 
-  settings, 
-  onUpdateSetting, 
+export function TeamFooter({
+  selectedTeam,
+  settings,
+  onUpdateSetting,
   onRemoveUnit,
-  onStartBattle 
+  onStartBattle,
 }: TeamFooterProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   // Check for companion pairs
   const getCompanion = (unit: BattleUnitV3) => {
-    const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '')
-    return selectedTeam.find(u => {
-      const uBaseId = u.id.replace(/^(roboto|robopet)-/, '')
-      return uBaseId === unitBaseId && u.type !== unit.type
-    })
-  }
+    const unitBaseId = unit.id.replace(/^(roboto|robopet)-/, '');
+    return selectedTeam.find((u) => {
+      const uBaseId = u.id.replace(/^(roboto|robopet)-/, '');
+      return uBaseId === unitBaseId && u.type !== unit.type;
+    });
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-black/95 border-t-2 border-green-500/50 backdrop-blur-sm">
@@ -48,8 +48,8 @@ export function TeamFooter({
         {/* Left: Settings */}
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="terminal" 
+            <Button
+              variant="terminal"
               size="icon"
               className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10"
               onMouseEnter={() => gameSounds.playHover()}
@@ -57,13 +57,13 @@ export function TeamFooter({
               <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="start" 
+          <DropdownMenuContent
+            align="start"
             className="bg-black/95 border-green-500/50 text-green-500"
           >
             <DropdownMenuLabel className="text-green-400 font-mono">TEAM SIZE</DropdownMenuLabel>
-            <DropdownMenuRadioGroup 
-              value={settings.teamSize.toString()} 
+            <DropdownMenuRadioGroup
+              value={settings.teamSize.toString()}
               onValueChange={(value) => onUpdateSetting('teamSize', parseInt(value) as 3 | 5)}
             >
               <DropdownMenuRadioItem value="3" className="text-green-500 hover:bg-green-500/10">
@@ -73,18 +73,21 @@ export function TeamFooter({
                 5v5
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
-            
+
             <DropdownMenuSeparator className="bg-green-500/20" />
-            
+
             <DropdownMenuLabel className="text-green-400 font-mono">TIMER</DropdownMenuLabel>
-            <DropdownMenuRadioGroup 
-              value={settings.speed} 
+            <DropdownMenuRadioGroup
+              value={settings.speed}
               onValueChange={(value) => onUpdateSetting('speed', value as 'calm' | 'speedy')}
             >
               <DropdownMenuRadioItem value="calm" className="text-green-500 hover:bg-green-500/10">
                 CALM (10s)
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="speedy" className="text-green-500 hover:bg-green-500/10">
+              <DropdownMenuRadioItem
+                value="speedy"
+                className="text-green-500 hover:bg-green-500/10"
+              >
                 SPEEDY (5s)
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -94,15 +97,15 @@ export function TeamFooter({
         {/* Center: Team Slots */}
         <div className="flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
           {[...Array(settings.teamSize)].map((_, index) => {
-            const unit = selectedTeam[index]
-            const companion = unit ? getCompanion(unit) : null
-            
+            const unit = selectedTeam[index];
+            const companion = unit ? getCompanion(unit) : null;
+
             return (
               <div
                 key={`footer-slot-${index}`}
                 className={`relative w-8 h-8 sm:w-10 sm:h-10 border-2 rounded ${
-                  unit 
-                    ? 'border-green-500 bg-black cursor-pointer hover:border-red-500 transition-colors' 
+                  unit
+                    ? 'border-green-500 bg-black cursor-pointer hover:border-red-500 transition-colors'
                     : 'border-green-500/30 border-dashed bg-black/50'
                 }`}
                 onClick={() => unit && onRemoveUnit(unit)}
@@ -131,7 +134,7 @@ export function TeamFooter({
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </div>
 
@@ -151,5 +154,5 @@ export function TeamFooter({
         </Button>
       </div>
     </div>
-  )
+  );
 }
