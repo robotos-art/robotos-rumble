@@ -328,7 +328,7 @@ export default function TeamBuilder() {
     setTimeout(() => {
       router.push('/battle/training')
     }, 200)
-  }, [selectedTeam, router])
+  }, [selectedTeam, router, settings.teamSize])
 
   const updateSetting = <K extends keyof BattleSettings>(
     key: K,

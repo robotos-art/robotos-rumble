@@ -13,7 +13,7 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [mainnet],
   [
     publicProvider(), // Free public RPC
-    alchemyProvider({ apiKey: 'jwUAqVKEyazD8laQ6Vz224g085Ekr6zz' }), // Alchemy as backup
+    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY || '' }), // Alchemy as backup
   ]
 )
 

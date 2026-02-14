@@ -385,7 +385,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                           : 'border-orange-600 bg-orange-600/20 text-orange-300'
                       }`}
                     >
-                      {badge.id.replace('_', ' ').toUpperCase()} - {badge.tier}
+                      {badge.id.replace(/_/g, ' ').toUpperCase()} - {badge.tier}
                     </div>
                   ))}
                 </div>

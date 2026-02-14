@@ -66,19 +66,26 @@ export async function POST(request: NextRequest) {
     profile.stats.totalDamageDealt += battleData.damageDealt || 0
     profile.stats.totalDamageReceived += battleData.damageReceived || 0
     
-    // Calculate new average battle duration
-    const totalDuration = (profile.stats.averageBattleDuration * oldStats.totalBattles) + battleData.duration
-    profile.stats.averageBattleDuration = Math.round(totalDuration / profile.stats.totalBattles)
+    // Calculate new average battle duration (guard against undefined/NaN)
+    const duration = battleData.duration || 0
+    const totalDuration = (profile.stats.averageBattleDuration * oldStats.totalBattles) + duration
+    profile.stats.averageBattleDuration = Math.round(totalDuration / profile.stats.totalBattles) || 0
     
-    // Update favorite element (most used)
-    const elementCounts: Record<string, number> = {}
-    battleData.elementsUsed.forEach(element => {
-      elementCounts[element] = (elementCounts[element] || 0) + 1
-    })
-    const mostUsedElement = Object.entries(elementCounts)
-      .sort(([, a], [, b]) => b - a)[0]?.[0]
-    if (mostUsedElement) {
-      profile.stats.favoriteElement = mostUsedElement
+    // Update favorite element -- accumulate usage across all battles
+    // Store cumulative element counts in a hidden field, or just update based on this battle's majority
+    // Since we don't have historical element tracking, use the current battle's majority element
+    // but only update if the player has used this element more times than the current favorite
+    if (battleData.elementsUsed && battleData.elementsUsed.length > 0) {
+      const elementCounts: Record<string, number> = {}
+      battleData.elementsUsed.forEach(element => {
+        elementCounts[element] = (elementCounts[element] || 0) + 1
+      })
+      const mostUsedElement = Object.entries(elementCounts)
+        .sort(([, a], [, b]) => b - a)[0]?.[0]
+      // Only change favorite if it's a new profile or the element was used by majority of the team
+      if (mostUsedElement && (!profile.stats.favoriteElement || elementCounts[mostUsedElement] >= Math.ceil(battleData.elementsUsed.length / 2))) {
+        profile.stats.favoriteElement = mostUsedElement
+      }
     }
     
     // Check for paired team victory

@@ -35,26 +35,36 @@ export default function BattleArena({ playerTeam, onBattleEnd }: BattleArenaProp
     const generateEnemyTeam = () => {
       const enemies: BattleUnitV3[] = []
       const usedIndices = new Set<number>()
-      const teamSize = savedSettings ? JSON.parse(savedSettings).teamSize : 5
-      
+      let teamSize = 5
+      if (savedSettings) {
+        try {
+          teamSize = JSON.parse(savedSettings).teamSize || 5
+        } catch (e) {
+          // Use default if parsing fails
+        }
+      }
+
+      // Clamp team size to available database entries to prevent infinite loop
+      const maxTeamSize = Math.min(teamSize, sampleRobotoDatabase.length)
+
       // Pick random Robotos from the database matching team size
-      while (enemies.length < teamSize) {
+      while (enemies.length < maxTeamSize) {
         const randomIndex = Math.floor(Math.random() * sampleRobotoDatabase.length)
         if (usedIndices.has(randomIndex)) continue
-        
+
         usedIndices.add(randomIndex)
         const roboto = sampleRobotoDatabase[randomIndex]
-        
+
         const battleUnit = TraitProcessorV3.processRobotoTraits({
           tokenId: roboto.tokenId,
           name: roboto.name,
           image: roboto.image,
           attributes: roboto.attributes
         })
-        
+
         enemies.push(battleUnit)
       }
-      
+
       return enemies
     }
     

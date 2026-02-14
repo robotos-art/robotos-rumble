@@ -13,14 +13,15 @@ interface LeaderboardRowProps {
 }
 
 export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
-  // Fetch ENS name client-side
+  // Only fetch ENS if not already stored in the entry
   const { data: ensName } = useEnsName({
     address: entry.address as `0x${string}`,
-    chainId: 1
+    chainId: 1,
+    enabled: !entry.ensName && !entry.displayName // Skip query if we already have a name
   })
-  
-  // Use the fetched ENS name, fallback to stored ENS, then display name, then address
-  const displayName = ensName || entry.ensName || entry.displayName || formatAddress(entry.address, 'medium')
+
+  // Use stored ENS/displayName first, then fetched ENS, then formatted address
+  const displayName = entry.ensName || entry.displayName || ensName || formatAddress(entry.address, 'medium')
   
   return (
     <tr 
@@ -80,7 +81,7 @@ export function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       </td>
       <td className="p-4 text-center font-mono text-green-400">{entry.wins}</td>
       <td className="p-4 text-center font-mono text-red-400">{entry.losses}</td>
-      <td className="p-4 text-center font-mono">{entry.winRate.toFixed(1)}%</td>
+      <td className="p-4 text-center font-mono">{Math.round(entry.winRate)}%</td>
       <td className="p-4 text-center">
         {entry.favoriteElement && (
           <span className="font-mono text-green-400">

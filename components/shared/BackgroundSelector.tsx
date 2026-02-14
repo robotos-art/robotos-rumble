@@ -23,18 +23,20 @@ interface BackgroundSelectorProps {
 
 export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedBackground, setSelectedBackground] = useState<BackgroundType>(() => {
-    // Load from localStorage or default to random
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        return saved as BackgroundType
-      }
+  const [selectedBackground, setSelectedBackground] = useState<BackgroundType>('particles')
+
+  // Load from localStorage on mount to avoid SSR hydration mismatch
+  useEffect(() => {
+    const saved = localStorage.getItem('roboto_rumble_background')
+    if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
+      setSelectedBackground(saved as BackgroundType)
+    } else {
+      // Random selection excluding 'none'
+      const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
+      const random = options[Math.floor(Math.random() * options.length)].value
+      setSelectedBackground(random)
     }
-    // Random selection excluding 'none'
-    const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
-    return options[Math.floor(Math.random() * options.length)].value
-  })
+  }, [])
 
   useEffect(() => {
     // Save to localStorage
@@ -89,24 +91,16 @@ export function BackgroundSelector({ onBackgroundChange }: BackgroundSelectorPro
 }
 
 export function useBackground() {
-  const [background, setBackground] = useState<BackgroundType>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        return saved as BackgroundType
-      }
-    }
-    const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
-    return options[Math.floor(Math.random() * options.length)].value
-  })
+  const [background, setBackground] = useState<BackgroundType>('particles')
 
   useEffect(() => {
-    // Check localStorage on mount in case it was set before this component mounted
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('roboto_rumble_background')
-      if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
-        setBackground(saved as BackgroundType)
-      }
+    // Load from localStorage on mount to avoid SSR hydration mismatch
+    const saved = localStorage.getItem('roboto_rumble_background')
+    if (saved && BACKGROUND_OPTIONS.some(opt => opt.value === saved)) {
+      setBackground(saved as BackgroundType)
+    } else {
+      const options = BACKGROUND_OPTIONS.filter(opt => opt.value !== 'none')
+      setBackground(options[Math.floor(Math.random() * options.length)].value)
     }
 
     const handleBackgroundChange = (event: CustomEvent) => {

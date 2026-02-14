@@ -19,13 +19,23 @@ export default function TrainingBattle() {
   
   useEffect(() => {
     // Load saved team based on battle settings
-    const savedSettings = localStorage.getItem('battle_settings')
-    const teamSize = savedSettings ? JSON.parse(savedSettings).teamSize : 5
+    let teamSize = 5
+    try {
+      const savedSettings = localStorage.getItem('battle_settings')
+      if (savedSettings) {
+        teamSize = JSON.parse(savedSettings).teamSize || 5
+      }
+    } catch (e) {
+      // Use default if parsing fails
+    }
     const teamKey = `roboto_rumble_team_${teamSize}`
-    const savedTeam = localStorage.getItem(teamKey)
-    
-    if (savedTeam) {
-      setPlayerTeam(JSON.parse(savedTeam))
+    try {
+      const savedTeam = localStorage.getItem(teamKey)
+      if (savedTeam) {
+        setPlayerTeam(JSON.parse(savedTeam))
+      }
+    } catch (e) {
+      // Use empty team if parsing fails
     }
     setLoading(false)
   }, [])

@@ -232,8 +232,9 @@ const glitchStyles = `
 }
 `
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !document.querySelector('#glitch-keyframes')) {
   const style = document.createElement('style')
+  style.id = 'glitch-keyframes'
   style.textContent = glitchStyles
   document.head.appendChild(style)
 }

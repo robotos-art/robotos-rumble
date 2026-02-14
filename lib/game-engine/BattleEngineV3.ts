@@ -143,7 +143,7 @@ export class BattleEngineV3 {
     Object.entries(elementCounts).forEach(([element, count]) => {
       if (count >= 2) {
         const comboKey = `${element}_${element}`
-        const combo = (elements.elementCombos.dual as any)[comboKey]
+        const combo = (elements.elementCombos?.dual as any)?.[comboKey]
         if (combo && typeof combo === 'object' && 'name' in combo) {
           this.addBattleEvent({
             type: 'element',
@@ -279,7 +279,7 @@ export class BattleEngineV3 {
     // Set cooldown
     if (ability.stats.cooldown === 'once_per_battle') {
       sourceStatus.cooldowns.set(abilityId, 999)
-    } else if (ability.stats.cooldown > 0) {
+    } else if (typeof ability.stats.cooldown === 'number' && ability.stats.cooldown > 0) {
       sourceStatus.cooldowns.set(abilityId, ability.stats.cooldown)
     }
     
@@ -315,8 +315,8 @@ export class BattleEngineV3 {
         break
     }
     
-    // Process end of turn
-    this.nextTurn()
+    // Note: nextTurn() is NOT called here. The caller (UI layer or executeAITurn)
+    // is responsible for advancing the turn to avoid double-advancement.
   }
   
   private executeDamageAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
@@ -433,8 +433,8 @@ export class BattleEngineV3 {
       const targetStatus = this.state.unitStatuses.get(target.id)!
       
       // Check for debuff immunity
-      const hasImmunity = targetStatus.statusEffects.some(e => 
-        e.effect.debuff_immunity || e.effect.encrypted
+      const hasImmunity = targetStatus.statusEffects.some(e =>
+        e.effect?.debuff_immunity || e.effect?.encrypted
       )
       
       if (hasImmunity) {
@@ -491,7 +491,8 @@ export class BattleEngineV3 {
   
   private executeUtilityAbility(source: BattleUnitV3, targetId: string | string[], ability: any) {
     // Handle various utility effects
-    if (ability.effects.includes('cleanse')) {
+    const effects = Array.isArray(ability.effects) ? ability.effects : [ability.effects]
+    if (effects.includes('cleanse')) {
       const targets = this.resolveTargets(source, targetId, ability.targeting)
       targets.forEach(target => {
         const targetStatus = this.state.unitStatuses.get(target.id)!
@@ -517,10 +518,12 @@ export class BattleEngineV3 {
         return target ? [target] : []
         
       case 'all_enemies':
-        return isPlayerUnit ? this.state.enemyTeam : this.state.playerTeam
-        
+        return (isPlayerUnit ? this.state.enemyTeam : this.state.playerTeam)
+          .filter(u => this.state.unitStatuses.get(u.id)?.isAlive)
+
       case 'all_allies':
-        return isPlayerUnit ? this.state.playerTeam : this.state.enemyTeam
+        return (isPlayerUnit ? this.state.playerTeam : this.state.enemyTeam)
+          .filter(u => this.state.unitStatuses.get(u.id)?.isAlive)
         
       case 'self':
         return [source]
@@ -537,13 +540,12 @@ export class BattleEngineV3 {
     }
   }
   
-  private applyAbilityEffects(source: BattleUnitV3, target: BattleUnitV3, effects: any[]) {
+  private applyAbilityEffects(source: BattleUnitV3, target: BattleUnitV3, effects: any) {
     const targetStatus = this.state.unitStatuses.get(target.id)!
-    
-    effects.forEach(effect => {
+    const effectsArray = Array.isArray(effects) ? effects : [effects]
+
+    effectsArray.forEach(effect => {
       // Apply element-specific status effects
-      const elementData = source.element !== 'NEUTRAL' ? elements.elements[source.element] : null
-      
       if (effect === 'shocked' && source.element === 'SURGE') {
         const shockedEffect = elements.elements.SURGE.statusEffects.shocked
         targetStatus.statusEffects.push({
@@ -554,7 +556,7 @@ export class BattleEngineV3 {
           effect: shockedEffect
         })
       }
-      
+
       if (effect === 'hacked' && source.element === 'CODE') {
         const hackedEffect = elements.elements.CODE.statusEffects.hacked
         targetStatus.statusEffects.push({
@@ -578,13 +580,16 @@ export class BattleEngineV3 {
     return (typeChart as any)[defenseKey] || 1.0
   }
   
-  private nextTurn() {
+  nextTurn() {
     // Process status effects
     this.processStatusEffects()
-    
+
+    // If battle ended from status effects, stop processing
+    if (this.state.status !== 'active') return
+
     // Reduce cooldowns
     this.reduceCooldowns()
-    
+
     // Process field effects
     this.processFieldEffects()
     
@@ -619,12 +624,15 @@ export class BattleEngineV3 {
     this.state.unitStatuses.forEach((status, unitId) => {
       const unit = this.findUnit(unitId)
       if (!unit || !status.isAlive) return
-      
+
       status.statusEffects = status.statusEffects.filter(effect => {
+        // Skip processing if unit already died from a previous effect this turn
+        if (!status.isAlive) return false
+
         // Process effect
-        if (effect.effect.damagePerTurn) {
+        if (effect.effect?.damagePerTurn) {
           status.currentHp -= effect.effect.damagePerTurn
-          
+
           this.addBattleEvent({
             type: 'damage',
             target: unitId,
@@ -632,31 +640,33 @@ export class BattleEngineV3 {
             description: `${unit.name} takes ${effect.effect.damagePerTurn} damage from ${effect.name}!`,
             timestamp: Date.now()
           })
-          
+
           if (status.currentHp <= 0) {
             status.currentHp = 0
             status.isAlive = false
-            
+
             this.addBattleEvent({
               type: 'ko',
               target: unitId,
               description: `${unit.name} destroyed by ${effect.name}!`,
               timestamp: Date.now()
             })
+
+            this.checkBattleEnd()
+            return false // Remove effect from dead unit
           }
         }
-        
+
         // Skip turn chance (for shocked)
-        if (effect.effect.skipTurnChance && Math.random() < effect.effect.skipTurnChance) {
+        if (effect.effect?.skipTurnChance && Math.random() < effect.effect.skipTurnChance) {
           this.addBattleEvent({
             type: 'debuff',
             target: unitId,
             description: `${unit.name} is paralyzed and skips turn!`,
             timestamp: Date.now()
           })
-          // TODO: Implement turn skipping
         }
-        
+
         // Reduce duration
         effect.duration--
         return effect.duration > 0
@@ -857,15 +867,9 @@ export class BattleEngineV3 {
         target = alivePlayerUnits[0].id // Default target
       }
       
-      // Log ability use with name
-      this.addBattleEvent({
-        type: 'ability',
-        source: currentUnit.id,
-        description: `${currentUnit.name} uses ${chosenAbility.ability.name}!`,
-        timestamp: Date.now()
-      })
-      
+      // executeAbility already logs the ability use, so no need to log here
       this.executeAbility(currentUnit.id, target, chosenAbility.id)
+      this.nextTurn()
     } else {
       // Use basic attack
       // Smart target selection for basic attacks
@@ -1043,6 +1047,7 @@ export class BattleEngineV3 {
     // Use the existing executeAbility method
     if (action.abilityId && action.targetId) {
       this.executeAbility(action.sourceId, action.targetId, action.abilityId)
+      this.nextTurn()
       // Return the last few events from the battle log
       const recentEvents = this.state.battleLog.slice(-3)
       return { events: recentEvents, stateChanges: [] }

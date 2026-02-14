@@ -89,7 +89,9 @@ export default function BattleFooter({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onCancel()
+        if (phase === 'selecting-target') {
+          onCancel()
+        }
         return
       }
       

@@ -2,7 +2,7 @@ import { createPublicClient, http } from 'viem'
 import { mainnet } from 'viem/chains'
 import { normalize } from 'viem/ens'
 
-const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY || 'J5JRKzNp7V3nTPqqryLLHECH1SnyJJvt'
+const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY || ''
 
 const client = createPublicClient({
   chain: mainnet,

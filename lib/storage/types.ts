@@ -73,6 +73,7 @@ export interface LeaderboardEntry {
   winStreak: number
   favoriteElement: string | null
   lastUpdated: string
+  rank?: number
 }
 
 export interface GlobalStats {

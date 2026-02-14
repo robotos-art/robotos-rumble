@@ -23,7 +23,10 @@ const ELEMENT_COLORS = {
   SURGE: 'text-yellow-400 border-yellow-400',
   CODE: 'text-cyan-400 border-cyan-400',
   METAL: 'text-gray-400 border-gray-400',
-  GLITCH: 'text-purple-400 border-purple-400'
+  GLITCH: 'text-purple-400 border-purple-400',
+  BOND: 'text-pink-400 border-pink-400',
+  WILD: 'text-orange-400 border-orange-400',
+  NEUTRAL: 'text-green-400 border-green-400'
 }
 
 export default function RobotoUnit({
