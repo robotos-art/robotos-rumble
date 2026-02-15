@@ -121,6 +121,16 @@ export default function BattleArenaV3({
   // Use background from shared selector
   const selectedBackground = useBackground()
 
+  // Battle results screen
+  const [battleResults, setBattleResults] = useState<{
+    won: boolean
+    damageDealt: number
+    damageReceived: number
+    turnsPlayed: number
+    achievements: string[]
+    badges: string[]
+  } | null>(null)
+
   // Animation states
   const [attackingUnitId, setAttackingUnitId] = useState<string | null>(null)
   const [defendingUnitId, setDefendingUnitId] = useState<string | null>(null)
@@ -425,11 +435,22 @@ export default function BattleArenaV3({
       showMessage('DEFEAT... Better luck next time.', 0)
     }
 
+    // Set initial battle results immediately so the screen shows up
+    const currentTurn = battleEngine.getState().turn || 1
+    setBattleResults({
+      won,
+      damageDealt: totalDamageDealt.current,
+      damageReceived: totalDamageReceived.current,
+      turnsPlayed: currentTurn,
+      achievements: [],
+      badges: []
+    })
+
     // Save battle results if player is connected
     if (address) {
       try {
         const battleDuration = Math.floor((Date.now() - battleStartTime.current) / 1000)
-        
+
         const battleData: BattleRecord = {
           id: `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           playerAddress: address,
@@ -452,35 +473,31 @@ export default function BattleArenaV3({
           damageReceived: totalDamageReceived.current,
           elementsUsed: Array.from(new Set(playerTeam.map(u => u.element)))
         }
-        
+
         const response = await fetch('/api/battles/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(battleData)
         })
-        
+
         if (response.ok) {
           const result = await response.json()
-          
-          // Show achievements if any
-          if (result.newAchievements?.length > 0) {
-            // TODO: Show achievement notifications
-            console.log('New achievements unlocked:', result.newAchievements)
-          }
-          
-          if (result.newBadges?.length > 0) {
-            // TODO: Show badge notifications
-            console.log('New badges earned:', result.newBadges)
+
+          // Update battle results with achievements and badges from API
+          const newAchievements = result.newAchievements || []
+          const newBadges = result.newBadges || []
+          if (newAchievements.length > 0 || newBadges.length > 0) {
+            setBattleResults(prev => prev ? {
+              ...prev,
+              achievements: newAchievements,
+              badges: newBadges
+            } : prev)
           }
         }
       } catch (error) {
         console.error('Failed to save battle results:', error)
       }
     }
-
-    setTimeout(() => {
-      onBattleEnd(won)
-    }, 3000)
   }
 
   const handleAttack = useCallback(() => {
@@ -1296,28 +1313,101 @@ export default function BattleArenaV3({
           </div>
         )}
 
-        {/* Victory/Defeat Overlay */}
-        <AnimatePresence>
-          {battleState.status !== 'active' && (
+        {/* Post-Battle Results Screen */}
+        {battleResults && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-black/90 flex items-center justify-center z-50"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/80 flex items-center justify-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="text-center space-y-6 max-w-md mx-auto px-4"
             >
-              <motion.h1
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className={cn(
-                  "text-6xl md:text-8xl font-bold",
-                  battleState.status === 'victory' ? 'text-green-400' : 'text-red-500'
-                )}
-              >
-                {battleState.status === 'victory' ? 'VICTORY!' : 'DEFEAT'}
-              </motion.h1>
+              {/* Result Title */}
+              <h1 className={cn(
+                "text-5xl md:text-7xl font-bold",
+                battleResults.won ? 'text-green-400' : 'text-red-500'
+              )}>
+                {battleResults.won ? 'VICTORY!' : 'DEFEAT'}
+              </h1>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4 text-left">
+                <div className="bg-green-900/20 border border-green-800/50 rounded p-3">
+                  <div className="text-xs text-green-600">DAMAGE DEALT</div>
+                  <div className="text-2xl font-bold text-green-400">{battleResults.damageDealt}</div>
+                </div>
+                <div className="bg-red-900/20 border border-red-800/50 rounded p-3">
+                  <div className="text-xs text-red-600">DAMAGE TAKEN</div>
+                  <div className="text-2xl font-bold text-red-400">{battleResults.damageReceived}</div>
+                </div>
+                <div className="bg-yellow-900/20 border border-yellow-800/50 rounded p-3">
+                  <div className="text-xs text-yellow-600">TURNS</div>
+                  <div className="text-2xl font-bold text-yellow-400">{battleResults.turnsPlayed}</div>
+                </div>
+                <div className="bg-purple-900/20 border border-purple-800/50 rounded p-3">
+                  <div className="text-xs text-purple-600">DURATION</div>
+                  <div className="text-2xl font-bold text-purple-400">{Math.floor((Date.now() - battleStartTime.current) / 1000)}s</div>
+                </div>
+              </div>
+
+              {/* Achievements */}
+              {battleResults.achievements.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs text-yellow-500 font-bold">ACHIEVEMENTS UNLOCKED</div>
+                  {battleResults.achievements.map((a, i) => (
+                    <motion.div
+                      key={a}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.5 + i * 0.2 }}
+                      className="bg-yellow-500/10 border border-yellow-500/30 rounded px-3 py-2 text-yellow-400 text-sm"
+                    >
+                      {a}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {/* Badges */}
+              {battleResults.badges.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs text-cyan-500 font-bold">NEW BADGES</div>
+                  {battleResults.badges.map((b, i) => (
+                    <motion.div
+                      key={b}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.8 + i * 0.2 }}
+                      className="bg-cyan-500/10 border border-cyan-500/30 rounded px-3 py-2 text-cyan-400 text-sm"
+                    >
+                      {b.replace(/_/g, ' ').toUpperCase()}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 justify-center pt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-green-600 hover:bg-green-500 text-black font-bold rounded transition-colors"
+                >
+                  REMATCH
+                </button>
+                <button
+                  onClick={() => onBattleEnd(battleResults.won)}
+                  className="px-6 py-3 bg-green-900/50 hover:bg-green-800/50 text-green-400 border border-green-700 font-bold rounded transition-colors"
+                >
+                  CONTINUE
+                </button>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
       </div>
 
       {/* Attack Animations */}

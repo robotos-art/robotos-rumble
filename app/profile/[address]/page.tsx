@@ -298,7 +298,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   <div className="text-xl font-bold">{profile.stats.totalDamageReceived}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-400">K/D Ratio</div>
+                  <div className="text-sm text-gray-400">Damage Ratio</div>
                   <div className="text-xl font-bold">
                     {profile.stats.totalDamageReceived > 0 
                       ? (profile.stats.totalDamageDealt / profile.stats.totalDamageReceived).toFixed(2)

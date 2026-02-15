@@ -368,15 +368,18 @@ export default function TeamBuilder() {
   const getElementTooltip = useCallback((element: string): string => {
     switch (element) {
       case 'SURGE':
-        return 'SURGE > METAL > CODE > GLITCH > SURGE'
-      case 'METAL':
-        return 'METAL > CODE > GLITCH > SURGE > METAL'
+        return 'Strong vs METAL (1.5x) · Weak vs GLITCH (0.75x)'
       case 'CODE':
-        return 'CODE > GLITCH > SURGE > METAL > CODE'
+        return 'Strong vs SURGE (1.5x) · Weak vs METAL (0.75x)'
+      case 'METAL':
+        return 'Strong vs GLITCH (1.5x) · Weak vs SURGE (0.75x)'
       case 'GLITCH':
-        return 'GLITCH > SURGE > METAL > CODE > GLITCH'
+        return 'Strong vs CODE (1.5x) · Weak vs METAL (0.75x)'
+      case 'BOND':
+      case 'WILD':
+        return 'Companion element · No type advantages'
       case 'NEUTRAL':
-        return 'No element advantages or disadvantages'
+        return 'No type advantages or disadvantages'
       default:
         return element
     }
@@ -401,7 +404,7 @@ export default function TeamBuilder() {
       <GameHeader
         title="TEAM BUILDER"
         showBackButton
-        backHref="/"
+        backHref="/battle"
       />
 
       {/* Constrained content */}
@@ -515,9 +518,18 @@ export default function TeamBuilder() {
                       {unit ? (
                         <div className="text-center p-2 w-full">
                           {companion && (
-                            <div className="absolute top-1 right-1 text-xs bg-yellow-500 text-black px-1 rounded font-bold">
-                              +2%
-                            </div>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="absolute top-1 right-1 text-xs bg-yellow-500 text-black px-1 rounded font-bold cursor-help">
+                                    +2%
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Companion Bonus: +2% to all stats when paired with matching Roboto/Robopet</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                           <img
                             src={unit.imageUrl}
@@ -540,7 +552,8 @@ export default function TeamBuilder() {
                     variant="terminal"
                     size="lg"
                     onClick={saveTeamAndBattle}
-                    className="animate-pulse rounded-lg"
+                    className="rounded-lg"
+                    style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 3' }}
                   >
                     START BATTLE
                   </Button>
@@ -839,6 +852,21 @@ export default function TeamBuilder() {
                   )
                 })}
               </div>
+
+              {/* Empty Filter State */}
+              {!loading && processedUnits.length > 0 && filteredUnits.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-green-400/60 text-lg mb-4">
+                    No units match your filters
+                  </p>
+                  <Button
+                    variant="terminal"
+                    onClick={() => setCurrentFilters({ search: '', elements: [], robotType: 'all', sortBy: 'name', sortOrder: 'asc' })}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
 
               {/* Empty State */}
               {!loading && processedUnits.length === 0 && (

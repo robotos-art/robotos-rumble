@@ -8,6 +8,8 @@ import { Bot, UserCircle, Users, Clock, Settings } from 'lucide-react'
 import { gameSounds } from '../../lib/sounds/gameSounds'
 import { GameHeader } from '../../components/shared/GameHeader'
 import { PageLayout } from '../../components/shared/PageLayout'
+import { useAccount } from 'wagmi'
+import { WalletConnect } from '../../components/shared/WalletConnect'
 
 export interface BattleSettings {
   teamSize: 3 | 5
@@ -16,6 +18,7 @@ export interface BattleSettings {
 
 export default function BattleSelect() {
   const router = useRouter()
+  const { isConnected } = useAccount()
   const [settings, setSettings] = useState<BattleSettings>({
     teamSize: 5,
     speed: 'speedy'
@@ -152,9 +155,9 @@ export default function BattleSelect() {
         
         {/* Battle Mode Selection - Taller cards */}
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <Card 
-            className="bg-black/80 border-2 border-green-500/50 hover:border-green-500 transition-all cursor-pointer"
-            onClick={() => handleModeSelect('computer')}
+          <Card
+            className={`bg-black/80 border-2 border-green-500/50 transition-all ${isConnected ? 'hover:border-green-500 cursor-pointer' : ''}`}
+            onClick={isConnected ? () => handleModeSelect('computer') : undefined}
             onMouseEnter={() => gameSounds.playHover()}
           >
             <CardHeader>
@@ -174,9 +177,16 @@ export default function BattleSelect() {
                 <li>• No entry fees</li>
               </ul>
               <div className="pt-4">
-                <Button className="w-full terminal-button">
-                  PLAY
-                </Button>
+                {isConnected ? (
+                  <Button className="w-full terminal-button">
+                    PLAY
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-green-400/60 text-center">Connect wallet to battle</p>
+                    <WalletConnect />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -208,12 +218,6 @@ export default function BattleSelect() {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* Instructions */}
-        <div className="mt-8 text-center text-green-400/60 text-sm">
-          <p>BATTLE PROTOCOL: SELECT YOUR OPPONENT TYPE</p>
-          <p>SQUAD SIZE: {settings.teamSize} UNITS REQUIRED</p>
         </div>
       </div>
     </PageLayout>

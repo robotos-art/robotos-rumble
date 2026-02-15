@@ -15,6 +15,12 @@ export default function Home() {
   const { isConnected } = useAccount()
 
   useEffect(() => {
+    // Skip boot animation if already played this session
+    if (sessionStorage.getItem('roboto_boot_done')) {
+      setShowMenu(true)
+      return
+    }
+
     const fullText = `ROBOTO RUMBLE v1.0.0
 INITIALIZING COMBAT PROTOCOLS...
 LOADING ANCIENT BATTLE SYSTEMS...
@@ -31,7 +37,10 @@ PRESS ANY KEY TO CONTINUE`
         index++
       } else {
         clearInterval(interval)
-        setTimeout(() => setShowMenu(true), 500)
+        setTimeout(() => {
+          setShowMenu(true)
+          sessionStorage.setItem('roboto_boot_done', '1')
+        }, 500)
       }
     }, 20)
 
@@ -39,6 +48,7 @@ PRESS ANY KEY TO CONTINUE`
     const skipBoot = () => {
       clearInterval(interval)
       setShowMenu(true)
+      sessionStorage.setItem('roboto_boot_done', '1')
       gameSounds.playClick()
     }
 

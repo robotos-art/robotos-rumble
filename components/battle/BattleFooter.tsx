@@ -6,7 +6,7 @@ import { Card } from '../ui/card'
 import { Button } from '../ui/button'
 import { Progress } from '../ui/progress'
 import { cn } from '../../lib/utils'
-import { BattleUnitV3 } from '../../lib/game-engine/TraitProcessorV3'
+import { BattleUnitV3, TraitProcessorV3 } from '../../lib/game-engine/TraitProcessorV3'
 import { ChevronLeft, Shield, Zap, Heart, Clock, Target } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import Image from 'next/image'
@@ -239,7 +239,23 @@ export default function BattleFooter({
                   const unitStatus = currentUnit && unitStatuses.get(currentUnit.id)
                   const cooldown = unitStatus?.cooldowns.get(ability) || 0
                   const isOnCooldown = cooldown > 0
-                  
+                  const abilityData = TraitProcessorV3.getAbilityData(ability)
+                  const abilityName = abilityData?.name || ability.replace(/_/g, ' ')
+                  const energyCost = abilityData?.stats?.energyCost || 0
+                  const abilityElement = abilityData?.element || ''
+
+                  // Element color mapping for the accent border
+                  const elementColorClass: Record<string, string> = {
+                    'SURGE': 'border-l-yellow-400',
+                    'CODE': 'border-l-green-400',
+                    'METAL': 'border-l-gray-400',
+                    'GLITCH': 'border-l-purple-400',
+                    'NEUTRAL': 'border-l-white',
+                    'BOND': 'border-l-cyan-400',
+                    'WILD': 'border-l-red-400',
+                  }
+                  const accentClass = abilityElement ? elementColorClass[abilityElement] || 'border-l-green-400' : 'border-l-green-400'
+
                   return (
                     <TooltipProvider key={ability}>
                       <Tooltip>
@@ -248,7 +264,8 @@ export default function BattleFooter({
                             <Button
                               onClick={() => !isOnCooldown && handleAbility(index)}
                               className={cn(
-                                "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto",
+                                "flex items-center gap-2 transition-all min-h-[44px] px-4 sm:px-6 w-full sm:w-auto border-l-4",
+                                accentClass,
                                 focusIndex === index + 1 && "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black",
                                 isOnCooldown && "opacity-50 cursor-not-allowed"
                               )}
@@ -256,8 +273,14 @@ export default function BattleFooter({
                               disabled={isOnCooldown}
                             >
                               <Target className="w-4 h-4" />
-                              <span className="sm:hidden">{ability}</span>
-                              <span className="hidden sm:inline">{ability} ({index === 0 ? 'S' : 'D'})</span>
+                              <span className="sm:hidden capitalize">{abilityName}</span>
+                              <span className="hidden sm:inline capitalize">{abilityName} ({index === 0 ? 'S' : 'D'})</span>
+                              {energyCost > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-cyan-900/60 text-cyan-300 rounded px-1.5 py-0.5 ml-1">
+                                  <Zap className="w-3 h-3" />
+                                  {energyCost}
+                                </span>
+                              )}
                             </Button>
                             {isOnCooldown && (
                               <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
@@ -266,15 +289,27 @@ export default function BattleFooter({
                             )}
                           </div>
                         </TooltipTrigger>
-                        {isOnCooldown && (
-                          <TooltipContent>
+                        <TooltipContent>
+                          {isOnCooldown ? (
                             <p className="text-red-400">
-                              {cooldown === 999 
-                                ? 'Once per battle - Already used!' 
+                              {cooldown === 999
+                                ? 'Once per battle - Already used!'
                                 : `Cooldown: ${cooldown} turn${cooldown > 1 ? 's' : ''} remaining`}
                             </p>
-                          </TooltipContent>
-                        )}
+                          ) : (
+                            <div className="space-y-1">
+                              <p className="text-green-300 font-bold capitalize">{abilityName}</p>
+                              {abilityData?.description && (
+                                <p className="text-gray-300 text-xs">{abilityData.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                {abilityElement && <span className="text-green-400">{abilityElement}</span>}
+                                {abilityData?.stats?.power && <span>PWR: {abilityData.stats.power}</span>}
+                                {energyCost > 0 && <span className="text-cyan-400">EN: {energyCost}</span>}
+                              </div>
+                            </div>
+                          )}
+                        </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )

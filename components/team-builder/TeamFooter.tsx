@@ -141,9 +141,8 @@ export function TeamFooter({
           size="sm"
           onClick={onStartBattle}
           disabled={selectedTeam.length !== settings.teamSize}
-          className={`flex-shrink-0 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm ${
-            selectedTeam.length === settings.teamSize ? 'animate-pulse' : ''
-          }`}
+          className="flex-shrink-0 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
+          style={selectedTeam.length === settings.teamSize ? { animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 3' } : undefined}
           onMouseEnter={() => selectedTeam.length === settings.teamSize && gameSounds.playHover()}
         >
           <span className="hidden sm:inline">START BATTLE →</span>

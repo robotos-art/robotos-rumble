@@ -168,16 +168,6 @@ export default function RobotoUnit({
         </p>
       </div>
       
-      {/* Idle Animation */}
-      <motion.div
-        animate={{ y: [0, -5, 0] }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: 2 + delay,
-          ease: "easeInOut"
-        }}
-        className="absolute inset-0"
-      />
     </motion.div>
   )
 }
