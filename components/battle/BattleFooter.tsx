@@ -405,7 +405,46 @@ export default function BattleFooter({
               </motion.div>
             )}
             
-            {/* Remove timing and defense UI - no longer needed */}
+            {/* Enemy Turn Info */}
+            {(phase === 'defending' || phase === 'executing') && !isPlayerTurn && currentUnit && (
+              <motion.div
+                key="enemy-turn"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex items-center gap-4"
+              >
+                <div className="flex items-center gap-3 px-4 py-2 bg-red-900/20 border border-red-800/50 rounded-lg">
+                  <Shield className="w-5 h-5 text-red-400 animate-pulse" />
+                  <div>
+                    <div className="text-sm font-bold text-red-400">
+                      {currentUnit.name} is attacking!
+                    </div>
+                    <div className="text-xs text-red-400/60">
+                      {phase === 'defending' ? 'Time your defense!' : 'Brace for impact...'}
+                    </div>
+                  </div>
+                </div>
+                {targetUnit && (
+                  <div className="text-xs text-gray-400">
+                    Target: <span className="text-yellow-400">{targetUnit.name}</span>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Waiting phase */}
+            {phase === 'waiting' && (
+              <motion.div
+                key="waiting"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center text-green-400/40 text-sm py-2"
+              >
+                Preparing next turn...
+              </motion.div>
+            )}
           </AnimatePresence>
           
           {/* Team Status Bar */}
